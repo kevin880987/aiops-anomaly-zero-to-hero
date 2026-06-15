@@ -1,0 +1,23 @@
+name: aiops-anomaly-zero-to-hero
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - pip
+  # Core dependencies
+  - numpy>=1.26
+  - pandas>=2.0
+  - scikit-learn>=1.4
+  # Course / notebook
+  - matplotlib>=3.9
+  - jupyterlab>=4.3
+  - ipykernel>=6.29
+  # Dev / testing
+  - pytest>=8.0
+  - pytest-cov
+  - pip:
+      # Not on conda-forge with exact version constraints — install via pip
+      - prometheus_client>=0.20
+      # Install the package itself in editable mode
+      - -e .

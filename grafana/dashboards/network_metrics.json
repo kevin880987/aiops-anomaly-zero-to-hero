@@ -1,0 +1,335 @@
+{
+  "__inputs": [],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "9.0.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Network interface RRD metrics — AIOps course starter dashboard",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "Traffic (Octets / 5-min interval)",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 8 },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "id": 1,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "expr": "network_rrd_in_octets{device_id=~\"$device\", port_id=~\"$port\"}",
+          "legendFormat": "IN  {{device_id}} / {{port_id}} ({{port_role}})",
+          "refId": "A"
+        }
+      ],
+      "title": "Inbound Octets",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 8 },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "id": 2,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "expr": "network_rrd_out_octets{device_id=~\"$device\", port_id=~\"$port\"}",
+          "legendFormat": "OUT {{device_id}} / {{port_id}} ({{port_role}})",
+          "refId": "A"
+        }
+      ],
+      "title": "Outbound Octets",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
+      "id": 101,
+      "title": "Errors & Discards",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 15 },
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 10 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 10 },
+      "id": 3,
+      "options": { "legend": { "calcs": ["max", "sum"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "expr": "network_rrd_in_errors{device_id=~\"$device\", port_id=~\"$port\"}",
+          "legendFormat": "IN ERR  {{device_id}} / {{port_id}}",
+          "refId": "A"
+        },
+        {
+          "expr": "network_rrd_out_errors{device_id=~\"$device\", port_id=~\"$port\"}",
+          "legendFormat": "OUT ERR {{device_id}} / {{port_id}}",
+          "refId": "B"
+        }
+      ],
+      "title": "Interface Errors (IN / OUT)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 15 },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 10 },
+      "id": 4,
+      "options": { "legend": { "calcs": ["max", "sum"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "expr": "network_rrd_in_discards{device_id=~\"$device\", port_id=~\"$port\"}",
+          "legendFormat": "IN DISC  {{device_id}} / {{port_id}}",
+          "refId": "A"
+        },
+        {
+          "expr": "network_rrd_out_discards{device_id=~\"$device\", port_id=~\"$port\"}",
+          "legendFormat": "OUT DISC {{device_id}} / {{port_id}}",
+          "refId": "B"
+        }
+      ],
+      "title": "Discarded Packets (IN / OUT)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 },
+      "id": 102,
+      "title": "Packet Counts",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 8 },
+          "unit": "pps"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 19 },
+      "id": 5,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "expr": "network_rrd_in_ucast_pkts{device_id=~\"$device\", port_id=~\"$port\"}",
+          "legendFormat": "IN  {{device_id}} / {{port_id}}",
+          "refId": "A"
+        },
+        {
+          "expr": "network_rrd_out_ucast_pkts{device_id=~\"$device\", port_id=~\"$port\"}",
+          "legendFormat": "OUT {{device_id}} / {{port_id}}",
+          "refId": "B"
+        }
+      ],
+      "title": "Unicast Packets (IN / OUT)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 1, "fillOpacity": 8 },
+          "unit": "pps"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 19 },
+      "id": 6,
+      "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+      "targets": [
+        {
+          "expr": "network_rrd_in_broadcast_pkts{device_id=~\"$device\", port_id=~\"$port\"}",
+          "legendFormat": "BCAST IN  {{port_id}}",
+          "refId": "A"
+        },
+        {
+          "expr": "network_rrd_out_broadcast_pkts{device_id=~\"$device\", port_id=~\"$port\"}",
+          "legendFormat": "BCAST OUT {{port_id}}",
+          "refId": "B"
+        },
+        {
+          "expr": "network_rrd_in_multicast_pkts{device_id=~\"$device\", port_id=~\"$port\"}",
+          "legendFormat": "MCAST IN  {{port_id}}",
+          "refId": "C"
+        },
+        {
+          "expr": "network_rrd_out_multicast_pkts{device_id=~\"$device\", port_id=~\"$port\"}",
+          "legendFormat": "MCAST OUT {{port_id}}",
+          "refId": "D"
+        }
+      ],
+      "title": "Broadcast & Multicast Packets",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 27 },
+      "id": 103,
+      "title": "Simulated Timeline & Event Labels",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "blue", "mode": "fixed" },
+          "unit": "dateTimeAsIso",
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 28 },
+      "id": 7,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "expr": "network_rrd_simulated_timestamp * 1000",
+          "legendFormat": "Simulated time",
+          "refId": "A"
+        }
+      ],
+      "title": "Current Simulated Timestamp",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 16, "x": 8, "y": 28 },
+      "id": 8,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "expr": "network_rrd_event{device_id=~\"$device\", port_id=~\"$port\", event_label!=\"normal\"}",
+          "legendFormat": "🚨 {{device_id}} / {{port_id}} — {{event_label}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Anomaly Events (non-normal)",
+      "type": "stat"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "tags": ["aiops", "network", "rrd"],
+  "templating": {
+    "list": [
+      {
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "definition": "label_values(network_rrd_in_octets, device_id)",
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "name": "device",
+        "options": [],
+        "query": {
+          "query": "label_values(network_rrd_in_octets, device_id)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "label": "Device"
+      },
+      {
+        "current": { "selected": true, "text": "All", "value": "$__all" },
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "definition": "label_values(network_rrd_in_octets{device_id=~\"$device\"}, port_id)",
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "name": "port",
+        "options": [],
+        "query": {
+          "query": "label_values(network_rrd_in_octets{device_id=~\"$device\"}, port_id)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "label": "Port"
+      }
+    ]
+  },
+  "time": { "from": "now-30m", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Network Interface Monitoring",
+  "uid": "aiops-network-rrd",
+  "version": 1
+}

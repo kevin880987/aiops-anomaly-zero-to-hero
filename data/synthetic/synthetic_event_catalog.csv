@@ -1,0 +1,11 @@
+event_id,event_type,port_id,start_time,periods_5min,description,end_time
+A,business_traffic_growth,port-id7430,2026-02-04 09:00,24,正常業務流量增加,2026-02-04 10:55:00
+B,small_packet_scan,port-id7428,2026-02-06 13:10,10,大量小封包 / 掃描,2026-02-06 13:55:00
+C,large_file_backup,port-id7431,2026-02-08 01:00,36,大檔案傳輸 / 備份,2026-02-08 03:55:00
+D,queue_congestion,port-id7427,2026-02-11 15:20,14,頻寬壅塞 / Queue 滿,2026-02-11 16:25:00
+E,link_quality_issue,port-id7429,2026-02-14 10:35,8,線路品質問題,2026-02-14 11:10:00
+F,load_sensitive_link_issue,port-id7427,2026-02-17 16:00,18,高負載下線路不穩,2026-02-17 17:25:00
+G,broadcast_storm,MULTI,2026-02-19 11:30,12,Broadcast Storm / L2 Loop,2026-02-19 12:25:00
+H,multicast_flooding,MULTI,2026-02-22 20:05,18,Multicast Flooding,2026-02-22 21:30:00
+I,abnormal_device_sender,port-id7430,2026-02-25 09:45,16,異常設備大量發送,2026-02-25 11:00:00
+J,unknown_protocol_scan,port-id7428,2026-02-27 14:15,10,Unknown Protocol,2026-02-27 15:00:00

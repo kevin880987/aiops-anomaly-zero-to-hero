@@ -1,0 +1,40 @@
+name: Validate course
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package and course dependencies
+        run: python -m pip install -e ".[course,dev]"
+
+      - name: Run package tests
+        run: pytest -q
+
+      - name: Validate JSON notebooks and dashboards
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          paths = list(Path("notebooks").glob("*.ipynb"))
+          paths += list(Path("data").rglob("*.ipynb"))
+          paths += list(Path("hands-on").rglob("*.ipynb"))
+          paths += list(Path("grafana/dashboards").glob("*.json"))
+          for path in paths:
+              json.loads(path.read_text(encoding="utf-8"))
+              print(f"ok {path}")
+          PY
+
+      - name: Validate Compose configuration
+        run: docker compose config --quiet
