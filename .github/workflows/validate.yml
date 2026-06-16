@@ -13,28 +13,37 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
 
-      - name: Install package and course dependencies
-        run: python -m pip install -e ".[course,dev]"
-
-      - name: Run package tests
-        run: pytest -q
-
-      - name: Validate JSON notebooks and dashboards
+      - name: Validate JSON labs and dashboards
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
 
-          paths = list(Path("notebooks").glob("*.ipynb"))
+          paths = list(Path("labs").rglob("*.ipynb"))
           paths += list(Path("data").rglob("*.ipynb"))
-          paths += list(Path("hands-on").rglob("*.ipynb"))
           paths += list(Path("grafana/dashboards").glob("*.json"))
           for path in paths:
               json.loads(path.read_text(encoding="utf-8"))
               print(f"ok {path}")
           PY
 
-      - name: Validate Compose configuration
-        run: docker compose config --quiet
+      - name: Validate startup scripts
+        run: |
+          bash -n labs/getting-started/scripts/bootstrap_macos.sh
+          python -m py_compile labs/getting-started/scripts/validate_setup.py exporter.py
+          python labs/getting-started/scripts/validate_setup.py --repo-only
+          python - <<'PY'
+          from pathlib import Path
+          for path in [
+              "labs/getting-started/scripts/bootstrap_windows.ps1",
+              "labs/getting-started/scripts/bootstrap_macos.sh",
+              "labs/getting-started/scripts/validate_setup.py",
+          ]:
+              data = Path(path).read_bytes()
+              if b"\x00" in data:
+                  raise SystemExit(f"NUL byte found in {path}")
+              if path.endswith(".ps1") and b"\r" in data:
+                  raise SystemExit(f"Unexpected CR byte found in {path}")
+              print(f"ok script bytes {path}")
+          PY

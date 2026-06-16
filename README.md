@@ -13,118 +13,85 @@ Network telemetry
   -> operational action
 ```
 
-核心路徑不要求雲端帳號或 Kubernetes。Docker lab、Python package、notebooks、資料與測試均收錄在同一個 repository。
+核心路徑不要求雲端帳號、Kubernetes 或 Python package 開發經驗。初學者只需要依照設定指南建立 conda 環境，安裝本機 Prometheus 與 Grafana，接著從 labs 開始操作。
 
 ## 立即開始
 
-### 路徑一：啟動即時監控環境
+### 路徑一：從初學者設定指南開始
 
-安裝 [Docker Desktop](https://www.docker.com/products/docker-desktop/) 後，在 repository 根目錄執行：
+第一次使用請先閱讀 [`labs/getting-started/README.md`](labs/getting-started/README.md)。
 
-```bash
-docker compose up --build -d
-```
+設定指南會帶你完成三件事：
 
-開啟：
+1. 使用 conda 建立 Python 與 JupyterLab 環境。
+2. 依作業系統安裝 Prometheus。
+3. 依作業系統安裝 Grafana，並連接 Prometheus。
 
-- Grafana: <http://localhost:3000>，本機課程帳號為 `admin` / `admin`
-- Prometheus: <http://localhost:9090>
-- RRD replay metrics: <http://localhost:8000/metrics>
-
-Grafana 已 provision `Network Interface Monitoring` dashboard。完整操作與驗證步驟見 [`labs/01-observability-foundation/README.md`](labs/01-observability-foundation/README.md)。
-
-停止環境：
+macOS 可在 repository 根目錄執行：
 
 ```bash
-docker compose down
+bash labs/getting-started/scripts/bootstrap_macos.sh
 ```
 
-刪除本機 Prometheus 與 Grafana volume：
+Windows 可在 repository 根目錄執行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File labs\getting-started\scripts\bootstrap_windows.ps1
+```
+
+兩個腳本都會先檢查現有 conda 環境；若已符合課程需求，會跳過更新。若只想準備環境、不立刻開啟 JupyterLab，macOS 加上 `--no-launch`，Windows 加上 `-NoLaunch`。
+
+### 路徑二：開啟 labs
+
+設定完成後，在 JupyterLab 依序執行 `labs/` 中的課程檔案。若要手動啟動：
 
 ```bash
-docker compose down -v
+conda activate aiops-anomaly-zero-to-hero
+jupyter lab labs
 ```
 
-> `admin` / `admin` 僅供本機課程使用，不可沿用到共享或正式環境。
-
-### 路徑二：執行 Python package 與 notebooks
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -e ".[course]"
-```
-
-重新產生 synthetic data：
-
-```bash
-aiops-simulate --days 30 --out-dir data/synthetic
-```
-
-啟動 JupyterLab：
-
-```bash
-jupyter lab notebooks
-```
-
-Windows 與較完整的初學者設定說明見 [`hands-on/aiops-anomaly-detection/getting-started/README.md`](hands-on/aiops-anomaly-detection/getting-started/README.md)。
-
-## Notebook 路徑
+## Labs 路徑
 
 建議依序執行：
 
 1. `data/synthetic/simulator_rrd_metrics.ipynb`
-2. `notebooks/Notebook1_Time_Series_Features.ipynb`
-3. `notebooks/Notebook2_Baseline_Anomaly_Detection.ipynb`
-4. `notebooks/Notebook3_SPC_for_AD.ipynb`
-5. `notebooks/Notebook4_ML_Unsupervised_for_AD.ipynb`
-6. `notebooks/Notebook5_AD_Alert_Reduction.ipynb`
-7. `notebooks/Notebook6_Forecasting.ipynb`
-8. `notebooks/Notebook7_Root_Cause_Analysis_with_LLM.ipynb`
+2. `labs/full-course/00_observability_stack.ipynb`
+3. `labs/full-course/01_time_series_features.ipynb`
+4. `labs/full-course/02_baseline_anomaly_detection.ipynb`
+5. `labs/full-course/03_spc_anomaly_detection.ipynb`
+6. `labs/full-course/04_ml_anomaly_detection.ipynb`
+7. `labs/full-course/05_alert_reduction.ipynb`
+8. `labs/full-course/06_forecasting.ipynb`
+9. `labs/full-course/07_root_cause_analysis.ipynb`
+10. `labs/full-course/08_deploy_to_production.ipynb`
 
 ## 課程架構
 
 | 路徑 | 學習成果 | 目前狀態 |
 | --- | --- | --- |
 | 可觀測性基礎 | 啟動 Prometheus/Grafana、讀懂 metrics、操作 dashboard | 第一個 lab 已建立 |
-| Network AIOps | 特徵工程、統計與 ML 異常偵測、告警降噪、預測、RCA | package 與 7 個 notebooks 已建立 |
+| Network AIOps | 特徵工程、統計與 ML 異常偵測、告警降噪、預測、RCA | 7 個 labs 已建立 |
 | 營運整合 | alerting、SLO、事件關聯、部署與治理 | 規劃中 |
-
-完整模組、學習產出與完成標準見 [`curriculum/README.md`](curriculum/README.md)。
 
 ## Repository 結構
 
 ```text
 .
-├── src/aiops_monitor/           # 可測試、可安裝的 simulator/anomaly/exporter package
-├── compose.yaml                 # Prometheus、Grafana 與 RRD exporter
-├── prometheus/                  # scrape configuration
-├── grafana/                     # datasource、dashboard provisioning
-├── labs/                        # 可重複執行的操作實驗
-├── curriculum/                  # 課程地圖與完成標準
-├── course_materials/            # 網路介面監控概念文件
+├── environment.yml              # conda 課程環境
+├── labs/                        # AIOps 教學 labs
+│   ├── getting-started/         # 初學者設定指南與啟動腳本
+│   ├── full-course/             # 完整自學版 notebooks
+│   └── hands-on/                # 工作坊短版 notebooks
 ├── data/                        # synthetic、sample、processed data
-├── notebooks/                   # AIOps 教學 notebooks
-├── hands-on/                    # 初學者環境設定與短版練習
-├── reports/                     # RCA 輸出範例
-├── scripts/                     # notebook 建置與課程維護工具
-└── tests/                       # package regression tests
+├── prometheus/                  # Prometheus 設定範例
+├── grafana/                     # Grafana datasource 與 dashboard 設定範例
+├── docs/                        # 補充文件
+└── exporter.py                  # CSV-to-Prometheus metrics exporter
 ```
 
-## Python command surface
+Docker 不在本教學主路徑內。依照 `labs/getting-started/` 完成 conda 與本機監控工具安裝即可開始。
 
-產生 RRD-like dataset：
-
-```bash
-aiops-simulate --days 30 --seed 42 --out-dir data/synthetic
-```
-
-在本機直接啟動 metrics exporter：
-
-```bash
-CSV_PATH=data/synthetic/synthetic_rrd_metrics.csv aiops-export
-```
+Prometheus 設定檔分平台提供：macOS / Linux 使用 `prometheus/prometheus.yml`，Windows 使用 `prometheus/prometheus.windows.yml`。Python 環境、notebooks、dashboard 與 synthetic data 都隨 repository 一起提供；clone 後不需要複製本機私有檔案。
 
 ## 資料
 
@@ -132,7 +99,7 @@ CSV_PATH=data/synthetic/synthetic_rrd_metrics.csv aiops-export
 data/
 ├── synthetic/   # 可由 simulator 重建的 RRD-like metrics
 ├── sample/      # LibreNMS/RRDTool sample data
-└── processed/   # notebooks 產出的 features、alerts、forecast 與 RCA 結果
+└── processed/   # labs 產出的 features、alerts、forecast 與 RCA 結果
 ```
 
 讀取 `.rrd` sample 需要系統安裝 RRDtool。macOS 可執行：
@@ -149,7 +116,7 @@ brew install rrdtool
 - dashboard、告警與模型輸出必須能追溯到原始 telemetry。
 - 生成式 AI 只能協助解釋有證據的訊號，不替代監控資料或驗證程序。
 
-本課程參考 [grafana-zero-to-hero](https://github.com/blueswen/grafana-zero-to-hero) 與 [observability-zero-to-hero](https://github.com/iam-veeramalla/observability-zero-to-hero) 的課程組織方式，但範例、資料、程式與練習均在本 repository 中獨立設計。比較結果與品質目標見 [`docs/reference-analysis.md`](docs/reference-analysis.md)。
+本課程參考 [grafana-zero-to-hero](https://github.com/blueswen/grafana-zero-to-hero) 與 [observability-zero-to-hero](https://github.com/iam-veeramalla/observability-zero-to-hero) 的課程組織方式，但範例、資料、程式與練習均在本 repository 中獨立設計。
 
 ## License
 

@@ -1,0 +1,147 @@
+groups:
+
+  # ── Recording rules: pre-compute features (equivalent to Notebook 01) ────────
+  - name: network_features
+    interval: 5s
+    rules:
+
+      # Total traffic (IN + OUT bytes)
+      - record: network:traffic_total
+        expr: network_rrd_inoctets + network_rrd_outoctets
+
+      # Total errors and discards
+      - record: network:errors_total
+        expr: network_rrd_inerrors + network_rrd_outerrors
+
+      - record: network:discards_total
+        expr: network_rrd_indiscards + network_rrd_outdiscards
+
+      # Total unicast packets (denominator for rates)
+      - record: network:ucast_total
+        expr: network_rrd_inucastpkts + network_rrd_outucastpkts
+
+      # Error rate = errors / unicast packets
+      - record: network:error_rate
+        expr: network:errors_total / clamp_min(network:ucast_total, 1)
+
+      # Discard rate
+      - record: network:discard_rate
+        expr: network:discards_total / clamp_min(network:ucast_total, 1)
+
+      # Broadcast total
+      - record: network:broadcast_total
+        expr: network_rrd_inbroadcastpkts + network_rrd_outbroadcastpkts
+
+      # Rolling 1-hour mean and stddev (12 × 5-min intervals)
+      - record: network:traffic_mean_1h
+        expr: avg_over_time(network:traffic_total[1h])
+
+      - record: network:traffic_stddev_1h
+        expr: stddev_over_time(network:traffic_total[1h])
+
+      - record: network:error_rate_mean_1h
+        expr: avg_over_time(network:error_rate[1h])
+
+      - record: network:error_rate_stddev_1h
+        expr: stddev_over_time(network:error_rate[1h])
+
+      - record: network:discard_rate_mean_1h
+        expr: avg_over_time(network:discard_rate[1h])
+
+      - record: network:discard_rate_stddev_1h
+        expr: stddev_over_time(network:discard_rate[1h])
+
+      - record: network:broadcast_mean_1h
+        expr: avg_over_time(network:broadcast_total[1h])
+
+      - record: network:broadcast_stddev_1h
+        expr: stddev_over_time(network:broadcast_total[1h])
+
+      # Z-scores (equivalent to Notebook 02 z-score calculation)
+      - record: network:traffic_zscore
+        expr: >
+          (network:traffic_total - network:traffic_mean_1h)
+          / clamp_min(network:traffic_stddev_1h, 1)
+
+      - record: network:error_rate_zscore
+        expr: >
+          (network:error_rate - network:error_rate_mean_1h)
+          / clamp_min(network:error_rate_stddev_1h, 0.0001)
+
+      - record: network:discard_rate_zscore
+        expr: >
+          (network:discard_rate - network:discard_rate_mean_1h)
+          / clamp_min(network:discard_rate_stddev_1h, 0.0001)
+
+      - record: network:broadcast_zscore
+        expr: >
+          (network:broadcast_total - network:broadcast_mean_1h)
+          / clamp_min(network:broadcast_stddev_1h, 1)
+
+  # ── Alert rules: anomaly detection (equivalent to Notebook 02 flags) ─────────
+  - name: network_anomaly_detection
+    interval: 5s
+    rules:
+
+      - alert: TrafficSurge
+        expr: network:traffic_zscore > 3
+        for: 1m
+        labels:
+          severity: warning
+          anomaly_type: traffic_surge
+        annotations:
+          summary: "Traffic surge on {{ $labels.port_id }}"
+          description: >
+            Port {{ $labels.port_id }} ({{ $labels.device_id }}) traffic z-score
+            = {{ $value | printf "%.1f" }}σ above 1-hour baseline.
+            Notebook 02 threshold: z > 3.0
+
+      - alert: TrafficDrop
+        expr: network:traffic_zscore < -3
+        for: 2m
+        labels:
+          severity: warning
+          anomaly_type: traffic_drop
+        annotations:
+          summary: "Traffic drop on {{ $labels.port_id }}"
+          description: >
+            Port {{ $labels.port_id }} traffic dropped to
+            {{ $value | printf "%.1f" }}σ below 1-hour baseline.
+            Possible: link failure, upstream routing change.
+
+      - alert: ErrorRateSurge
+        expr: network:error_rate_zscore > 3
+        for: 1m
+        labels:
+          severity: critical
+          anomaly_type: error_burst
+        annotations:
+          summary: "Error rate spike on {{ $labels.port_id }}"
+          description: >
+            Port {{ $labels.port_id }} error rate z-score = {{ $value | printf "%.1f" }}σ.
+            Check: cable, SFP, NIC, duplex/speed mismatch.
+
+      - alert: DiscardRateSurge
+        expr: network:discard_rate_zscore > 3
+        for: 1m
+        labels:
+          severity: warning
+          anomaly_type: discard_spike
+        annotations:
+          summary: "Discard rate spike on {{ $labels.port_id }}"
+          description: >
+            Port {{ $labels.port_id }} discard rate z-score = {{ $value | printf "%.1f" }}σ.
+            Check: queue congestion, QoS policy, buffer exhaustion.
+
+      - alert: BroadcastStorm
+        expr: network:broadcast_zscore > 3
+        for: 30s
+        labels:
+          severity: critical
+          anomaly_type: broadcast_storm
+        annotations:
+          summary: "Broadcast storm suspected on {{ $labels.port_id }}"
+          description: >
+            Port {{ $labels.port_id }} broadcast z-score = {{ $value | printf "%.1f" }}σ.
+            Check: ARP storm, switch loop, DHCP storm.
+            Cross-port: look for simultaneous spikes on multiple ports.

@@ -1,5 +1,5 @@
 event_id,event_type,port_id,start_time,periods_5min,description,end_time
-A,business_traffic_growth,port-id7430,2026-02-04 09:00,24,正常業務流量增加,2026-02-04 10:55:00
+A,business_traffic_growth,port-id7430,2026-02-04 09:00,24,正常業務Traffic增加,2026-02-04 10:55:00
 B,small_packet_scan,port-id7428,2026-02-06 13:10,10,大量小封包 / 掃描,2026-02-06 13:55:00
 C,large_file_backup,port-id7431,2026-02-08 01:00,36,大檔案傳輸 / 備份,2026-02-08 03:55:00
 D,queue_congestion,port-id7427,2026-02-11 15:20,14,頻寬壅塞 / Queue 滿,2026-02-11 16:25:00

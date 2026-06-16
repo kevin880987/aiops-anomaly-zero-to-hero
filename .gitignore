@@ -2,21 +2,10 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
-*.egg
-.eggs/
-dist/
-build/
-.venv/
-venv/
-env/
-
-# Testing
 .pytest_cache/
 .coverage
-htmlcov/
-
-# Data (users supply their own)
-data/*.csv
+.venv/
+venv/
 
 # Local configuration
 .env
@@ -29,3 +18,6 @@ data/*.csv
 
 # Conda local env (if created in-project)
 .conda/
+
+# Generated notebook outputs
+data/processed/*.csv

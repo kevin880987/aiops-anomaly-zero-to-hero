@@ -17,7 +17,5 @@ dependencies:
   - pytest>=8.0
   - pytest-cov
   - pip:
-      # Not on conda-forge with exact version constraints — install via pip
+      # Not on conda-forge with exact version constraints; install via pip.
       - prometheus_client>=0.20
-      # Install the package itself in editable mode
-      - -e .

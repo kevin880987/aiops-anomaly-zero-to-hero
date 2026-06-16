@@ -46,7 +46,7 @@
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "network_rrd_in_octets{device_id=~\"$device\", port_id=~\"$port\"}",
+          "expr": "network_rrd_inoctets{device_id=~\"$device\", port_id=~\"$port\"}",
           "legendFormat": "IN  {{device_id}} / {{port_id}} ({{port_role}})",
           "refId": "A"
         }
@@ -69,7 +69,7 @@
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "network_rrd_out_octets{device_id=~\"$device\", port_id=~\"$port\"}",
+          "expr": "network_rrd_outoctets{device_id=~\"$device\", port_id=~\"$port\"}",
           "legendFormat": "OUT {{device_id}} / {{port_id}} ({{port_role}})",
           "refId": "A"
         }
@@ -107,12 +107,12 @@
       "options": { "legend": { "calcs": ["max", "sum"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "network_rrd_in_errors{device_id=~\"$device\", port_id=~\"$port\"}",
+          "expr": "network_rrd_inerrors{device_id=~\"$device\", port_id=~\"$port\"}",
           "legendFormat": "IN ERR  {{device_id}} / {{port_id}}",
           "refId": "A"
         },
         {
-          "expr": "network_rrd_out_errors{device_id=~\"$device\", port_id=~\"$port\"}",
+          "expr": "network_rrd_outerrors{device_id=~\"$device\", port_id=~\"$port\"}",
           "legendFormat": "OUT ERR {{device_id}} / {{port_id}}",
           "refId": "B"
         }
@@ -135,12 +135,12 @@
       "options": { "legend": { "calcs": ["max", "sum"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "network_rrd_in_discards{device_id=~\"$device\", port_id=~\"$port\"}",
+          "expr": "network_rrd_indiscards{device_id=~\"$device\", port_id=~\"$port\"}",
           "legendFormat": "IN DISC  {{device_id}} / {{port_id}}",
           "refId": "A"
         },
         {
-          "expr": "network_rrd_out_discards{device_id=~\"$device\", port_id=~\"$port\"}",
+          "expr": "network_rrd_outdiscards{device_id=~\"$device\", port_id=~\"$port\"}",
           "legendFormat": "OUT DISC {{device_id}} / {{port_id}}",
           "refId": "B"
         }
@@ -170,12 +170,12 @@
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "network_rrd_in_ucast_pkts{device_id=~\"$device\", port_id=~\"$port\"}",
+          "expr": "network_rrd_inucastpkts{device_id=~\"$device\", port_id=~\"$port\"}",
           "legendFormat": "IN  {{device_id}} / {{port_id}}",
           "refId": "A"
         },
         {
-          "expr": "network_rrd_out_ucast_pkts{device_id=~\"$device\", port_id=~\"$port\"}",
+          "expr": "network_rrd_outucastpkts{device_id=~\"$device\", port_id=~\"$port\"}",
           "legendFormat": "OUT {{device_id}} / {{port_id}}",
           "refId": "B"
         }
@@ -198,22 +198,22 @@
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "network_rrd_in_broadcast_pkts{device_id=~\"$device\", port_id=~\"$port\"}",
+          "expr": "network_rrd_inbroadcastpkts{device_id=~\"$device\", port_id=~\"$port\"}",
           "legendFormat": "BCAST IN  {{port_id}}",
           "refId": "A"
         },
         {
-          "expr": "network_rrd_out_broadcast_pkts{device_id=~\"$device\", port_id=~\"$port\"}",
+          "expr": "network_rrd_outbroadcastpkts{device_id=~\"$device\", port_id=~\"$port\"}",
           "legendFormat": "BCAST OUT {{port_id}}",
           "refId": "B"
         },
         {
-          "expr": "network_rrd_in_multicast_pkts{device_id=~\"$device\", port_id=~\"$port\"}",
+          "expr": "network_rrd_inmulticastpkts{device_id=~\"$device\", port_id=~\"$port\"}",
           "legendFormat": "MCAST IN  {{port_id}}",
           "refId": "C"
         },
         {
-          "expr": "network_rrd_out_multicast_pkts{device_id=~\"$device\", port_id=~\"$port\"}",
+          "expr": "network_rrd_outmulticastpkts{device_id=~\"$device\", port_id=~\"$port\"}",
           "legendFormat": "MCAST OUT {{port_id}}",
           "refId": "D"
         }
@@ -289,14 +289,14 @@
       {
         "current": { "selected": true, "text": "All", "value": "$__all" },
         "datasource": { "type": "prometheus", "uid": "prometheus" },
-        "definition": "label_values(network_rrd_in_octets, device_id)",
+        "definition": "label_values(network_rrd_inoctets, device_id)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "device",
         "options": [],
         "query": {
-          "query": "label_values(network_rrd_in_octets, device_id)",
+          "query": "label_values(network_rrd_inoctets, device_id)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
@@ -308,14 +308,14 @@
       {
         "current": { "selected": true, "text": "All", "value": "$__all" },
         "datasource": { "type": "prometheus", "uid": "prometheus" },
-        "definition": "label_values(network_rrd_in_octets{device_id=~\"$device\"}, port_id)",
+        "definition": "label_values(network_rrd_inoctets{device_id=~\"$device\"}, port_id)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "port",
         "options": [],
         "query": {
-          "query": "label_values(network_rrd_in_octets{device_id=~\"$device\"}, port_id)",
+          "query": "label_values(network_rrd_inoctets{device_id=~\"$device\"}, port_id)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
