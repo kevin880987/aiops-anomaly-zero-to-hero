@@ -15,7 +15,7 @@ Shared pipeline diagrams live in `labs/self-study/diagrams/`。`labs/workshop/di
 請從 [`getting-started/README.md`](getting-started/README.md) 開始。它會帶你完成：
 
 1. 建立 `aiops-anomaly-zero-to-hero` conda 環境。
-2. 啟動 `exporter.py`，讓 Prometheus 可抓取課程 synthetic metrics。
+2. 啟動 `infra/exporter.py`，讓 Prometheus 可抓取課程 synthetic metrics。
 3. 安裝並啟動 Prometheus。
 4. 視課程路徑安裝 node_exporter 或 windows_exporter。
 5. 安裝 Grafana，連接 Prometheus，匯入 dashboard。

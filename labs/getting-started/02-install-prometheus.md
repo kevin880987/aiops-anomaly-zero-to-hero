@@ -8,8 +8,8 @@ Prometheus 是系統級監控服務，安裝方式依作業系統與權限設定
 本課程提供兩份 Prometheus 設定檔。請依作業系統選一份使用：
 
 ```text
-prometheus/prometheus.yml          macOS / Linux，使用 node_exporter :9100
-prometheus/prometheus.windows.yml  Windows，使用 windows_exporter :9182
+infra/prometheus/prometheus.yml          macOS / Linux，使用 node_exporter :9100
+infra/prometheus/prometheus.windows.yml  Windows，使用 windows_exporter :9182
 ```
 
 macOS / Linux 設定檔會抓取三個本機目標：
@@ -36,7 +36,7 @@ localhost:9182  windows_exporter
 
 ```bash
 conda activate aiops-anomaly-zero-to-hero
-python exporter.py
+python infra/exporter.py
 ```
 
 看到 `Exporting metrics on http://localhost:8000/metrics` 後保持這個終端機開著。另開一個終端機繼續安裝與啟動 Prometheus。
@@ -62,7 +62,7 @@ brew install prometheus
 安裝後開啟第二個終端機，回到 repository 根目錄，使用本課程提供的設定檔啟動：
 
 ```bash
-prometheus --config.file=prometheus/prometheus.yml --web.enable-lifecycle
+prometheus --config.file=infra/prometheus/prometheus.yml --web.enable-lifecycle
 ```
 
 如果終端機顯示 `prometheus: command not found`，先確認 Homebrew 的 `bin` 目錄已加入 `PATH`：
@@ -80,7 +80,7 @@ brew --prefix
 3. 開啟第二個 PowerShell，在 Prometheus 解壓縮目錄執行：
 
 ```powershell
-.\prometheus.exe --config.file="C:\path\to\aiops-anomaly-zero-to-hero\prometheus\prometheus.windows.yml" --web.enable-lifecycle
+.\prometheus.exe --config.file="C:\path\to\aiops-anomaly-zero-to-hero\infra\prometheus\prometheus.windows.yml" --web.enable-lifecycle
 ```
 
 瀏覽器開啟 [http://localhost:9090](http://localhost:9090) 確認是否正常運作。
@@ -89,7 +89,7 @@ brew --prefix
 
 ```bash
 sudo apt-get update && sudo apt-get install -y prometheus
-prometheus --config.file=prometheus/prometheus.yml --web.enable-lifecycle
+prometheus --config.file=infra/prometheus/prometheus.yml --web.enable-lifecycle
 ```
 
 其他發行版請參考官方安裝文件。

@@ -22,7 +22,7 @@ jobs:
 
           paths = list(Path("labs").rglob("*.ipynb"))
           paths += list(Path("data").rglob("*.ipynb"))
-          paths += list(Path("grafana/dashboards").glob("*.json"))
+          paths += list(Path("infra/grafana/dashboards").glob("*.json"))
           for path in paths:
               json.loads(path.read_text(encoding="utf-8"))
               print(f"ok {path}")
@@ -31,7 +31,7 @@ jobs:
       - name: Validate startup scripts
         run: |
           bash -n labs/getting-started/scripts/bootstrap_macos.sh
-          python -m py_compile labs/getting-started/scripts/validate_setup.py exporter.py
+          python -m py_compile labs/getting-started/scripts/validate_setup.py infra/exporter.py
           python labs/getting-started/scripts/validate_setup.py --repo-only
           python - <<'PY'
           from pathlib import Path

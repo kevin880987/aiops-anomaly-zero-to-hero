@@ -59,18 +59,18 @@ sudo systemctl enable grafana-server
 本 repository 提供一份 Grafana dashboard JSON：
 
 ```text
-grafana/dashboards/network_metrics.json
+infra/grafana/dashboards/network_metrics.json
 ```
 
 匯入方式：
 
 1. 左側選單：**Dashboards → New → Import**。
 2. 點擊 **Upload dashboard JSON file**。
-3. 選擇 `grafana/dashboards/network_metrics.json`。
+3. 選擇 `infra/grafana/dashboards/network_metrics.json`。
 4. 如果 Grafana 要求選擇 Prometheus data source，選剛剛建立的 Prometheus。
 5. 點擊 **Import**。
 
-匯入後若 panel 沒有資料，先確認 Prometheus 的 `up{job="csv-exporter"}` 是 `1`，並確認 `python exporter.py` 的終端機仍在執行。
+匯入後若 panel 沒有資料，先確認 Prometheus 的 `up{job="csv-exporter"}` 是 `1`，並確認 `python infra/exporter.py` 的終端機仍在執行。
 
 ## 常見問題
 
@@ -81,4 +81,4 @@ grafana/dashboards/network_metrics.json
 先確認 Prometheus 可以在 [http://localhost:9090](http://localhost:9090) 開啟。Grafana 的資料來源 URL 應填 `http://localhost:9090`，不是 `http://localhost:3000`。
 
 **Dashboard 沒有資料？**
-確認三件事：`python exporter.py` 正在執行、Prometheus 使用正確作業系統的設定檔啟動、Grafana data source 指向 `http://localhost:9090`。
+確認三件事：`python infra/exporter.py` 正在執行、Prometheus 使用正確作業系統的設定檔啟動、Grafana data source 指向 `http://localhost:9090`。

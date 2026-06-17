@@ -154,8 +154,8 @@ python labs/getting-started/scripts/validate_setup.py --repo-only
 Prometheus 設定可用 `promtool` 檢查：
 
 ```bash
-promtool check config prometheus/prometheus.yml
-promtool check config prometheus/prometheus.windows.yml
+promtool check config infra/prometheus/prometheus.yml
+promtool check config infra/prometheus/prometheus.windows.yml
 ```
 
 ## 教師使用建議

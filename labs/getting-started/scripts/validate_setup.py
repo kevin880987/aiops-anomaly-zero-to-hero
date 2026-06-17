@@ -26,17 +26,17 @@ REPO_ROOT = SCRIPT_PATH.parents[3]
 REQUIRED_FILES = [
     "COURSE_GUIDE.md",
     "environment.yml",
-    "exporter.py",
+    "infra/exporter.py",
     "data/synthetic/synthetic_rrd_metrics.csv",
     "data/synthetic/synthetic_event_catalog.csv",
-    "prometheus/prometheus.yml",
-    "prometheus/prometheus.windows.yml",
-    "prometheus/alerts.yml",
-    "grafana/dashboards/network_metrics.json",
+    "infra/prometheus/prometheus.yml",
+    "infra/prometheus/prometheus.windows.yml",
+    "infra/prometheus/alerts.yml",
+    "infra/grafana/dashboards/network_metrics.json",
     "labs/README.md",
     "labs/getting-started/README.md",
-    "labs/hands-on/00_observability_stack_and_promql.ipynb",
-    "labs/full-course/00_observability_stack.ipynb",
+    "labs/workshop/00_observability_stack_and_promql.ipynb",
+    "labs/self-study/00_observability_stack.ipynb",
 ]
 
 REQUIRED_PACKAGES = {
@@ -98,7 +98,7 @@ def check_json(path: str) -> tuple[bool, str]:
 
 
 def check_dashboard_metric_refs() -> tuple[bool, str]:
-    exporter_source = ast.parse((REPO_ROOT / "exporter.py").read_text(encoding="utf-8"))
+    exporter_source = ast.parse((REPO_ROOT / "infra/exporter.py").read_text(encoding="utf-8"))
     metric_cols = None
     for node in exporter_source.body:
         if not isinstance(node, ast.Assign):
@@ -113,7 +113,7 @@ def check_dashboard_metric_refs() -> tuple[bool, str]:
     emitted = {f"network_rrd_{col.lower()}" for col in metric_cols}
     emitted |= {"network_rrd_simulated_timestamp", "network_rrd_event"}
 
-    dashboard = json.loads((REPO_ROOT / "grafana/dashboards/network_metrics.json").read_text(encoding="utf-8"))
+    dashboard = json.loads((REPO_ROOT / "infra/grafana/dashboards/network_metrics.json").read_text(encoding="utf-8"))
     refs: set[str] = set()
     for panel in dashboard.get("panels", []):
         for target in panel.get("targets", []):

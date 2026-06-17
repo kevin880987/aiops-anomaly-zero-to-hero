@@ -54,29 +54,29 @@ jupyter lab labs
 
 本 repository 提供兩條 notebook 路徑：
 
-- `labs/hands-on/`：工作坊短版，聚焦可觀測性、特徵工程、異常偵測與 RCA capstone。
-- `labs/full-course/`：完整自學版，從資料模擬一路做到部署檢查。
+- `labs/workshop/`：工作坊短版，聚焦可觀測性、特徵工程、異常偵測與 RCA capstone。
+- `labs/self-study/`：完整自學版，從資料模擬一路做到部署檢查。
 
 完整自學版建議依序執行：
 
 1. `data/synthetic/simulator_rrd_metrics.ipynb`
-2. `labs/full-course/00_observability_stack.ipynb`
-3. `labs/full-course/01_time_series_features.ipynb`
-4. `labs/full-course/02_baseline_anomaly_detection.ipynb`
-5. `labs/full-course/03_spc_anomaly_detection.ipynb`
-6. `labs/full-course/04_ml_anomaly_detection.ipynb`
-7. `labs/full-course/05_alert_reduction.ipynb`
-8. `labs/full-course/06_forecasting.ipynb`
-9. `labs/full-course/07_root_cause_analysis.ipynb`
-10. `labs/full-course/08_deploy_to_production.ipynb`
+2. `labs/self-study/00_observability_stack.ipynb`
+3. `labs/self-study/01_time_series_features.ipynb`
+4. `labs/self-study/02_baseline_anomaly_detection.ipynb`
+5. `labs/self-study/03_spc_anomaly_detection.ipynb`
+6. `labs/self-study/04_ml_anomaly_detection.ipynb`
+7. `labs/self-study/05_alert_reduction.ipynb`
+8. `labs/self-study/06_forecasting.ipynb`
+9. `labs/self-study/07_root_cause_analysis.ipynb`
+10. `labs/self-study/08_deploy_to_production.ipynb`
 
 ## 課程架構
 
 | 路徑 | 學習成果 | 目前狀態 |
 | --- | --- | --- |
 | `labs/getting-started/` | 建立 conda 環境，安裝 Prometheus、Grafana 與 OS exporter | 完整 |
-| `labs/hands-on/` | 工作坊短版，使用即時 Prometheus 指標完成核心 AIOps 流程 | 完整 |
-| `labs/full-course/` | 完整自學版，使用 synthetic data 重建 features、alerts、forecast 與 RCA outputs | 完整 |
+| `labs/workshop/` | 工作坊短版，使用即時 Prometheus 指標完成核心 AIOps 流程 | 完整 |
+| `labs/self-study/` | 完整自學版，使用 synthetic data 重建 features、alerts、forecast 與 RCA outputs | 完整 |
 
 ## Repository 結構
 
@@ -84,19 +84,20 @@ jupyter lab labs
 .
 ├── environment.yml              # conda 課程環境
 ├── COURSE_GUIDE.md              # 教材總覽、學習成果、路線與檢核方式
-├── labs/                        # AIOps 教學 labs
+├── labs/                        # 人員面向教材
 │   ├── getting-started/         # 初學者設定指南與啟動腳本
-│   ├── full-course/             # 完整自學版 notebooks
-│   └── hands-on/                # 工作坊短版 notebooks
+│   ├── workshop/                # 工作坊短版 notebooks
+│   └── self-study/              # 完整自學版 notebooks
 ├── data/                        # synthetic、sample、processed data
-├── prometheus/                  # Prometheus 設定範例
-├── grafana/                     # Grafana datasource 與 dashboard 設定範例
-└── exporter.py                  # CSV-to-Prometheus metrics exporter
+└── infra/                       # 運維設定與工具
+    ├── prometheus/              # Prometheus 設定範例
+    ├── grafana/                 # Grafana datasource 與 dashboard 設定範例
+    └── exporter.py              # CSV-to-Prometheus metrics exporter
 ```
 
 Docker 不在本教學主路徑內。依照 `labs/getting-started/` 完成 conda 與本機監控工具安裝即可開始。
 
-Prometheus 設定檔分平台提供：macOS / Linux 使用 `prometheus/prometheus.yml`，Windows 使用 `prometheus/prometheus.windows.yml`。Python 環境、notebooks、dashboard 與 synthetic data 都隨 repository 一起提供；clone 後不需要複製本機私有檔案。
+Prometheus 設定檔分平台提供：macOS / Linux 使用 `infra/prometheus/prometheus.yml`，Windows 使用 `infra/prometheus/prometheus.windows.yml`。Python 環境、notebooks、dashboard 與 synthetic data 都隨 repository 一起提供；clone 後不需要複製本機私有檔案。
 
 ## 資料
 

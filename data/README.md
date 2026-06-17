@@ -6,7 +6,7 @@
 
 - `synthetic/`：主教材使用的 RRD-like network metrics，以及資料模擬 notebook。
 - `sample/`：選讀資料。外部提供的 LibreNMS / RRDTool sample data，用來理解真實 `.rrd` 檔格式，不是初學者主線必跑步驟。
-- `processed/`：`labs/full-course/01` 到 `07` 產生的 features、anomaly flags、SPC、ML scores、alerts、forecast 與 RCA outputs。
+- `processed/`：`labs/self-study/01` 到 `07` 產生的 features、anomaly flags、SPC、ML scores、alerts、forecast 與 RCA outputs。
 
 `processed/` 內容可由 notebooks 重建。若要重建 synthetic data，請執行：
 
