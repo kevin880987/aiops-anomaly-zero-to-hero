@@ -1,6 +1,8 @@
 # Sample Data
 
-此資料夾放外部提供的原始範例資料，與 `data/synthetic/` 的模擬資料、`data/processed/` 的 pipeline 產物分開管理。
+此資料夾是選讀資料，放外部提供的原始範例資料，與 `data/synthetic/` 的主教材資料、`data/processed/` 的 pipeline 產物分開管理。
+
+初學者不需要先讀這裡。完整 labs 使用 `data/synthetic/` 與 `data/processed/` 即可完成。只有在你想理解 LibreNMS / RRDTool 的原始 `.rrd` 檔時，才進入本資料夾。
 
 ## Structure
 

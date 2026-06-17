@@ -1,6 +1,8 @@
 # Error Log Sample
 
-此資料夾收錄三竹提供的 LibreNMS / RRDTool 網路監控範例資料。
+此資料夾收錄三竹提供的 LibreNMS / RRDTool 網路監控範例資料。它是選讀資料，不是 labs 的必要輸入。
+
+主教材已經把同類型欄位整理成 `data/synthetic/synthetic_rrd_metrics.csv`，所以初學者可以先跳過本資料夾。
 
 ## 內容
 
