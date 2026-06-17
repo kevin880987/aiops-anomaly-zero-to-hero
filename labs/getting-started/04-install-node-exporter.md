@@ -40,7 +40,7 @@ Windows 使用 [windows_exporter](https://github.com/prometheus-community/window
 Prometheus 請使用 Windows 專用設定檔：
 
 ```powershell
-.\prometheus.exe --config.file="C:\path\to\aiops-anomaly-zero-to-hero\prometheus\prometheus.windows.yml" --web.enable-lifecycle
+.\prometheus.exe --config.file="C:\path\to\aiops-anomaly-zero-to-hero\infra\prometheus\prometheus.windows.yml" --web.enable-lifecycle
 ```
 
 ---
@@ -83,7 +83,13 @@ scrape_configs:
 如果 Prometheus 已經依 [02-install-prometheus.md](02-install-prometheus.md) 啟動，安裝 node_exporter 後通常等待幾秒就能看到目標變成 `up`。也可以手動重新載入 Prometheus：
 
 ```bash
+# macOS / Linux
 curl -X POST http://localhost:9090/-/reload
+```
+
+```powershell
+# Windows
+Invoke-WebRequest -Method Post http://localhost:9090/-/reload
 ```
 
 在 Prometheus UI（`http://localhost:9090`）查詢 `up{job="node-exporter"}` 確認值為 `1`。

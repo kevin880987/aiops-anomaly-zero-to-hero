@@ -108,11 +108,20 @@ data/
 └── processed/   # labs 產出的 features、alerts、forecast 與 RCA 結果
 ```
 
-讀取 `.rrd` sample 需要系統安裝 RRDtool。macOS 可執行：
+讀取 `.rrd` sample 需要系統安裝 RRDtool。
 
 ```bash
+# macOS
 brew install rrdtool
+
+# Linux（Ubuntu / Debian）
+sudo apt-get install rrdtool
+
+# Windows（Chocolatey）
+choco install rrdtool
 ```
+
+RRDtool 不在核心路徑中；若只使用 synthetic CSV 資料，可以略過此步驟。
 
 ## 課程設計原則
 

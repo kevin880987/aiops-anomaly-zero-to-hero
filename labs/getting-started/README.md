@@ -42,8 +42,14 @@ Step 3   開啟 Labs，開始課程
 | --- | --- |
 | macOS 12 以上 | [01a-setup-macos-python-environment.md](01a-setup-macos-python-environment.md) |
 | Windows 10 / 11 | [01b-setup-windows-python-environment.md](01b-setup-windows-python-environment.md) |
+| Linux（Ubuntu / Debian 等） | 安裝 [Miniconda](https://docs.conda.io/en/latest/miniconda.html)，再執行 `conda env create -f environment.yml && conda activate aiops-anomaly-zero-to-hero` |
 
-兩份文件都使用 `environment.yml` 建立名為 `aiops-anomaly-zero-to-hero` 的 conda 環境。腳本會先檢查現有環境；若已符合課程需求，會跳過更新，避免每次啟動都重新安裝套件。腳本也會執行 `labs/getting-started/scripts/validate_setup.py`，確認 clone 下來的 repository 檔案、notebook JSON、dashboard JSON 與 Python 套件都可用。
+三種平台都使用同一份 `environment.yml` 建立名為 `aiops-anomaly-zero-to-hero` 的 conda 環境。macOS 與 Windows 的 bootstrap 腳本會自動檢查現有環境，若已符合課程需求則跳過更新，並執行 `labs/getting-started/scripts/validate_setup.py` 確認 repository 檔案、notebook JSON、dashboard JSON 與 Python 套件都可用。Linux 使用者請手動執行 validate_setup.py：
+
+```bash
+conda activate aiops-anomaly-zero-to-hero
+python labs/getting-started/scripts/validate_setup.py --repo-only
+```
 
 如果你只想先建立環境、不立刻開啟 JupyterLab：
 
@@ -55,6 +61,12 @@ bash labs/getting-started/scripts/bootstrap_macos.sh --no-launch
 ```powershell
 # Windows
 powershell -ExecutionPolicy Bypass -File labs\getting-started\scripts\bootstrap_windows.ps1 -NoLaunch
+```
+
+```bash
+# Linux
+conda env create -f environment.yml
+conda activate aiops-anomaly-zero-to-hero
 ```
 
 ---
