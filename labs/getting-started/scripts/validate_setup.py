@@ -24,6 +24,7 @@ SCRIPT_PATH = Path(__file__).resolve()
 REPO_ROOT = SCRIPT_PATH.parents[3]
 
 REQUIRED_FILES = [
+    "COURSE_GUIDE.md",
     "environment.yml",
     "exporter.py",
     "data/synthetic/synthetic_rrd_metrics.csv",
@@ -32,6 +33,7 @@ REQUIRED_FILES = [
     "prometheus/prometheus.windows.yml",
     "prometheus/alerts.yml",
     "grafana/dashboards/network_metrics.json",
+    "labs/README.md",
     "labs/getting-started/README.md",
     "labs/hands-on/00_observability_stack_and_promql.ipynb",
     "labs/full-course/00_observability_stack.ipynb",

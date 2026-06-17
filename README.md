@@ -19,7 +19,7 @@ Network telemetry
 
 ### 路徑一：從初學者設定指南開始
 
-第一次使用請先閱讀 [`labs/getting-started/README.md`](labs/getting-started/README.md)。
+第一次使用請先閱讀 [`labs/getting-started/README.md`](labs/getting-started/README.md)。如果你已經完成環境設定，直接看 [`labs/README.md`](labs/README.md) 選擇工作坊短版或完整自學版。若要先理解整份教材的對象、學習成果、資料流與教學節奏，請看 [`COURSE_GUIDE.md`](COURSE_GUIDE.md)。
 
 設定指南會帶你完成三件事：
 
@@ -52,7 +52,12 @@ jupyter lab labs
 
 ## Labs 路徑
 
-建議依序執行：
+本 repository 提供兩條 notebook 路徑：
+
+- `labs/hands-on/`：工作坊短版，聚焦可觀測性、特徵工程、異常偵測與 RCA capstone。
+- `labs/full-course/`：完整自學版，從資料模擬一路做到部署檢查。
+
+完整自學版建議依序執行：
 
 1. `data/synthetic/simulator_rrd_metrics.ipynb`
 2. `labs/full-course/00_observability_stack.ipynb`
@@ -69,15 +74,16 @@ jupyter lab labs
 
 | 路徑 | 學習成果 | 目前狀態 |
 | --- | --- | --- |
-| 可觀測性基礎 | 啟動 Prometheus/Grafana、讀懂 metrics、操作 dashboard | 第一個 lab 已建立 |
-| Network AIOps | 特徵工程、統計與 ML 異常偵測、告警降噪、預測、RCA | 7 個 labs 已建立 |
-| 營運整合 | alerting、SLO、事件關聯、部署與治理 | 規劃中 |
+| `labs/getting-started/` | 建立 conda 環境，安裝 Prometheus、Grafana 與 OS exporter | 完整 |
+| `labs/hands-on/` | 工作坊短版，使用即時 Prometheus 指標完成核心 AIOps 流程 | 完整 |
+| `labs/full-course/` | 完整自學版，使用 synthetic data 重建 features、alerts、forecast 與 RCA outputs | 完整 |
 
 ## Repository 結構
 
 ```text
 .
 ├── environment.yml              # conda 課程環境
+├── COURSE_GUIDE.md              # 教材總覽、學習成果、路線與檢核方式
 ├── labs/                        # AIOps 教學 labs
 │   ├── getting-started/         # 初學者設定指南與啟動腳本
 │   ├── full-course/             # 完整自學版 notebooks
@@ -85,7 +91,6 @@ jupyter lab labs
 ├── data/                        # synthetic、sample、processed data
 ├── prometheus/                  # Prometheus 設定範例
 ├── grafana/                     # Grafana datasource 與 dashboard 設定範例
-├── docs/                        # 補充文件
 └── exporter.py                  # CSV-to-Prometheus metrics exporter
 ```
 

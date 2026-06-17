@@ -6,10 +6,12 @@
 
 - `synthetic/`：模擬產生的 RRD-like network metrics，以及資料模擬 notebook。
 - `sample/`：外部提供的 LibreNMS / RRDTool sample data。
-- `processed/`：Notebook1-7 產生的 features、anomaly flags、SPC、ML scores、alerts、forecast 與 RCA outputs。
+- `processed/`：`labs/full-course/01` 到 `07` 產生的 features、anomaly flags、SPC、ML scores、alerts、forecast 與 RCA outputs。
 
-`processed/` 內容可由 notebooks 重建。`synthetic/` 也可執行下列指令重建：
+`processed/` 內容可由 notebooks 重建。若要重建 synthetic data，請執行：
 
 ```bash
-aiops-simulate --days 30 --seed 42 --out-dir data/synthetic
+jupyter lab data/synthetic/simulator_rrd_metrics.ipynb
 ```
+
+打開 notebook 後依序執行所有 cells，會更新 `data/synthetic/synthetic_rrd_metrics.csv` 與 `data/synthetic/synthetic_event_catalog.csv`。
