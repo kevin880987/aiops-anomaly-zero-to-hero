@@ -16,24 +16,25 @@ brew install grafana
 brew services start grafana
 ```
 
-### Windows
-
-1. 至 [grafana.com/grafana/download](https://grafana.com/grafana/download/) 選擇 Windows，下載 `.msi` 安裝檔。
-2. 執行安裝檔，依指示完成安裝。
-3. Grafana 服務會自動啟動。若未啟動，在「服務」管理員中找到 `Grafana` 手動啟動。
-
 ### Linux（Ubuntu / Debian）
 
 ```bash
-sudo apt-get install -y apt-transport-https software-properties-common wget
-wget -q -O - https://apt.grafana.com/gpg.key | sudo apt-key add -
-echo "deb https://apt.grafana.com stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
+sudo apt-get install -y apt-transport-https software-properties-common wget gpg
+sudo mkdir -p /etc/apt/keyrings
+wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
 sudo apt-get update && sudo apt-get install -y grafana
 sudo systemctl start grafana-server
 sudo systemctl enable grafana-server
 ```
 
-其他發行版請參考官方安裝文件。
+其他發行版請參考[官方安裝文件](https://grafana.com/docs/grafana/latest/setup-grafana/installation/)。
+
+### Windows
+
+1. 至 [grafana.com/grafana/download](https://grafana.com/grafana/download/) 選擇 Windows，下載 `.msi` 安裝檔。
+2. 執行安裝檔，依指示完成安裝。
+3. Grafana 服務會自動啟動。若未啟動，在「服務」管理員中找到 `Grafana` 手動啟動。
 
 ## 首次登入
 
@@ -75,7 +76,7 @@ infra/grafana/dashboards/network_metrics.json
 ## 常見問題
 
 **瀏覽器無法開啟 `localhost:3000`？**
-確認 Grafana 服務已啟動。macOS 可執行 `brew services list`，Windows 可開啟「服務」管理員查看 `Grafana`。
+確認 Grafana 服務已啟動。macOS 可執行 `brew services list`，Linux 可執行 `systemctl status grafana-server`，Windows 可開啟「服務」管理員查看 `Grafana`。
 
 **Save & test 失敗？**
 先確認 Prometheus 可以在 [http://localhost:9090](http://localhost:9090) 開啟。Grafana 的資料來源 URL 應填 `http://localhost:9090`，不是 `http://localhost:3000`。

@@ -33,13 +33,22 @@ macOS 可在 repository 根目錄執行：
 bash labs/getting-started/scripts/bootstrap_macos.sh
 ```
 
+Linux 可在 repository 根目錄執行：
+
+```bash
+conda env create -f environment.yml
+conda activate aiops-anomaly-zero-to-hero
+python labs/getting-started/scripts/validate_setup.py --repo-only
+jupyter lab labs
+```
+
 Windows 可在 repository 根目錄執行：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File labs\getting-started\scripts\bootstrap_windows.ps1
 ```
 
-兩個腳本都會先檢查現有 conda 環境；若已符合課程需求，會跳過更新。若只想準備環境、不立刻開啟 JupyterLab，macOS 加上 `--no-launch`，Windows 加上 `-NoLaunch`。
+macOS 與 Windows 腳本會先檢查現有 conda 環境；若已符合課程需求，會跳過更新。若只想準備環境、不立刻開啟 JupyterLab，macOS 加上 `--no-launch`，Windows 加上 `-NoLaunch`。Linux 請依 [`labs/getting-started/01b-setup-linux-python-environment.md`](labs/getting-started/01b-setup-linux-python-environment.md) 手動建立同一個 conda 環境。
 
 ### 路徑二：開啟 labs
 

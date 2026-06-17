@@ -28,7 +28,7 @@ localhost:8000  課程 exporter.py
 localhost:9182  windows_exporter
 ```
 
-先完成 [01a](01a-setup-macos-python-environment.md) 或 [01b](01b-setup-windows-python-environment.md)，確認 conda 環境已建立。
+先完成 [01a](01a-setup-macos-python-environment.md)、[01b](01b-setup-linux-python-environment.md) 或 [01c](01c-setup-windows-python-environment.md)，確認 conda 環境已建立。
 
 ## 先啟動課程 exporter
 
@@ -73,6 +73,26 @@ brew --prefix
 
 瀏覽器開啟 [http://localhost:9090](http://localhost:9090) 確認是否正常運作。
 
+## Linux（二進制）
+
+```bash
+PROM_VERSION="3.12.0"
+curl -LO "https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz"
+tar xvf "prometheus-${PROM_VERSION}.linux-amd64.tar.gz"
+cd "prometheus-${PROM_VERSION}.linux-amd64"
+./prometheus --config.file=/path/to/aiops-anomaly-zero-to-hero/infra/prometheus/prometheus.yml --web.enable-lifecycle
+```
+
+請先到 [prometheus.io/download](https://prometheus.io/download/) 確認目前最新版本，再更新 `PROM_VERSION`。也可以使用發行版套件管理器安裝，但版本可能落後官方 release。
+
+若你的系統已透過套件管理器安裝 `prometheus` 指令，也可以在 repository 根目錄執行：
+
+```bash
+prometheus --config.file=infra/prometheus/prometheus.yml --web.enable-lifecycle
+```
+
+其他發行版請參考[官方安裝文件](https://prometheus.io/docs/prometheus/latest/installation/)。
+
 ## Windows
 
 1. 至 [prometheus.io/download](https://prometheus.io/download/) 下載 `prometheus-*windows-amd64.zip`。
@@ -84,15 +104,6 @@ brew --prefix
 ```
 
 瀏覽器開啟 [http://localhost:9090](http://localhost:9090) 確認是否正常運作。
-
-## Linux（Ubuntu / Debian）
-
-```bash
-sudo apt-get update && sudo apt-get install -y prometheus
-prometheus --config.file=infra/prometheus/prometheus.yml --web.enable-lifecycle
-```
-
-其他發行版請參考官方安裝文件。
 
 ## 確認安裝成功
 

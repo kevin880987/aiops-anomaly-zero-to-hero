@@ -35,6 +35,12 @@ REQUIRED_FILES = [
     "infra/grafana/dashboards/network_metrics.json",
     "labs/README.md",
     "labs/getting-started/README.md",
+    "labs/getting-started/01a-setup-macos-python-environment.md",
+    "labs/getting-started/01b-setup-linux-python-environment.md",
+    "labs/getting-started/01c-setup-windows-python-environment.md",
+    "labs/getting-started/02-install-prometheus.md",
+    "labs/getting-started/03-install-grafana.md",
+    "labs/getting-started/04-install-node-exporter.md",
     "labs/workshop/00_observability_stack_and_promql.ipynb",
     "labs/self-study/00_observability_stack.ipynb",
 ]
@@ -174,7 +180,7 @@ def main() -> int:
     print("Notebook and dashboard JSON")
     json_paths = list((REPO_ROOT / "labs").rglob("*.ipynb"))
     json_paths += list((REPO_ROOT / "data").rglob("*.ipynb"))
-    json_paths += list((REPO_ROOT / "grafana" / "dashboards").glob("*.json"))
+    json_paths += list((REPO_ROOT / "infra" / "grafana" / "dashboards").glob("*.json"))
     for full_path in sorted(json_paths):
         ok, message = check_json(str(full_path.relative_to(REPO_ROOT)))
         print(f"  [{'OK' if ok else '!!'}] {message}")

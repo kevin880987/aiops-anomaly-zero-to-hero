@@ -119,7 +119,7 @@ install_miniconda() {
 
   case "$(uname -s)" in
     Darwin) ;;
-    *) fail "This script is for macOS. Use the Windows guide on Windows, or install Miniconda manually on Linux." ;;
+    *) fail "This script is for macOS. Use the Linux or Windows setup guide on those platforms." ;;
   esac
 
   local tmp arch pkg target
@@ -160,7 +160,7 @@ install_miniconda() {
 
 case "$(uname -s)" in
   Darwin) ;;
-  *) fail "This script is for macOS. Use the Windows guide on Windows." ;;
+  *) fail "This script is for macOS. Use the Linux or Windows setup guide on those platforms." ;;
 esac
 
 if CONDA="$(find_conda)"; then
