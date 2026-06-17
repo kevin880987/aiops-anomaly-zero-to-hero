@@ -1,14 +1,10 @@
-# Processed Data
+# data/processed/ — not used
 
-此資料夾放 Notebook pipeline 的輸出結果。
+Notebook runtime outputs have moved to `outputs/` at the repository root:
 
-## Files
+- `outputs/workshop/` — workshop lab artifacts (features, events, annotations, images)
+- `outputs/self-study/` — self-study lab artifacts (features, anomaly flags, forecasts, RCA)
 
-- `features.csv`：`labs/self-study/01_time_series_features.ipynb` 產生的 rolling statistics、lag、rate 與 ratio features。
-- `baseline_anomaly_flags.csv`：`labs/self-study/02_baseline_anomaly_detection.ipynb` 產生的 baseline anomaly flags。
-- `spc_results.csv`：`labs/self-study/03_spc_anomaly_detection.ipynb` 產生的 SPC control chart results。
-- `ml_anomaly_scores.csv`：`labs/self-study/04_ml_anomaly_detection.ipynb` 產生的 unsupervised ML anomaly scores。
-- `raw_alerts.csv`：`labs/self-study/05_alert_reduction.ipynb` 產生的低階 raw alerts。
-- `reduced_alerts.csv`：`labs/self-study/05_alert_reduction.ipynb` 聚合後的 reduced alerts。
-- `forecast_results.csv`：`labs/self-study/06_forecasting.ipynb` 產生的 forecast 與 early warning results。
-部分 RCA 表格會在 notebook 執行過程中即時計算與展示；若本資料夾沒有 RCA 事件檔，請重新執行 `labs/self-study/07_root_cause_analysis.ipynb` 查看當次結果。
+Both directories are gitignored (`.gitkeep` anchors them in git). They are created automatically when you run the notebooks.
+
+Source data remains in `data/synthetic/` and `data/sample/`.
