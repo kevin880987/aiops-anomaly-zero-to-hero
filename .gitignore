@@ -19,5 +19,10 @@ venv/
 # Conda local env (if created in-project)
 .conda/
 
-# Generated notebook outputs
-data/processed/*.csv
+# Notebook runtime outputs — written to outputs/ during lab runs, not source data.
+# Source datasets live in data/synthetic/ and data/sample/ (both committed).
+# .gitkeep files anchor the directories in git; all generated content is ignored.
+outputs/workshop/*
+!outputs/workshop/.gitkeep
+outputs/self-study/*
+!outputs/self-study/.gitkeep
