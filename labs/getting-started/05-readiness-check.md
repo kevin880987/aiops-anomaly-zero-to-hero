@@ -13,7 +13,7 @@
 | Python 3.12 + 必要套件 | 必須 | 必須 |
 | 可執行 Notebook 的工具 | 必須 | 必須 |
 | Prometheus | 必須（Lab 00 開始） | 必須 |
-| Grafana（本機或 Cloud，擇一） | 必須 | 必須 |
+| Grafana local 或 Grafana Cloud（擇一） | 必須 | 必須 |
 | node_exporter / windows_exporter | 選用 | **必須** |
 
 ---
@@ -159,11 +159,11 @@ up
 
 ---
 
-## 檢查 4 — Grafana（本機或 Grafana Cloud，擇一）
+## 檢查 4 — Grafana local 或 Grafana Cloud（擇一）
 
 依你在步驟 03 選擇的路徑執行對應確認。
 
-### 路徑 A — 本機 Grafana
+### 路徑 A — Grafana local
 
 設定步驟：[03a-install-grafana-local.md](03a-install-grafana-local.md)
 
@@ -235,7 +235,7 @@ windows_net_bytes_received_total
 - [ ] 可以在 notebook 工具中開啟 `labs/self-study/00_observability_stack.ipynb` 並執行 cell
 - [ ] Prometheus 在 `http://localhost:9090` 可以連線
 - [ ] `up{job="csv-exporter"}` 值為 `1`
-- [ ] Grafana `up{job="csv-exporter"}` 值為 `1`（本機 :3000 或 Grafana Cloud）
+- [ ] Grafana `up{job="csv-exporter"}` 值為 `1`（Grafana local :3000 或 Grafana Cloud）
 
 **以上通過，可以從 `labs/self-study/00_observability_stack.ipynb` 開始。**
 
@@ -267,7 +267,7 @@ windows_net_bytes_received_total
 
 執行 `python -m ipykernel install --user --name aiops-anomaly-zero-to-hero` 再重新整理 JupyterLab。
 
-### 本機 Grafana 無法連線 `http://localhost:3000`
+### Grafana local 無法連線 `http://localhost:3000`
 
 確認 Grafana 服務已啟動。macOS 用 `brew services list | grep grafana`；Linux 用 `systemctl status grafana-server`；Windows 開「服務」管理員找 `Grafana`。
 

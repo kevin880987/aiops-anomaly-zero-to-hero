@@ -140,7 +140,7 @@ Prometheus、csv-exporter 與你的 OS exporter 都回傳 `1` 表示設定正確
 
 Prometheus 本機安裝完成後，選擇一條 Grafana 路徑：
 
-- **路徑 A — 本機 Grafana：** → [03a-install-grafana-local.md](03a-install-grafana-local.md)（安裝本機 Grafana，資料來源設為 `http://localhost:9090`）
+- **路徑 A — Grafana local：** → [03a-install-grafana-local.md](03a-install-grafana-local.md)（安裝Grafana local，資料來源設為 `http://localhost:9090`）
 - **路徑 B — Grafana Cloud：** → [03b-setup-grafana-cloud.md](03b-setup-grafana-cloud.md)（建立免費帳號，設定 remote_write 推送指標）
 
 兩條路徑可以看到的 dashboard 與 PromQL 查詢完全相同。
