@@ -39,7 +39,7 @@ REQUIRED_FILES = [
     "labs/getting-started/01b-setup-linux-python-environment.md",
     "labs/getting-started/01c-setup-windows-python-environment.md",
     "labs/getting-started/02-install-prometheus.md",
-    "labs/getting-started/03-setup-grafana-cloud.md",
+    # Grafana path: either 03a (local) or 03b (cloud) — checked separately below
     "labs/getting-started/04-install-node-exporter.md",
     "labs/getting-started/05-readiness-check.md",
     "labs/workshop/00_observability_stack_and_promql.ipynb",
@@ -176,6 +176,17 @@ def main() -> int:
         ok, message = check_file(path)
         print(f"  [{'OK' if ok else '!!'}] {message}")
         failures += 0 if ok else 1
+
+    grafana_03a = REPO_ROOT / "labs/getting-started/03a-install-grafana-local.md"
+    grafana_03b = REPO_ROOT / "labs/getting-started/03b-setup-grafana-cloud.md"
+    if grafana_03a.exists() or grafana_03b.exists():
+        which = "03a (local)" if grafana_03a.exists() else ""
+        which += " + " if grafana_03a.exists() and grafana_03b.exists() else ""
+        which += "03b (cloud)" if grafana_03b.exists() else ""
+        print(f"  [OK] ok file: labs/getting-started/grafana guide ({which})")
+    else:
+        print("  [!!] missing file: labs/getting-started/03a or 03b grafana guide")
+        failures += 1
 
     print("")
     print("Notebook and dashboard JSON")

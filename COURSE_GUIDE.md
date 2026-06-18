@@ -22,7 +22,7 @@
 
 完成教材後，學員應該能做到：
 
-1. 啟動本機 Prometheus 與 exporter，設定 remote_write 推送到 Grafana Cloud，並確認資料真的被抓取。
+1. 啟動本機 Prometheus 與 exporter，選擇本機 Grafana 或 Grafana Cloud，並確認資料真的被抓取。
 2. 用 PromQL 查詢 counter、rate、label filtering 與 aggregation。
 3. 從 raw network counters 建立可解釋的 time-series features。
 4. 比較固定閾值、Z-score、SPC、Isolation Forest 與 forecasting 的適用情境。
@@ -109,7 +109,7 @@ data/synthetic/synthetic_rrd_metrics.csv
 
 | 階段 | 實務問題 | 主要設計決策 | 生產環境位置 |
 | --- | --- | --- | --- |
-| Lab 00 Observability | 指標是否真的被收集，且可查詢？ | scrape interval、label 設計、remote_write、資料來源健康檢查 | Prometheus scrape config、Grafana Cloud dashboard |
+| Lab 00 Observability | 指標是否真的被收集，且可查詢？ | scrape interval、label 設計、資料來源健康檢查 | Prometheus scrape config、Grafana（本機或 Cloud）dashboard |
 | Lab 01 Feature engineering | raw counters 如何變成可比較的訊號？ | rate、ratio、rolling window、lag、多解析度 | Prometheus recording rules 或 feature service |
 | Lab 02 Baseline detection | 哪些偏離值得告警？ | 閾值、baseline 視窗、deadband、誤報預算 | Prometheus alert rules、Grafana Cloud annotations |
 | Lab 03 SPC | 如何區分隨機波動與製程偏移？ | control limits、EWMA 記憶長度、CUSUM 靈敏度 | rule service 或 batch validation |

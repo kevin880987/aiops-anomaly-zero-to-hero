@@ -13,7 +13,7 @@
 | Python 3.12 + 必要套件 | 必須 | 必須 |
 | 可執行 Notebook 的工具 | 必須 | 必須 |
 | Prometheus | 必須（Lab 00 開始） | 必須 |
-| Grafana Cloud | 必須 | 必須 |
+| Grafana（本機或 Cloud，擇一） | 必須 | 必須 |
 | node_exporter / windows_exporter | 選用 | **必須** |
 
 ---
@@ -30,7 +30,7 @@ python labs/getting-started/scripts/validate_setup.py
 
 輸出範例（全部通過）：
 
-```
+```text
 Repository root: /path/to/aiops-anomaly-zero-to-hero
 Platform: Darwin 24.x.x (arm64)
 
@@ -159,15 +159,27 @@ up
 
 ---
 
-## 檢查 4 — Grafana Cloud
+## 檢查 4 — Grafana（本機或 Grafana Cloud，擇一）
 
-官方文件：[grafana.com/docs/grafana-cloud/send-data/metrics/metrics-prometheus](https://grafana.com/docs/grafana-cloud/send-data/metrics/metrics-prometheus/)
+依你在步驟 03 選擇的路徑執行對應確認。
 
-Grafana Cloud 設定步驟在 [03-setup-grafana-cloud.md](03-setup-grafana-cloud.md)。完成後用你的 Grafana Cloud 網址（`https://yourname.grafana.net`）登入。
+### 路徑 A — 本機 Grafana
 
-### 確認指標已到達 Grafana Cloud
+設定步驟：[03a-install-grafana-local.md](03a-install-grafana-local.md)
 
-登入後進入 **Explore**，資料來源選 **Prometheus**，輸入：
+瀏覽器開啟 [http://localhost:3000](http://localhost:3000)，登入後進入 **Explore**，輸入：
+
+```promql
+up{job="csv-exporter"}
+```
+
+值為 `1` 即表示 Grafana 與 Prometheus 連線正常。
+
+### 路徑 B — Grafana Cloud
+
+設定步驟：[03b-setup-grafana-cloud.md](03b-setup-grafana-cloud.md)
+
+開啟你的 Grafana Cloud 網址（`https://yourname.grafana.net`），進入 **Explore**，資料來源選 **Prometheus**，輸入：
 
 ```promql
 up{job="csv-exporter"}
@@ -175,9 +187,9 @@ up{job="csv-exporter"}
 
 值為 `1` 即表示 remote_write 正在推送指標。
 
-### 確認課程 Dashboard 可以載入
+### 確認課程 Dashboard 可以載入（兩條路徑相同）
 
-左側選單 → **Dashboards**，找到已匯入的 `network_metrics` dashboard。點開後若資料尚未進來 panel 會顯示 `No data`，但不報錯即為正常（代表連線正確，等 exporter 推送第一批資料即可）。
+左側選單 → **Dashboards**，找到已匯入的 `network_metrics` dashboard。點開後若資料尚未進來 panel 會顯示 `No data`，但不報錯即為正常。
 
 ---
 
@@ -223,7 +235,7 @@ windows_net_bytes_received_total
 - [ ] 可以在 notebook 工具中開啟 `labs/self-study/00_observability_stack.ipynb` 並執行 cell
 - [ ] Prometheus 在 `http://localhost:9090` 可以連線
 - [ ] `up{job="csv-exporter"}` 值為 `1`
-- [ ] Grafana Cloud `up{job="csv-exporter"}` 值為 `1`
+- [ ] Grafana `up{job="csv-exporter"}` 值為 `1`（本機 :3000 或 Grafana Cloud）
 
 **以上通過，可以從 `labs/self-study/00_observability_stack.ipynb` 開始。**
 
@@ -239,25 +251,29 @@ windows_net_bytes_received_total
 
 ## 常見問題
 
-**`validate_setup.py` 出現 `[!!] missing Python package`**
+### `validate_setup.py` 出現 `[!!] missing Python package`
 
 確認你在正確的 Python 環境中執行（conda 用 `conda activate aiops-anomaly-zero-to-hero`，VS Code 用右下角 Python interpreter 切換至課程環境）。
 
-**Prometheus `csv-exporter` 顯示 DOWN**
+### Prometheus `csv-exporter` 顯示 DOWN
 
 先確認 `python infra/exporter.py` 正在另一個終端機執行。Prometheus 每 15 秒抓一次，啟動後等待最多 30 秒。
 
-**無法連線 `http://localhost:9090`**
+### 無法連線 `http://localhost:9090`
 
 確認 Prometheus 程序正在執行。macOS 用 `brew services list | grep prometheus`；Linux 用 `systemctl status prometheus`；Windows 查「服務」管理員。
 
-**JupyterLab 找不到 kernel**
+### JupyterLab 找不到 kernel
 
 執行 `python -m ipykernel install --user --name aiops-anomaly-zero-to-hero` 再重新整理 JupyterLab。
 
-**Grafana Cloud Explore 查不到指標？**
+### 本機 Grafana 無法連線 `http://localhost:3000`
 
-確認 prometheus.yml 的 remote_write url、username、password 已填入正確值，且 Prometheus 在修改後重啟。等待 30 秒後再試。詳細排查步驟見 [03-setup-grafana-cloud.md](03-setup-grafana-cloud.md)。
+確認 Grafana 服務已啟動。macOS 用 `brew services list | grep grafana`；Linux 用 `systemctl status grafana-server`；Windows 開「服務」管理員找 `Grafana`。
+
+### Grafana Cloud Explore 查不到指標
+
+確認 prometheus.yml 的 remote_write url、username、password 已填入正確值，且 Prometheus 在修改後重啟。等待 30 秒後再試。詳細步驟見 [03b-setup-grafana-cloud.md](03b-setup-grafana-cloud.md)。
 
 ---
 
