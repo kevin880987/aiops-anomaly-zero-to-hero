@@ -1,146 +1,52 @@
 # AIOps Anomaly Detection: Zero to Hero
 
-這是一套從網路 telemetry、可觀測性到 AIOps 決策支援的實作課程。學員會建立 Prometheus 與 Grafana 環境，理解 RRD/SNMP-like metrics，再完成特徵工程、異常偵測、告警降噪、預測與根因分析。
+從網路 telemetry 到 AIOps 決策支援的完整實作課程。學員建立本機 Prometheus 與 Grafana 環境，理解 RRD/SNMP-like metrics，完成特徵工程、異常偵測、告警降噪、預測與根因分析。
 
-```text
-Network telemetry
-  -> Prometheus and Grafana
-  -> time-series features
-  -> anomaly detection
-  -> alert reduction
-  -> forecasting
-  -> root-cause analysis
-  -> operational action
-```
+不需要雲端帳號或 Python package 開發經驗。課程著重演算法層面：特徵工程、偵測方法選擇、告警設計與根因判讀。
 
-核心路徑不要求雲端帳號、Kubernetes 或 Python package 開發經驗。初學者只需要依照設定指南建立 conda 環境，安裝本機 Prometheus 與 Grafana，接著從 labs 開始操作。
+---
 
-## 立即開始
+## 開始使用
 
-### 路徑一：從初學者設定指南開始
+**需要設定環境：** → [`labs/getting-started/`](labs/getting-started/README.md) — 環境設定步驟、路徑選擇、就緒確認，全部在這裡。
 
-第一次使用請先閱讀 [`labs/getting-started/README.md`](labs/getting-started/README.md)。如果你已經完成環境設定，直接看 [`labs/README.md`](labs/README.md) 選擇工作坊短版或完整自學版。若要先理解整份教材的對象、學習成果、資料流與教學節奏，請看 [`COURSE_GUIDE.md`](COURSE_GUIDE.md)。
+**已有自己的環境：** → [`labs/getting-started/05-readiness-check.md`](labs/getting-started/05-readiness-check.md) — 直接確認 Python 套件、Prometheus、Grafana 是否符合課程需求。
 
-設定指南會帶你完成三件事：
-
-1. 使用 conda 建立 Python 與 JupyterLab 環境。
-2. 依作業系統安裝 Prometheus。
-3. 依作業系統安裝 Grafana，並連接 Prometheus。
-
-macOS 可在 repository 根目錄執行：
-
-```bash
-bash labs/getting-started/scripts/bootstrap_macos.sh
-```
-
-Linux 可在 repository 根目錄執行：
-
-```bash
-conda env create -f environment.yml
-conda activate aiops-anomaly-zero-to-hero
-python labs/getting-started/scripts/validate_setup.py --repo-only
-jupyter lab labs
-```
-
-Windows 可在 repository 根目錄執行：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File labs\getting-started\scripts\bootstrap_windows.ps1
-```
-
-macOS 與 Windows 腳本會先檢查現有 conda 環境；若已符合課程需求，會跳過更新。若只想準備環境、不立刻開啟 JupyterLab，macOS 加上 `--no-launch`，Windows 加上 `-NoLaunch`。Linux 請依 [`labs/getting-started/01b-setup-linux-python-environment.md`](labs/getting-started/01b-setup-linux-python-environment.md) 手動建立同一個 conda 環境。
-
-### 路徑二：開啟 labs
-
-設定完成後，在 JupyterLab 依序執行 `labs/` 中的課程檔案。若要手動啟動：
-
-```bash
-conda activate aiops-anomaly-zero-to-hero
-jupyter lab labs
-```
-
-## Labs 路徑
-
-本 repository 提供兩條 notebook 路徑：
-
-- `labs/workshop/`：工作坊短版，聚焦可觀測性、特徵工程、異常偵測與 RCA capstone。
-- `labs/self-study/`：完整自學版，從資料模擬一路做到部署檢查。
-
-完整自學版建議依序執行：
-
-1. `data/synthetic/simulator_rrd_metrics.ipynb`
-2. `labs/self-study/00_observability_stack.ipynb`
-3. `labs/self-study/01_time_series_features.ipynb`
-4. `labs/self-study/02_baseline_anomaly_detection.ipynb`
-5. `labs/self-study/03_spc_anomaly_detection.ipynb`
-6. `labs/self-study/04_ml_anomaly_detection.ipynb`
-7. `labs/self-study/05_alert_reduction.ipynb`
-8. `labs/self-study/06_forecasting.ipynb`
-9. `labs/self-study/07_root_cause_analysis.ipynb`
-10. `labs/self-study/08_deploy_to_production.ipynb`
-
-## 課程架構
-
-| 路徑 | 學習成果 | 目前狀態 |
-| --- | --- | --- |
-| `labs/getting-started/` | 建立 conda 環境，安裝 Prometheus、Grafana 與 OS exporter | 完整 |
-| `labs/workshop/` | 工作坊短版，使用即時 Prometheus 指標完成核心 AIOps 流程 | 完整 |
-| `labs/self-study/` | 完整自學版，使用 synthetic data 重建 features、alerts、forecast 與 RCA outputs | 完整 |
+---
 
 ## Repository 結構
 
 ```text
 .
+├── README.md                    # 本文件：repo 介紹與導覽
+├── COURSE_GUIDE.md              # 教材總覽、學習成果、路線與評量方式
 ├── environment.yml              # conda 課程環境
-├── COURSE_GUIDE.md              # 教材總覽、學習成果、路線與檢核方式
-├── labs/                        # 人員面向教材
-│   ├── getting-started/         # 初學者設定指南與啟動腳本
+├── labs/
+│   ├── getting-started/         # 設定指南（01a–01c、02–04）與就緒確認（05）
 │   ├── workshop/                # 工作坊短版 notebooks
 │   └── self-study/              # 完整自學版 notebooks
-├── data/                        # synthetic、sample、processed data
-└── infra/                       # 運維設定與工具
-    ├── prometheus/              # Prometheus 設定範例
-    ├── grafana/                 # Grafana datasource 與 dashboard 設定範例
+├── data/
+│   ├── synthetic/               # 可由 simulator 重建的 RRD-like metrics
+│   └── sample/                  # LibreNMS/RRDTool sample data
+├── outputs/                     # Labs 產出（gitignored）
+│   ├── workshop/
+│   └── self-study/
+└── infra/
+    ├── prometheus/              # Prometheus 設定（prometheus.yml / prometheus.windows.yml）
+    ├── grafana/                 # Dashboard JSON 與 datasource 設定
     └── exporter.py              # CSV-to-Prometheus metrics exporter
 ```
 
-Docker 不在本教學主路徑內。依照 `labs/getting-started/` 完成 conda 與本機監控工具安裝即可開始。
-
-Prometheus 設定檔分平台提供：macOS / Linux 使用 `infra/prometheus/prometheus.yml`，Windows 使用 `infra/prometheus/prometheus.windows.yml`。Python 環境、notebooks、dashboard 與 synthetic data 都隨 repository 一起提供；clone 後不需要複製本機私有檔案。
-
-## 資料
-
-```text
-data/
-├── synthetic/   # 可由 simulator 重建的 RRD-like metrics
-├── sample/      # LibreNMS/RRDTool sample data
-└── processed/   # labs 產出的 features、alerts、forecast 與 RCA 結果
-```
-
-讀取 `.rrd` sample 需要系統安裝 RRDtool。
-
-```bash
-# macOS
-brew install rrdtool
-
-# Linux（Ubuntu / Debian）
-sudo apt-get install rrdtool
-
-# Windows（Chocolatey）
-choco install rrdtool
-```
-
-RRDtool 不在核心路徑中；若只使用 synthetic CSV 資料，可以略過此步驟。
+---
 
 ## 課程設計原則
 
-- 每個 lab 都要有明確輸入、操作、驗證方法、預期結果與清除步驟。
-- 核心路徑先使用本機環境，Kubernetes、OpenTelemetry 與雲端部署列為進階內容。
+- 每個 lab 都有明確輸入、操作、驗證方法、預期結果與清除步驟。
 - 故障情境必須可重現，不能只展示完成後的 dashboard。
-- dashboard、告警與模型輸出必須能追溯到原始 telemetry。
+- Dashboard、告警與模型輸出必須能追溯到原始 telemetry。
 - 生成式 AI 只能協助解釋有證據的訊號，不替代監控資料或驗證程序。
 
-本課程參考 [grafana-zero-to-hero](https://github.com/blueswen/grafana-zero-to-hero) 與 [observability-zero-to-hero](https://github.com/iam-veeramalla/observability-zero-to-hero) 的課程組織方式，但範例、資料、程式與練習均在本 repository 中獨立設計。
+範例、資料、程式與練習均在本 repository 中獨立設計。
 
 ## License
 

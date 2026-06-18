@@ -41,6 +41,7 @@ REQUIRED_FILES = [
     "labs/getting-started/02-install-prometheus.md",
     "labs/getting-started/03-install-grafana.md",
     "labs/getting-started/04-install-node-exporter.md",
+    "labs/getting-started/05-readiness-check.md",
     "labs/workshop/00_observability_stack_and_promql.ipynb",
     "labs/self-study/00_observability_stack.ipynb",
 ]

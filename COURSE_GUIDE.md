@@ -2,6 +2,14 @@
 
 這份教材把 AIOps anomaly detection 拆成一條可執行的學習路徑。學員不是只看模型結果，而是從 telemetry 來源、Prometheus 查詢、特徵工程、偵測方法、告警降噪、預測與 RCA 一路走到營運判斷。
 
+## 開始使用
+
+**需要設定環境：** → [`labs/getting-started/README.md`](labs/getting-started/README.md) — 環境設定步驟、路徑選擇、就緒確認。
+
+**已有自己的環境：** → [`labs/getting-started/05-readiness-check.md`](labs/getting-started/05-readiness-check.md) — 直接確認 Python 套件、Prometheus、Grafana 是否符合課程需求。
+
+---
+
 ## 適合對象
 
 - 第一次接觸 Prometheus / Grafana，但已能照著指令操作終端機的學員。
@@ -86,16 +94,16 @@ getting-started
 
 ```text
 data/synthetic/synthetic_rrd_metrics.csv
-  -> data/processed/features.csv
-  -> data/processed/baseline_anomaly_flags.csv
-  -> data/processed/spc_results.csv
-  -> data/processed/ml_anomaly_scores.csv
-  -> data/processed/raw_alerts.csv
-  -> data/processed/reduced_alerts.csv
-  -> data/processed/forecast_results.csv
+  -> outputs/self-study/features.csv
+  -> outputs/self-study/baseline_anomaly_flags.csv
+  -> outputs/self-study/spc_results.csv
+  -> outputs/self-study/ml_anomaly_scores.csv
+  -> outputs/self-study/raw_alerts.csv
+  -> outputs/self-study/reduced_alerts.csv
+  -> outputs/self-study/forecast_results.csv
 ```
 
-每個 self-study notebook 會讀取前一步輸出，並把新的中間結果寫回 `data/processed/`。如果中途失敗，先從失敗 notebook 的前一個 lab 重跑，不要直接跳到後面的 lab。
+每個 self-study notebook 會讀取前一步輸出，並把新的中間結果寫回 `outputs/self-study/`（gitignored）。如果中途失敗，先從失敗 notebook 的前一個 lab 重跑，不要直接跳到後面的 lab。
 
 ## 演算法與架構設計地圖
 
@@ -145,7 +153,7 @@ conda activate aiops-anomaly-zero-to-hero
 python labs/getting-started/scripts/validate_setup.py
 ```
 
-若只想檢查 clone 下來的教材檔案，不檢查本機服務：
+只想驗證 repository 結構、暫時跳過 Python 與服務檢查：
 
 ```bash
 python labs/getting-started/scripts/validate_setup.py --repo-only
@@ -162,4 +170,4 @@ promtool check config infra/prometheus/prometheus.windows.yml
 
 現場課程不要一開始講完整模型分類。先讓學員在 Lab 00 看到 `up` 與 interface metrics，再逐步說明為什麼 raw counters 不足以直接告警。到 Lab 02 之後，再回頭整理三個層次：資料品質、偵測方法、營運行動。
 
-若時間不足，保留 `workshop/00`、`workshop/01`、`workshop/02`，把 `workshop/08` 作為展示或課後作業。完整自學版則適合要求學員提交 `data/processed/` 產出的 CSV 與一段 RCA 判讀說明。
+若時間不足，保留 `workshop/00`、`workshop/01`、`workshop/02`，把 `workshop/08` 作為展示或課後作業。完整自學版則適合要求學員提交 `outputs/self-study/` 產出的 CSV 與一段 RCA 判讀說明。
