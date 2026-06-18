@@ -6,13 +6,13 @@
 
 **需要設定環境：** → [`labs/getting-started/README.md`](labs/getting-started/README.md) — 環境設定步驟、路徑選擇、就緒確認。
 
-**已有自己的環境：** → [`labs/getting-started/05-readiness-check.md`](labs/getting-started/05-readiness-check.md) — 直接確認 Python 套件、Prometheus、Grafana Cloud 是否符合課程需求。
+**已有自己的環境：** → [`labs/getting-started/05-readiness-check.md`](labs/getting-started/05-readiness-check.md) — 直接確認 Python 套件、Prometheus、Grafana local 或 Grafana Cloud 是否符合課程需求。
 
 ---
 
 ## 適合對象
 
-- 第一次接觸 Prometheus / Grafana Cloud，但已能照著指令操作終端機的學員。
+- 第一次接觸 Prometheus / Grafana local / Grafana Cloud，但已能照著指令操作終端機的學員。
 - 想把時間序列資料轉成 AIOps 偵測流程的資料或維運工程師。
 - 需要教學版範例資料，而不是只想看 production deployment template 的讀者。
 
