@@ -13,7 +13,7 @@
 | Python 3.12 + 必要套件 | 必須 | 必須 |
 | 可執行 Notebook 的工具 | 必須 | 必須 |
 | Prometheus | 必須（Lab 00 開始） | 必須 |
-| Grafana | 選用（強烈建議） | 選用（強烈建議） |
+| Grafana Cloud | 必須 | 必須 |
 | node_exporter / windows_exporter | 選用 | **必須** |
 
 ---
@@ -55,7 +55,7 @@ Python environment
 Optional local services
   [OK] reachable service: course exporter (http://localhost:8000/metrics)
   [OK] reachable service: Prometheus (http://localhost:9090/-/ready)
-  [OK] reachable service: Grafana (http://localhost:3000/api/health)
+  [OK] reachable service: Prometheus (http://localhost:9090/-/ready)
   [..] not running yet: node_exporter (http://localhost:9100/metrics)
 
 Required checks passed.
@@ -159,27 +159,25 @@ up
 
 ---
 
-## 檢查 4 — Grafana（選用，強烈建議）
+## 檢查 4 — Grafana Cloud
 
-官方文件：[grafana.com/docs/grafana/latest/getting-started](https://grafana.com/docs/grafana/latest/getting-started/)
+官方文件：[grafana.com/docs/grafana-cloud/send-data/metrics/metrics-prometheus](https://grafana.com/docs/grafana-cloud/send-data/metrics/metrics-prometheus/)
 
-Grafana 在 `http://localhost:3000` 登入（帳號 `admin`，預設密碼 `admin`）。
+Grafana Cloud 設定步驟在 [03-setup-grafana-cloud.md](03-setup-grafana-cloud.md)。完成後用你的 Grafana Cloud 網址（`https://yourname.grafana.net`）登入。
 
-### 確認 Prometheus 資料來源已連線
+### 確認指標已到達 Grafana Cloud
 
-進入 **Connections → Data sources**，點擊 Prometheus 資料來源，再點 **Save & test**。
+登入後進入 **Explore**，資料來源選 **Prometheus**，輸入：
 
-成功時會看到綠色訊息：
+```promql
+up{job="csv-exporter"}
+```
 
-> Data source connected and labels found.
-
-![Grafana Datasource Configuration](https://prometheus.io/assets/docs/grafana_configuring_datasource.png)
-
-*圖片來源：[Prometheus 視覺化說明文件](https://prometheus.io/docs/visualization/grafana/)*
+值為 `1` 即表示 remote_write 正在推送指標。
 
 ### 確認課程 Dashboard 可以載入
 
-左側選單 → **Dashboards**，找到 `network_metrics` dashboard。點開後應該看到幾個 panel，若資料尚未進來 panel 會顯示 `No data`，但不報錯即為正常（代表 Grafana 與 Prometheus 連線正常）。
+左側選單 → **Dashboards**，找到已匯入的 `network_metrics` dashboard。點開後若資料尚未進來 panel 會顯示 `No data`，但不報錯即為正常（代表連線正確，等 exporter 推送第一批資料即可）。
 
 ---
 
@@ -225,7 +223,7 @@ windows_net_bytes_received_total
 - [ ] 可以在 notebook 工具中開啟 `labs/self-study/00_observability_stack.ipynb` 並執行 cell
 - [ ] Prometheus 在 `http://localhost:9090` 可以連線
 - [ ] `up{job="csv-exporter"}` 值為 `1`
-- [ ] Grafana dashboard 可以開啟（選用）
+- [ ] Grafana Cloud `up{job="csv-exporter"}` 值為 `1`
 
 **以上通過，可以從 `labs/self-study/00_observability_stack.ipynb` 開始。**
 
@@ -257,9 +255,9 @@ windows_net_bytes_received_total
 
 執行 `python -m ipykernel install --user --name aiops-anomaly-zero-to-hero` 再重新整理 JupyterLab。
 
-**Grafana `Save & test` 失敗**
+**Grafana Cloud Explore 查不到指標？**
 
-確認 Prometheus URL 填的是 `http://localhost:9090`（不是 `http://prometheus:9090`）。Grafana 與 Prometheus 都在本機時應使用 localhost。
+確認 prometheus.yml 的 remote_write url、username、password 已填入正確值，且 Prometheus 在修改後重啟。等待 30 秒後再試。詳細排查步驟見 [03-setup-grafana-cloud.md](03-setup-grafana-cloud.md)。
 
 ---
 
@@ -269,8 +267,7 @@ windows_net_bytes_received_total
 | --- | --- |
 | Prometheus | [prometheus.io/docs/prometheus/latest/getting\_started](https://prometheus.io/docs/prometheus/latest/getting_started/) |
 | Prometheus PromQL | [prometheus.io/docs/prometheus/latest/querying/basics](https://prometheus.io/docs/prometheus/latest/querying/basics/) |
-| Grafana | [grafana.com/docs/grafana/latest/getting-started](https://grafana.com/docs/grafana/latest/getting-started/) |
-| Grafana + Prometheus | [grafana.com/docs/grafana/latest/getting-started/get-started-grafana-prometheus](https://grafana.com/docs/grafana/latest/getting-started/get-started-grafana-prometheus/) |
+| Grafana Cloud | [grafana.com/docs/grafana-cloud/send-data/metrics/metrics-prometheus](https://grafana.com/docs/grafana-cloud/send-data/metrics/metrics-prometheus/) |
 | JupyterLab | [jupyterlab.readthedocs.io/en/stable/getting\_started/overview.html](https://jupyterlab.readthedocs.io/en/stable/getting_started/overview.html) |
 | node\_exporter | [prometheus.io/docs/guides/node-exporter](https://prometheus.io/docs/guides/node-exporter/) |
 | windows\_exporter | [github.com/prometheus-community/windows\_exporter](https://github.com/prometheus-community/windows_exporter) |

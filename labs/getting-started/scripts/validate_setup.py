@@ -39,7 +39,7 @@ REQUIRED_FILES = [
     "labs/getting-started/01b-setup-linux-python-environment.md",
     "labs/getting-started/01c-setup-windows-python-environment.md",
     "labs/getting-started/02-install-prometheus.md",
-    "labs/getting-started/03-install-grafana.md",
+    "labs/getting-started/03-setup-grafana-cloud.md",
     "labs/getting-started/04-install-node-exporter.md",
     "labs/getting-started/05-readiness-check.md",
     "labs/workshop/00_observability_stack_and_promql.ipynb",
@@ -69,7 +69,7 @@ REQUIRED_MODULES = {
 OPTIONAL_ENDPOINTS = [
     ("course exporter", "http://localhost:8000/metrics"),
     ("Prometheus", "http://localhost:9090/-/ready"),
-    ("Grafana", "http://localhost:3000/api/health"),
+    ("Prometheus", "http://localhost:9090/-/ready"),
     ("node_exporter", "http://localhost:9100/metrics"),
     ("windows_exporter", "http://localhost:9182/metrics"),
 ]

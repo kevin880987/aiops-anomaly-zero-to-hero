@@ -6,13 +6,13 @@
 
 **需要設定環境：** → [`labs/getting-started/README.md`](labs/getting-started/README.md) — 環境設定步驟、路徑選擇、就緒確認。
 
-**已有自己的環境：** → [`labs/getting-started/05-readiness-check.md`](labs/getting-started/05-readiness-check.md) — 直接確認 Python 套件、Prometheus、Grafana 是否符合課程需求。
+**已有自己的環境：** → [`labs/getting-started/05-readiness-check.md`](labs/getting-started/05-readiness-check.md) — 直接確認 Python 套件、Prometheus、Grafana Cloud 是否符合課程需求。
 
 ---
 
 ## 適合對象
 
-- 第一次接觸 Prometheus / Grafana，但已能照著指令操作終端機的學員。
+- 第一次接觸 Prometheus / Grafana Cloud，但已能照著指令操作終端機的學員。
 - 想把時間序列資料轉成 AIOps 偵測流程的資料或維運工程師。
 - 需要教學版範例資料，而不是只想看 production deployment template 的讀者。
 
@@ -22,7 +22,7 @@
 
 完成教材後，學員應該能做到：
 
-1. 啟動本機 Prometheus、Grafana 與 exporter，並確認資料真的被抓取。
+1. 啟動本機 Prometheus 與 exporter，設定 remote_write 推送到 Grafana Cloud，並確認資料真的被抓取。
 2. 用 PromQL 查詢 counter、rate、label filtering 與 aggregation。
 3. 從 raw network counters 建立可解釋的 time-series features。
 4. 比較固定閾值、Z-score、SPC、Isolation Forest 與 forecasting 的適用情境。
@@ -109,9 +109,9 @@ data/synthetic/synthetic_rrd_metrics.csv
 
 | 階段 | 實務問題 | 主要設計決策 | 生產環境位置 |
 | --- | --- | --- | --- |
-| Lab 00 Observability | 指標是否真的被收集，且可查詢？ | scrape interval、label 設計、資料來源健康檢查 | Prometheus scrape config、Grafana dashboard |
+| Lab 00 Observability | 指標是否真的被收集，且可查詢？ | scrape interval、label 設計、remote_write、資料來源健康檢查 | Prometheus scrape config、Grafana Cloud dashboard |
 | Lab 01 Feature engineering | raw counters 如何變成可比較的訊號？ | rate、ratio、rolling window、lag、多解析度 | Prometheus recording rules 或 feature service |
-| Lab 02 Baseline detection | 哪些偏離值得告警？ | 閾值、baseline 視窗、deadband、誤報預算 | Prometheus alert rules、Grafana annotations |
+| Lab 02 Baseline detection | 哪些偏離值得告警？ | 閾值、baseline 視窗、deadband、誤報預算 | Prometheus alert rules、Grafana Cloud annotations |
 | Lab 03 SPC | 如何區分隨機波動與製程偏移？ | control limits、EWMA 記憶長度、CUSUM 靈敏度 | rule service 或 batch validation |
 | Lab 04 ML anomaly detection | 單一指標看不出來的組合異常如何處理？ | feature set、contamination、解釋方式、重訓頻率 | scoring service，必要時回寫 Prometheus |
 | Lab 05 Alert reduction | 如何把大量 flags 變成可處理事件？ | grouping window、problem taxonomy、suppression rule | Alertmanager、event correlation service |
@@ -142,7 +142,7 @@ data/synthetic/synthetic_rrd_metrics.csv
 | Alert reduction | raw alerts 是否被合理聚合？是否犧牲了需要立即處理的訊號？ |
 | Forecasting | prediction interval 是否太窄或太寬？ |
 | RCA | RCA output 是否區分 evidence、hypothesis、recommended action？ |
-| Deployment | Grafana dashboard、Prometheus rules 與 notebook 輸出是否對得起來？ |
+| Deployment | Grafana Cloud dashboard、Prometheus rules 與 notebook 輸出是否對得起來？ |
 
 ## 驗證指令
 

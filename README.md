@@ -1,8 +1,8 @@
 # AIOps Anomaly Detection: Zero to Hero
 
-從網路 telemetry 到 AIOps 決策支援的完整實作課程。學員建立本機 Prometheus 與 Grafana 環境，理解 RRD/SNMP-like metrics，完成特徵工程、異常偵測、告警降噪、預測與根因分析。
+從網路 telemetry 到 AIOps 決策支援的完整實作課程。學員在本機執行 Prometheus 與 exporter，透過 remote_write 推送指標到 Grafana Cloud，完成特徵工程、異常偵測、告警降噪、預測與根因分析。
 
-不需要雲端帳號或 Python package 開發經驗。課程著重演算法層面：特徵工程、偵測方法選擇、告警設計與根因判讀。
+需要 Grafana Cloud 免費帳號（免安裝，瀏覽器即可使用）。課程著重演算法層面：特徵工程、偵測方法選擇、告警設計與根因判讀。
 
 ---
 

@@ -5,6 +5,20 @@ global:
 rule_files:
   - "alerts.yml"
 
+# ---------------------------------------------------------------------------
+# Grafana Cloud remote_write
+# 到 grafana.com → My Account → 你的 Stack → Prometheus 取得以下三個值：
+#   url      — Remote Write Endpoint（格式：https://prometheus-xxx.grafana.net/api/prom/push）
+#   username — Prometheus User ID（數字）
+#   password — 在 Access Policies 建立的 API token（MetricsPublisher 權限即可）
+# 填入後存檔並重啟 Prometheus，指標會自動推送到 Grafana Cloud。
+# ---------------------------------------------------------------------------
+remote_write:
+  - url: https://<YOUR_ORG>.grafana.net/api/prom/push
+    basic_auth:
+      username: <YOUR_USER_ID>
+      password: <YOUR_API_TOKEN>
+
 scrape_configs:
   - job_name: "prometheus"
     static_configs:

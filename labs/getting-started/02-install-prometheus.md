@@ -138,4 +138,6 @@ Prometheus、csv-exporter 與你的 OS exporter 都回傳 `1` 表示設定正確
 
 ## 下一步
 
-安裝完成後，若要做工作坊短版，先繼續 [04-install-node-exporter.md](04-install-node-exporter.md)。若只做完整自學版，可以直接繼續 [03-install-grafana.md](03-install-grafana.md)。
+Prometheus 本機安裝完成後，繼續 [03-setup-grafana-cloud.md](03-setup-grafana-cloud.md) 設定 remote_write，把指標推送到 Grafana Cloud。
+
+工作坊短版也需要 node_exporter，可以同步完成 [04-install-node-exporter.md](04-install-node-exporter.md)，再回來設定 Grafana Cloud。
