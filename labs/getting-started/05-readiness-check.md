@@ -13,7 +13,8 @@
 | Python 3.12 + 必要套件 | 必須 | 必須 |
 | 可執行 Notebook 的工具 | 必須 | 必須 |
 | Prometheus | 必須（Lab 00 開始） | 必須 |
-| Grafana local 或 Grafana Cloud（擇一） | 必須 | 必須 |
+| Grafana Local | 必須 | 必須 |
+| Grafana Cloud | 選用 | 選用 |
 | node_exporter / windows_exporter | 選用 | **必須** |
 
 ---
@@ -159,11 +160,7 @@ up
 
 ---
 
-## 檢查 4 — Grafana local 或 Grafana Cloud（擇一）
-
-依你在步驟 03 選擇的路徑執行對應確認。
-
-### 路徑 A — Grafana local
+## 檢查 4 — Grafana Local
 
 設定步驟：[03a-install-grafana-local.md](03a-install-grafana-local.md)
 
@@ -173,23 +170,19 @@ up
 up{job="csv-exporter"}
 ```
 
-值為 `1` 即表示 Grafana 與 Prometheus 連線正常。
+值為 `1` 即表示 Grafana Local 與 Prometheus 連線正常。
 
-### 路徑 B — Grafana Cloud
-
-設定步驟：[03b-setup-grafana-cloud.md](03b-setup-grafana-cloud.md)
-
-開啟你的 Grafana Cloud 網址（`https://yourname.grafana.net`），進入 **Explore**，資料來源選 **Prometheus**，輸入：
-
-```promql
-up{job="csv-exporter"}
-```
-
-值為 `1` 即表示 remote_write 正在推送指標。
-
-### 確認課程 Dashboard 可以載入（兩條路徑相同）
+### 確認課程 Dashboard 可以載入
 
 左側選單 → **Dashboards**，找到已匯入的 `network_metrics` dashboard。點開後若資料尚未進來 panel 會顯示 `No data`，但不報錯即為正常。
+
+---
+
+## 延伸選項 — Grafana Cloud（選用）
+
+完成 Grafana Local 後，可選擇另外設定 Grafana Cloud，將本機 Prometheus 指標同步推送到雲端。設定步驟：[03b-setup-grafana-cloud.md](03b-setup-grafana-cloud.md)。
+
+開啟你的 Grafana Cloud 網址（`https://yourname.grafana.net`），進入 **Explore**，資料來源選 **Prometheus**，查詢 `up{job="csv-exporter"}` 值為 `1` 即表示 remote_write 正在推送指標。
 
 ---
 
@@ -235,7 +228,7 @@ windows_net_bytes_received_total
 - [ ] 可以在 notebook 工具中開啟 `labs/self-study/00_observability_stack.ipynb` 並執行 cell
 - [ ] Prometheus 在 `http://localhost:9090` 可以連線
 - [ ] `up{job="csv-exporter"}` 值為 `1`
-- [ ] Grafana `up{job="csv-exporter"}` 值為 `1`（Grafana local :3000 或 Grafana Cloud）
+- [ ] Grafana Local `up{job="csv-exporter"}` 值為 `1`（`http://localhost:3000`）
 
 **以上通過，可以從 `labs/self-study/00_observability_stack.ipynb` 開始。**
 
@@ -267,7 +260,7 @@ windows_net_bytes_received_total
 
 執行 `python -m ipykernel install --user --name aiops-anomaly-zero-to-hero` 再重新整理 JupyterLab。
 
-### Grafana local 無法連線 `http://localhost:3000`
+### Grafana Local 無法連線 `http://localhost:3000`
 
 確認 Grafana 服務已啟動。macOS 用 `brew services list | grep grafana`；Linux 用 `systemctl status grafana-server`；Windows 開「服務」管理員找 `Grafana`。
 

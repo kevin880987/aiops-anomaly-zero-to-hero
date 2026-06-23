@@ -1,8 +1,8 @@
 # AIOps Anomaly Detection: Zero to Hero
 
-從網路 telemetry 到 AIOps 決策支援的完整實作課程。學員在本機執行 Prometheus 與 exporter，選擇Grafana local 或 Grafana Cloud 作為視覺化層，完成特徵工程、異常偵測、告警降噪、預測與根因分析。
+從網路 telemetry 到 AIOps 決策支援的完整實作課程。學員在本機執行 Prometheus、Grafana Local 與 exporter，完成特徵工程、異常偵測、告警降噪、預測與根因分析。
 
-Grafana Cloud path 需要免費帳號（免安裝，瀏覽器即可使用）；Grafana local path 不需要帳號。課程著重演算法層面：特徵工程、偵測方法選擇、告警設計與根因判讀。
+不需要雲端帳號。課程著重演算法層面：特徵工程、偵測方法選擇、告警設計與根因判讀。完成後可選擇延伸至 Grafana Cloud（選用）。
 
 ---
 

@@ -2,7 +2,7 @@
 
 官方文件：[grafana.com/docs/grafana-cloud/send-data/metrics/metrics-prometheus](https://grafana.com/docs/grafana-cloud/send-data/metrics/metrics-prometheus/)
 
-本課程使用 Grafana Cloud 免費方案（free tier）作為視覺化層。Prometheus 在本機執行並抓取指標，再透過 `remote_write` 推送到 Grafana Cloud。你在瀏覽器開啟的是 Grafana Cloud UI，不需要安裝 Grafana local。
+本課程使用 Grafana Cloud 免費方案（free tier）作為視覺化層。Prometheus 在本機執行並抓取指標，再透過 `remote_write` 推送到 Grafana Cloud。你在瀏覽器開啟的是 Grafana Cloud UI，不需要安裝 Grafana Local。
 
 **前置條件：** Prometheus 已安裝並正在運作（[02-install-prometheus.md](02-install-prometheus.md)）。
 
