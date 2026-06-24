@@ -174,7 +174,7 @@ up{job="csv-exporter"}
 
 ### 確認課程 Dashboard 可以載入
 
-左側選單 → **Dashboards**，找到已匯入的 `network_metrics` dashboard。點開後若資料尚未進來 panel 會顯示 `No data`，但不報錯即為正常。
+左側選單 → **Dashboards**，找到已匯入的 **Network Interface Monitoring** 儀表板。點開後若資料尚未進來 panel 會顯示 `No data`，但不報錯即為正常。
 
 ---
 
