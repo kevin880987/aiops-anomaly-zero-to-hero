@@ -56,7 +56,7 @@ Python environment
 Optional local services
   [OK] reachable service: course exporter (http://localhost:8000/metrics)
   [OK] reachable service: Prometheus (http://localhost:9090/-/ready)
-  [OK] reachable service: Prometheus (http://localhost:9090/-/ready)
+  [OK] reachable service: Grafana Local (http://localhost:3000/api/health)
   [..] not running yet: node_exporter (http://localhost:9100/metrics)
 
 Required checks passed.

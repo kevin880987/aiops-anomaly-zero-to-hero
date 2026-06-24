@@ -6,7 +6,7 @@ rule_files:
   - "alerts.yml"
 
 # ---------------------------------------------------------------------------
-# Grafana Cloud remote_write（路徑 B — Grafana local 用戶請略過此區塊）
+# Grafana Cloud remote_write（路徑 B — Grafana Local 用戶請略過此區塊）
 # 到 grafana.com → My Account → 你的 Stack → Prometheus 取得以下三個值：
 #   url      — Remote Write Endpoint（格式：https://prometheus-xxx.grafana.net/api/prom/push）
 #   username — Prometheus User ID（數字）

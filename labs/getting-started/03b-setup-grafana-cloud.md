@@ -2,9 +2,11 @@
 
 官方文件：[grafana.com/docs/grafana-cloud/send-data/metrics/metrics-prometheus](https://grafana.com/docs/grafana-cloud/send-data/metrics/metrics-prometheus/)
 
-本課程使用 Grafana Cloud 免費方案（free tier）作為視覺化層。Prometheus 在本機執行並抓取指標，再透過 `remote_write` 推送到 Grafana Cloud。你在瀏覽器開啟的是 Grafana Cloud UI，不需要安裝 Grafana Local。
+本步驟為選用延伸，需要先完成 [03a-install-grafana-local.md](03a-install-grafana-local.md)。設定完成後，指標會同時出現在本機 Grafana Local（`http://localhost:3000`）與 Grafana Cloud（雲端 UI）兩個地方。
 
-**前置條件：** Prometheus 已安裝並正在運作（[02-install-prometheus.md](02-install-prometheus.md)）。
+Prometheus 在本機執行並透過 `remote_write` 推送指標到 Grafana Cloud 免費方案（free tier）；你在 Grafana Cloud 網頁 UI 中查看，不需要在本機安裝額外的 Grafana 服務。
+
+**前置條件：** Grafana Local 已設定完成（[03a-install-grafana-local.md](03a-install-grafana-local.md)）且 Prometheus 正在運作（[02-install-prometheus.md](02-install-prometheus.md)）。
 
 ---
 

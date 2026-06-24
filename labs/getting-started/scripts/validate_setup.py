@@ -69,7 +69,7 @@ REQUIRED_MODULES = {
 OPTIONAL_ENDPOINTS = [
     ("course exporter", "http://localhost:8000/metrics"),
     ("Prometheus", "http://localhost:9090/-/ready"),
-    ("Prometheus", "http://localhost:9090/-/ready"),
+    ("Grafana Local", "http://localhost:3000/api/health"),
     ("node_exporter", "http://localhost:9100/metrics"),
     ("windows_exporter", "http://localhost:9182/metrics"),
 ]
