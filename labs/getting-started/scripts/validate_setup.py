@@ -26,6 +26,10 @@ REPO_ROOT = SCRIPT_PATH.parents[3]
 REQUIRED_FILES = [
     "README.md",
     "environment.yml",
+    "environments/README.md",
+    "environments/environment.macos.yml",
+    "environments/environment.linux.yml",
+    "environments/environment.windows.yml",
     "infra/exporter.py",
     "data/synthetic/synthetic_rrd_metrics.csv",
     "data/synthetic/synthetic_event_catalog.csv",

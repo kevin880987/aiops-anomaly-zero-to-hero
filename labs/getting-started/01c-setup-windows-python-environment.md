@@ -34,7 +34,7 @@ powershell -ExecutionPolicy Bypass -File labs\getting-started\scripts\bootstrap_
 powershell -ExecutionPolicy Bypass -File labs\getting-started\scripts\bootstrap_windows.ps1 -NoLaunch
 ```
 
-強制依照 `environment.yml` 更新環境：
+強制依照 Windows environment YAML 更新環境：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File labs\getting-started\scripts\bootstrap_windows.ps1 -Update
@@ -72,7 +72,7 @@ JupyterLab 是預設路徑，但任何支援 Jupyter kernel 的工具都可以�
 **環境已存在想更新套件版本？**
 
 ```powershell
-conda env update -n aiops-anomaly-zero-to-hero -f environment.yml --prune
+conda env update -n aiops-anomaly-zero-to-hero -f environments\environment.windows.yml --prune
 ```
 
 **環境要怎麼完全刪除重建？**

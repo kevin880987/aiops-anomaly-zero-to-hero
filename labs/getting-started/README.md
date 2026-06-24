@@ -14,3 +14,7 @@
 | [05-readiness-check.md](05-readiness-check.md) | 就緒確認 — 全部學員必做 |
 
 腳本放在 [scripts/](scripts/)。
+
+## Conda environment files
+
+大多數學員使用根目錄的 `environment.yml` 即可。平台指南會在需要時使用 machine-specific YAML：`environments/environment.macos.yml`、`environments/environment.linux.yml`、`environments/environment.windows.yml`。三個檔案都建立同一個 conda environment：`aiops-anomaly-zero-to-hero`。

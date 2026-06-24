@@ -1,5 +1,5 @@
-# Default cross-platform course environment.
-# Most learners should use this file. Platform-specific variants live in environments/.
+# Linux course environment.
+# Kept separate so Linux learners can pin or extend Linux-only system integration later.
 name: aiops-anomaly-zero-to-hero
 channels:
   - conda-forge

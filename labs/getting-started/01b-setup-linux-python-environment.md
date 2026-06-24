@@ -18,7 +18,7 @@ cd aiops-anomaly-zero-to-hero
 ### 2. 建立 conda 環境
 
 ```bash
-conda env create -f environment.yml
+conda env create -f environments/environment.linux.yml
 conda activate aiops-anomaly-zero-to-hero
 python labs/getting-started/scripts/validate_setup.py --repo-only
 ```
@@ -26,7 +26,7 @@ python labs/getting-started/scripts/validate_setup.py --repo-only
 如果環境已存在，改用更新指令：
 
 ```bash
-conda env update -n aiops-anomaly-zero-to-hero -f environment.yml --prune
+conda env update -n aiops-anomaly-zero-to-hero -f environments/environment.linux.yml --prune
 conda activate aiops-anomaly-zero-to-hero
 python labs/getting-started/scripts/validate_setup.py --repo-only
 ```
@@ -57,12 +57,12 @@ JupyterLab 是預設路徑，但任何支援 Jupyter kernel 的工具都可以�
 **環境已存在想更新套件版本？**
 
 ```bash
-conda env update -n aiops-anomaly-zero-to-hero -f environment.yml --prune
+conda env update -n aiops-anomaly-zero-to-hero -f environments/environment.linux.yml --prune
 ```
 
 **環境要怎麼完全刪除重建？**
 
 ```bash
 conda env remove -n aiops-anomaly-zero-to-hero
-conda env create -f environment.yml
+conda env create -f environments/environment.linux.yml
 ```

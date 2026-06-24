@@ -10,7 +10,9 @@ param(
 $ErrorActionPreference = "Stop"
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $EnvName  = "aiops-anomaly-zero-to-hero"
-$EnvFile  = Join-Path $RepoRoot "environment.yml"
+$DefaultEnvFile = Join-Path $RepoRoot "environment.yml"
+$PlatformEnvFile = Join-Path $RepoRoot "environments\environment.windows.yml"
+$EnvFile = $PlatformEnvFile
 $LabDir = Join-Path $RepoRoot "labs"
 $MinPython = [Version]"3.12"
 
@@ -26,7 +28,10 @@ function Stop-Setup {
 }
 
 if (-not (Test-Path $EnvFile)) {
-    Stop-Setup "environment.yml not found at $EnvFile. Run this script from the project checkout."
+    $EnvFile = $DefaultEnvFile
+}
+if (-not (Test-Path $EnvFile)) {
+    Stop-Setup "No conda environment YAML found. Expected $PlatformEnvFile or $DefaultEnvFile."
 }
 if (-not (Test-Path $LabDir)) {
     Stop-Setup "Lab directory not found at $LabDir."
@@ -161,7 +166,7 @@ if (Test-CondaEnvExists -CondaPath $Conda -Name $EnvName) {
         if ($LASTEXITCODE -ne 0) { Stop-Setup "conda env update failed." }
     }
 } else {
-    Write-Step "Creating environment '$EnvName' from environment.yml."
+    Write-Step "Creating environment '$EnvName' from $EnvFile."
     & $Conda env create -f $EnvFile
     if ($LASTEXITCODE -ne 0) {
         Stop-Setup "conda env create failed. Check the error above, then rerun with -Update if the environment was partially created."

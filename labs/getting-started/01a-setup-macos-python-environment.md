@@ -34,7 +34,7 @@ bash labs/getting-started/scripts/bootstrap_macos.sh
 bash labs/getting-started/scripts/bootstrap_macos.sh --no-launch
 ```
 
-強制依照 `environment.yml` 更新環境：
+強制依照 macOS environment YAML 更新環境：
 
 ```bash
 bash labs/getting-started/scripts/bootstrap_macos.sh --update
@@ -73,7 +73,7 @@ JupyterLab 是預設路徑，但任何支援 Jupyter kernel 的工具都可以�
 **環境已存在想更新套件版本？**
 
 ```bash
-conda env update -n aiops-anomaly-zero-to-hero -f environment.yml --prune
+conda env update -n aiops-anomaly-zero-to-hero -f environments/environment.macos.yml --prune
 ```
 
 **環境要怎麼完全刪除重建？**

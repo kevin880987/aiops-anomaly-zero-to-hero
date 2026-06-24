@@ -1,5 +1,5 @@
-# Default cross-platform course environment.
-# Most learners should use this file. Platform-specific variants live in environments/.
+# Windows course environment.
+# Includes pywin32 for native Jupyter/kernel integration on Windows.
 name: aiops-anomaly-zero-to-hero
 channels:
   - conda-forge
@@ -19,6 +19,7 @@ dependencies:
   - pyyaml>=6.0
   - pytest>=8.0
   - pytest-cov>=5.0
+  - pywin32>=306
   - prometheus_client>=0.20
   - pip:
       - anthropic>=0.40

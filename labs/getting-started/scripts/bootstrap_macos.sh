@@ -5,7 +5,9 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 ENV_NAME="aiops-anomaly-zero-to-hero"
-ENV_FILE="$REPO_ROOT/environment.yml"
+DEFAULT_ENV_FILE="$REPO_ROOT/environment.yml"
+PLATFORM_ENV_FILE="$REPO_ROOT/environments/environment.macos.yml"
+ENV_FILE="$PLATFORM_ENV_FILE"
 LAB_DIR="$REPO_ROOT/labs"
 MIN_PYTHON="3.12"
 
@@ -19,7 +21,7 @@ Usage: bash labs/getting-started/scripts/bootstrap_macos.sh [options]
 
 Options:
   --no-install    Do not install Miniconda if conda is missing.
-  --update        Force conda env update from environment.yml.
+  --update        Force conda env update from the selected environment YAML.
   --no-launch     Prepare the environment but do not start JupyterLab.
   -h, --help      Show this help.
 EOF
@@ -155,7 +157,10 @@ install_miniconda() {
   "$CONDA" init bash >/dev/null 2>&1 || true
 }
 
-[ -f "$ENV_FILE" ] || fail "environment.yml not found at $ENV_FILE. Run this script from the project checkout."
+if [ ! -f "$ENV_FILE" ]; then
+  ENV_FILE="$DEFAULT_ENV_FILE"
+fi
+[ -f "$ENV_FILE" ] || fail "No conda environment YAML found. Expected $PLATFORM_ENV_FILE or $DEFAULT_ENV_FILE."
 [ -d "$LAB_DIR" ] || fail "Lab directory not found at $LAB_DIR."
 
 case "$(uname -s)" in
@@ -185,7 +190,7 @@ if env_exists; then
       || fail "conda env update failed."
   fi
 else
-  info "Creating environment '$ENV_NAME' from environment.yml."
+  info "Creating environment '$ENV_NAME' from $ENV_FILE."
   "$CONDA" env create -f "$ENV_FILE" \
     || fail "conda env create failed. Check the error above, then rerun with --update if the environment was partially created."
 fi
