@@ -24,7 +24,7 @@ SCRIPT_PATH = Path(__file__).resolve()
 REPO_ROOT = SCRIPT_PATH.parents[3]
 
 REQUIRED_FILES = [
-    "COURSE_GUIDE.md",
+    "README.md",
     "environment.yml",
     "infra/exporter.py",
     "data/synthetic/synthetic_rrd_metrics.csv",

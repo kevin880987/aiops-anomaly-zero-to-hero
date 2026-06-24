@@ -36,7 +36,7 @@ Repository root: /path/to/aiops-anomaly-zero-to-hero
 Platform: Darwin 24.x.x (arm64)
 
 Required repository files
-  [OK] ok file: COURSE_GUIDE.md
+  [OK] ok file: README.md
   [OK] ok file: environment.yml
   ...
 
