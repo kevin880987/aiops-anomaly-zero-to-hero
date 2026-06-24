@@ -139,14 +139,14 @@ Prometheus 需要在 `http://localhost:9090` 可以連線。
 
 成功狀態如下：
 
-- `csv-exporter` 目標狀態為 **UP**（綠色）
+- `rrd-exporter` 目標狀態為 **UP**（綠色）
 - 如果已安裝 node_exporter，`node-exporter` 目標也應顯示 **UP**
 
 ![Prometheus Targets Page — all UP](https://prometheus.io/assets/docs/grafana_prometheus.png)
 
 *[Prometheus 官方 Targets 頁面說明](https://prometheus.io/docs/prometheus/latest/getting_started/#configuring-prometheus-to-monitor-itself)*
 
-如果目標顯示 **DOWN**，代表對應服務未執行。先確認 `infra/csv_exporter.py` 正在執行，再重新確認。
+如果目標顯示 **DOWN**，代表對應服務未執行。先確認 `infra/rrd_exporter.py` 正在執行，再重新確認。
 
 ### 快速 PromQL 驗證
 
@@ -156,7 +156,7 @@ Prometheus 需要在 `http://localhost:9090` 可以連線。
 up
 ```
 
-回傳結果中，`job="csv-exporter"` 的值應為 `1`。
+回傳結果中，`job="rrd-exporter"` 的值應為 `1`。
 
 ---
 
@@ -167,7 +167,7 @@ up
 瀏覽器開啟 [http://localhost:3000](http://localhost:3000)，登入後進入 **Explore**，輸入：
 
 ```promql
-up{job="csv-exporter"}
+up{job="rrd-exporter"}
 ```
 
 值為 `1` 即表示 Grafana Local 與 Prometheus 連線正常。
@@ -182,7 +182,7 @@ up{job="csv-exporter"}
 
 完成 Grafana Local 後，可選擇另外設定 Grafana Cloud，將本機 Prometheus 指標同步推送到雲端。設定步驟：[03b-setup-grafana-cloud.md](03b-setup-grafana-cloud.md)。
 
-開啟你的 Grafana Cloud 網址（`https://yourname.grafana.net`），進入 **Explore**，資料來源選 **Prometheus**，查詢 `up{job="csv-exporter"}` 值為 `1` 即表示 remote_write 正在推送指標。
+開啟你的 Grafana Cloud 網址（`https://yourname.grafana.net`），進入 **Explore**，資料來源選 **Prometheus**，查詢 `up{job="rrd-exporter"}` 值為 `1` 即表示 remote_write 正在推送指標。
 
 ---
 
@@ -227,8 +227,8 @@ windows_net_bytes_received_total
 - [ ] `validate_setup.py` 無 `[!!]` 錯誤
 - [ ] 可以在 notebook 工具中開啟 `labs/self-study/00_observability_stack.ipynb` 並執行 cell
 - [ ] Prometheus 在 `http://localhost:9090` 可以連線
-- [ ] `up{job="csv-exporter"}` 值為 `1`
-- [ ] Grafana Local `up{job="csv-exporter"}` 值為 `1`（`http://localhost:3000`）
+- [ ] `up{job="rrd-exporter"}` 值為 `1`
+- [ ] Grafana Local `up{job="rrd-exporter"}` 值為 `1`（`http://localhost:3000`）
 
 **以上通過，可以從 `labs/self-study/00_observability_stack.ipynb` 開始。**
 
@@ -248,9 +248,9 @@ windows_net_bytes_received_total
 
 確認你在正確的 Python 環境中執行（conda 用 `conda activate aiops-anomaly-zero-to-hero`，VS Code 用右下角 Python interpreter 切換至課程環境）。
 
-### Prometheus `csv-exporter` 顯示 DOWN
+### Prometheus `rrd-exporter` 顯示 DOWN
 
-先確認 `python infra/csv_exporter.py` 正在另一個終端機執行。Prometheus 每 15 秒抓一次，啟動後等待最多 30 秒。
+先確認 `python infra/rrd_exporter.py` 正在另一個終端機執行。Prometheus 每 15 秒抓一次，啟動後等待最多 30 秒。
 
 ### 無法連線 `http://localhost:9090`
 

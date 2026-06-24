@@ -177,7 +177,7 @@ promtool check config infra/prometheus/prometheus.windows.yml
 └── infra/
     ├── prometheus/              # Prometheus 設定（prometheus.macos.yml / prometheus.windows.yml）
     ├── grafana/                 # Dashboard JSON 與 datasource 設定
-    └── csv_exporter.py          # CSV-to-Prometheus metrics exporter (self-study)
+    └── rrd_exporter.py          # CSV-to-Prometheus metrics exporter (self-study)
 ```
 
 ---

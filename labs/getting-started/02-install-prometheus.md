@@ -8,16 +8,16 @@ Prometheus 是系統級監控服務，安裝方式依作業系統與權限設定
 本課程提供三份 Prometheus 設定檔，每份說明自己適用的平台：
 
 ```text
-infra/prometheus/prometheus.macos.yml    macOS   — csv-exporter :8000 + node_exporter :9100
-infra/prometheus/prometheus.linux.yml    Linux   — csv-exporter :8000 + node_exporter :9100
-infra/prometheus/prometheus.windows.yml  Windows — csv-exporter :8000 + windows_exporter :9182
+infra/prometheus/prometheus.macos.yml    macOS   — rrd-exporter :8000 + node_exporter :9100
+infra/prometheus/prometheus.linux.yml    Linux   — rrd-exporter :8000 + node_exporter :9100
+infra/prometheus/prometheus.windows.yml  Windows — rrd-exporter :8000 + windows_exporter :9182
 ```
 
 兩個 scrape target 同時設定，Prometheus 對 DOWN 的 target 靜默容忍：
 
 ```text
 localhost:9090  Prometheus self
-localhost:8000  csv-exporter  ← self-study 路線：infra/csv_exporter.py 提供合成 RRD 資料
+localhost:8000  rrd-exporter  ← self-study 路線：infra/rrd_exporter.py 提供合成 RRD 資料
 localhost:9100  node-exporter ← workshop 路線：真實 PC 網路指標（macOS / Linux）
 localhost:9182  windows-exporter ← workshop 路線：真實 PC 網路指標（Windows）
 ```
@@ -30,7 +30,7 @@ localhost:9182  windows-exporter ← workshop 路線：真實 PC 網路指標（
 
 ```bash
 conda activate aiops-anomaly-zero-to-hero
-python infra/csv_exporter.py
+python infra/rrd_exporter.py
 ```
 
 看到 `Exporting metrics on http://localhost:8000/metrics` 後保持這個終端機開著。另開一個終端機繼續安裝與啟動 Prometheus。
@@ -107,7 +107,7 @@ prometheus --config.file=infra/prometheus/prometheus.linux.yml --web.enable-life
 
 ```promql
 up{job="prometheus"}
-up{job="csv-exporter"}
+up{job="rrd-exporter"}
 ```
 
 若你已完成 node_exporter 或 windows_exporter 安裝，也查詢對應項目：
@@ -120,7 +120,7 @@ up{job="node-exporter"}
 up{job="windows-exporter"}
 ```
 
-Prometheus、csv-exporter 與你的 OS exporter 都回傳 `1` 表示設定正確。若 OS exporter 尚未安裝，這個目標會暫時是 `0` 或不存在，完成 [04-install-node-exporter.md](04-install-node-exporter.md) 後再確認即可。
+Prometheus、rrd-exporter 與你的 OS exporter 都回傳 `1` 表示設定正確。若 OS exporter 尚未安裝，這個目標會暫時是 `0` 或不存在，完成 [04-install-node-exporter.md](04-install-node-exporter.md) 後再確認即可。
 
 ## 常見問題
 

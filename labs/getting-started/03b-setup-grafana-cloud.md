@@ -78,7 +78,7 @@ prometheus --config.file=infra/prometheus/prometheus.macos.yml --web.enable-life
 3. 資料來源選 **Prometheus**（Grafana Cloud 已預先設定）。
 4. 在 Metrics browser 輸入 `up`，點擊 **Run query**。
 
-看到 `up{job="csv-exporter"}` 值為 `1` 即表示 remote_write 設定正確。
+看到 `up{job="rrd-exporter"}` 值為 `1` 即表示 remote_write 設定正確。
 
 ---
 
@@ -97,7 +97,7 @@ infra/grafana/dashboards/network_metrics.json
 3. 在 **Prometheus** 欄位選擇 Grafana Cloud 預設的 Prometheus datasource。
 4. 點擊 **Import**。
 
-匯入後若 panel 顯示 `No data`，先確認 `up{job="csv-exporter"}` 在 Explore 中值為 `1`。
+匯入後若 panel 顯示 `No data`，先確認 `up{job="rrd-exporter"}` 在 Explore 中值為 `1`。
 
 ---
 
@@ -113,4 +113,4 @@ URL 一定要以 `/api/prom/push` 結尾。從 My Account → Stack → Promethe
 回到 My Account → Stack → Prometheus Details → Access Policies，建立一個新 token。
 
 **Dashboard panel 一直 `No data`，但 `up` 可以查到？**
-確認 exporter 正在執行（`python infra/csv_exporter.py`）。Dashboard 使用的指標是 `network_rrd_*`，這些指標由 exporter 提供。
+確認 exporter 正在執行（`python infra/rrd_exporter.py`）。Dashboard 使用的指標是 `network_rrd_*`，這些指標由 exporter 提供。
