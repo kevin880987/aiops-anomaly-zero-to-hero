@@ -31,7 +31,7 @@ jobs:
       - name: Validate startup scripts
         run: |
           bash -n labs/getting-started/scripts/bootstrap_macos.sh
-          python -m py_compile labs/getting-started/scripts/validate_setup.py infra/exporter.py
+          python -m py_compile labs/getting-started/scripts/validate_setup.py infra/csv_exporter.py
           python labs/getting-started/scripts/validate_setup.py --repo-only
           python - <<'PY'
           from pathlib import Path

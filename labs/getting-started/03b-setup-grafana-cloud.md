@@ -37,9 +37,9 @@ Prometheus 在本機執行並透過 `remote_write` 推送指標到 Grafana Cloud
 
 ---
 
-## 步驟 4 — 填入 prometheus.yml 的 remote_write
+## 步驟 4 — 填入 prometheus.macos.yml 的 remote_write
 
-開啟 `infra/prometheus/prometheus.yml`（Windows 用 `prometheus.windows.yml`），找到 `remote_write` 區塊，將佔位符替換為你的實際值：
+開啟 `infra/prometheus/prometheus.macos.yml`（Windows 用 `prometheus.windows.yml`），找到 `remote_write` 區塊，將佔位符替換為你的實際值：
 
 ```yaml
 remote_write:
@@ -59,7 +59,7 @@ remote_write:
 
 ```bash
 # macOS / Linux（在 repository 根目錄）
-prometheus --config.file=infra/prometheus/prometheus.yml --web.enable-lifecycle
+prometheus --config.file=infra/prometheus/prometheus.macos.yml --web.enable-lifecycle
 ```
 
 ```powershell
@@ -104,7 +104,7 @@ infra/grafana/dashboards/network_metrics.json
 ## 常見問題
 
 **Explore 查不到任何指標？**
-確認 prometheus.yml 的 remote_write url、username、password 都已填入正確值，且 Prometheus 在修改後已重啟。等待 30 秒再試。
+確認 prometheus.macos.yml 的 remote_write url、username、password 都已填入正確值，且 Prometheus 在修改後已重啟。等待 30 秒再試。
 
 **remote_write url 格式不對？**
 URL 一定要以 `/api/prom/push` 結尾。從 My Account → Stack → Prometheus Details 頁面複製，不要手動拼接。
@@ -113,4 +113,4 @@ URL 一定要以 `/api/prom/push` 結尾。從 My Account → Stack → Promethe
 回到 My Account → Stack → Prometheus Details → Access Policies，建立一個新 token。
 
 **Dashboard panel 一直 `No data`，但 `up` 可以查到？**
-確認 exporter 正在執行（`python infra/exporter.py`）。Dashboard 使用的指標是 `network_rrd_*`，這些指標由 exporter 提供。
+確認 exporter 正在執行（`python infra/csv_exporter.py`）。Dashboard 使用的指標是 `network_rrd_*`，這些指標由 exporter 提供。

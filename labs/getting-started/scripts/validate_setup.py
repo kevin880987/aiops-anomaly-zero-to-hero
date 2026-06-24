@@ -30,10 +30,11 @@ REQUIRED_FILES = [
     "environments/environment.macos.yml",
     "environments/environment.linux.yml",
     "environments/environment.windows.yml",
-    "infra/exporter.py",
+    "infra/csv_exporter.py",
     "data/synthetic/synthetic_rrd_metrics.csv",
     "data/synthetic/synthetic_event_catalog.csv",
-    "infra/prometheus/prometheus.yml",
+    "infra/prometheus/prometheus.macos.yml",
+    "infra/prometheus/prometheus.linux.yml",
     "infra/prometheus/prometheus.windows.yml",
     "infra/prometheus/alerts.yml",
     "infra/grafana/dashboards/network_metrics.json",
@@ -109,7 +110,7 @@ def check_json(path: str) -> tuple[bool, str]:
 
 
 def check_dashboard_metric_refs() -> tuple[bool, str]:
-    exporter_source = ast.parse((REPO_ROOT / "infra/exporter.py").read_text(encoding="utf-8"))
+    exporter_source = ast.parse((REPO_ROOT / "infra/csv_exporter.py").read_text(encoding="utf-8"))
     metric_cols = None
     for node in exporter_source.body:
         if not isinstance(node, ast.Assign):
@@ -119,7 +120,7 @@ def check_dashboard_metric_refs() -> tuple[bool, str]:
                 metric_cols = ast.literal_eval(node.value)
                 break
     if metric_cols is None:
-        return False, "METRIC_COLS not found in exporter.py"
+        return False, "METRIC_COLS not found in csv_exporter.py"
 
     emitted = {f"network_rrd_{col.lower()}" for col in metric_cols}
     emitted |= {"network_rrd_simulated_timestamp", "network_rrd_event"}
@@ -134,8 +135,8 @@ def check_dashboard_metric_refs() -> tuple[bool, str]:
 
     missing = sorted(refs - emitted)
     if missing:
-        return False, f"dashboard references metrics not emitted by exporter.py: {', '.join(missing)}"
-    return True, "ok dashboard metric references match exporter.py"
+        return False, f"dashboard references metrics not emitted by csv_exporter.py: {', '.join(missing)}"
+    return True, "ok dashboard metric references match csv_exporter.py"
 
 
 def check_packages() -> list[tuple[bool, str]]:

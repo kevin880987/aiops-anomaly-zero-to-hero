@@ -146,7 +146,7 @@ Prometheus 需要在 `http://localhost:9090` 可以連線。
 
 *[Prometheus 官方 Targets 頁面說明](https://prometheus.io/docs/prometheus/latest/getting_started/#configuring-prometheus-to-monitor-itself)*
 
-如果目標顯示 **DOWN**，代表對應服務未執行。先確認 `infra/exporter.py` 正在執行，再重新確認。
+如果目標顯示 **DOWN**，代表對應服務未執行。先確認 `infra/csv_exporter.py` 正在執行，再重新確認。
 
 ### 快速 PromQL 驗證
 
@@ -250,7 +250,7 @@ windows_net_bytes_received_total
 
 ### Prometheus `csv-exporter` 顯示 DOWN
 
-先確認 `python infra/exporter.py` 正在另一個終端機執行。Prometheus 每 15 秒抓一次，啟動後等待最多 30 秒。
+先確認 `python infra/csv_exporter.py` 正在另一個終端機執行。Prometheus 每 15 秒抓一次，啟動後等待最多 30 秒。
 
 ### 無法連線 `http://localhost:9090`
 
@@ -266,7 +266,7 @@ windows_net_bytes_received_total
 
 ### Grafana Cloud Explore 查不到指標
 
-確認 prometheus.yml 的 remote_write url、username、password 已填入正確值，且 Prometheus 在修改後重啟。等待 30 秒後再試。詳細步驟見 [03b-setup-grafana-cloud.md](03b-setup-grafana-cloud.md)。
+確認 prometheus.macos.yml 的 remote_write url、username、password 已填入正確值，且 Prometheus 在修改後重啟。等待 30 秒後再試。詳細步驟見 [03b-setup-grafana-cloud.md](03b-setup-grafana-cloud.md)。
 
 ---
 

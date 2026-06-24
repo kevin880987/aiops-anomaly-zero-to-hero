@@ -152,7 +152,7 @@ python labs/getting-started/scripts/validate_setup.py --repo-only
 Prometheus 設定可用 `promtool` 檢查：
 
 ```bash
-promtool check config infra/prometheus/prometheus.yml
+promtool check config infra/prometheus/prometheus.macos.yml
 promtool check config infra/prometheus/prometheus.windows.yml
 ```
 
@@ -175,9 +175,9 @@ promtool check config infra/prometheus/prometheus.windows.yml
 │   ├── workshop/
 │   └── self-study/
 └── infra/
-    ├── prometheus/              # Prometheus 設定（prometheus.yml / prometheus.windows.yml）
+    ├── prometheus/              # Prometheus 設定（prometheus.macos.yml / prometheus.windows.yml）
     ├── grafana/                 # Dashboard JSON 與 datasource 設定
-    └── exporter.py              # CSV-to-Prometheus metrics exporter
+    └── csv_exporter.py          # CSV-to-Prometheus metrics exporter (self-study)
 ```
 
 ---

@@ -7,7 +7,7 @@ Each real second advances the simulation by REPLAY_SPEED_X seconds.
 
 Usage:
     conda activate aiops-anomaly-zero-to-hero
-    python infra/exporter.py
+    python infra/csv_exporter.py
 
 Environment variables:
     CSV_PATH        Path to synthetic_rrd_metrics.csv  (default: data/synthetic/synthetic_rrd_metrics.csv)

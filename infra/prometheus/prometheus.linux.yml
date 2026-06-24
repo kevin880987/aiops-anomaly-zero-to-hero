@@ -1,10 +1,10 @@
-# Windows — use this file when starting Prometheus on Windows.
-# macOS:  use prometheus.macos.yml (node_exporter on :9100).
-# Linux:  use prometheus.linux.yml (node_exporter on :9100).
+# Linux — use this file when starting Prometheus on Linux.
+# macOS:   use prometheus.macos.yml (identical scrape targets).
+# Windows: use prometheus.windows.yml (windows_exporter on :9182).
 #
 # Both scrape targets run simultaneously; Prometheus tolerates DOWN targets silently.
-#   csv-exporter     :8000 — self-study path: synthetic RRD data via infra/csv_exporter.py
-#   windows-exporter :9182 — workshop path:   real PC network interface metrics
+#   csv-exporter  :8000 — self-study path: synthetic RRD data via infra/csv_exporter.py
+#   node-exporter :9100 — workshop path:   real PC network interface metrics
 #
 # Grafana Cloud remote_write (optional): see labs/getting-started/03b-setup-grafana-cloud.md
 
@@ -31,7 +31,7 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:8000"]
 
-  - job_name: "windows-exporter"   # workshop: windows_exporter binary
+  - job_name: "node-exporter"      # workshop: node_exporter binary
     scrape_interval: 5s
     static_configs:
-      - targets: ["localhost:9182"]
+      - targets: ["localhost:9100"]

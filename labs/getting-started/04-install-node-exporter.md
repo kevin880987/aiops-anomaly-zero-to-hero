@@ -77,7 +77,7 @@ Prometheus 請使用 Windows 專用設定檔：
 
 ## 設定 Prometheus 抓取 node_exporter
 
-本 repository 的 `infra/prometheus/prometheus.yml` 已包含 macOS / Linux 的 node_exporter 目標：
+本 repository 的 `prometheus.macos.yml` 和 `prometheus.linux.yml` 都已包含 node_exporter 目標：
 
 ```yaml
 scrape_configs:
@@ -100,7 +100,7 @@ Invoke-WebRequest -Method Post http://localhost:9090/-/reload
 
 在 Prometheus UI（`http://localhost:9090`）查詢 `up{job="node-exporter"}` 確認值為 `1`。
 
-Windows 使用 windows_exporter 時，預設 port 是 `9182`，而且指標名稱與 node_exporter 不完全相同。請不要改 `infra/prometheus/prometheus.yml`，直接使用 `infra/prometheus/prometheus.windows.yml`。初學者若使用 Windows，建議先完成 self-study 合成資料路徑；若要跑 workshop 即時 OS 指標，依 notebook 提示調整 PromQL 指標名稱。
+Windows 使用 windows_exporter 時，預設 port 是 `9182`，而且指標名稱與 node_exporter 不完全相同。請直接使用 `infra/prometheus/prometheus.windows.yml`，不要修改 macOS / Linux 設定檔。初學者若使用 Windows，建議先完成 self-study 合成資料路徑；若要跑 workshop 即時 OS 指標，依 notebook 提示調整 PromQL 指標名稱。
 
 ---
 

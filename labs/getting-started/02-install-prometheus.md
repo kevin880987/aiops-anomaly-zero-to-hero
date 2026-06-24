@@ -5,27 +5,21 @@
 
 Prometheus 是系統級監控服務，安裝方式依作業系統與權限設定而異。本課程的 conda 腳本只處理 Python 環境，不會自動安裝 Prometheus。
 
-本課程提供兩份 Prometheus 設定檔。請依作業系統選一份使用：
+本課程提供三份 Prometheus 設定檔，每份說明自己適用的平台：
 
 ```text
-infra/prometheus/prometheus.yml          macOS / Linux，使用 node_exporter :9100
-infra/prometheus/prometheus.windows.yml  Windows，使用 windows_exporter :9182
+infra/prometheus/prometheus.macos.yml    macOS   — csv-exporter :8000 + node_exporter :9100
+infra/prometheus/prometheus.linux.yml    Linux   — csv-exporter :8000 + node_exporter :9100
+infra/prometheus/prometheus.windows.yml  Windows — csv-exporter :8000 + windows_exporter :9182
 ```
 
-macOS / Linux 設定檔會抓取三個本機目標：
+兩個 scrape target 同時設定，Prometheus 對 DOWN 的 target 靜默容忍：
 
 ```text
-localhost:9090  Prometheus 自己
-localhost:8000  課程 exporter.py
-localhost:9100  node_exporter（工作坊短版需要）
-```
-
-Windows 設定檔會抓取：
-
-```text
-localhost:9090  Prometheus 自己
-localhost:8000  課程 exporter.py
-localhost:9182  windows_exporter
+localhost:9090  Prometheus self
+localhost:8000  csv-exporter  ← self-study 路線：infra/csv_exporter.py 提供合成 RRD 資料
+localhost:9100  node-exporter ← workshop 路線：真實 PC 網路指標（macOS / Linux）
+localhost:9182  windows-exporter ← workshop 路線：真實 PC 網路指標（Windows）
 ```
 
 先完成 [01a](01a-setup-macos-python-environment.md)、[01b](01b-setup-linux-python-environment.md) 或 [01c](01c-setup-windows-python-environment.md)，確認 conda 環境已建立。
@@ -36,7 +30,7 @@ localhost:9182  windows_exporter
 
 ```bash
 conda activate aiops-anomaly-zero-to-hero
-python infra/exporter.py
+python infra/csv_exporter.py
 ```
 
 看到 `Exporting metrics on http://localhost:8000/metrics` 後保持這個終端機開著。另開一個終端機繼續安裝與啟動 Prometheus。
@@ -62,7 +56,7 @@ brew install prometheus
 安裝後開啟第二個終端機，回到 repository 根目錄，使用本課程提供的設定檔啟動：
 
 ```bash
-prometheus --config.file=infra/prometheus/prometheus.yml --web.enable-lifecycle
+prometheus --config.file=infra/prometheus/prometheus.macos.yml --web.enable-lifecycle
 ```
 
 如果終端機顯示 `prometheus: command not found`，先確認 Homebrew 的 `bin` 目錄已加入 `PATH`：
@@ -80,7 +74,7 @@ PROM_VERSION="3.12.0"
 curl -LO "https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz"
 tar xvf "prometheus-${PROM_VERSION}.linux-amd64.tar.gz"
 cd "prometheus-${PROM_VERSION}.linux-amd64"
-./prometheus --config.file=/path/to/aiops-anomaly-zero-to-hero/infra/prometheus/prometheus.yml --web.enable-lifecycle
+./prometheus --config.file=/path/to/aiops-anomaly-zero-to-hero/infra/prometheus/prometheus.linux.yml --web.enable-lifecycle
 ```
 
 請先到 [prometheus.io/download](https://prometheus.io/download/) 確認目前最新版本，再更新 `PROM_VERSION`。也可以使用發行版套件管理器安裝，但版本可能落後官方 release。
@@ -88,7 +82,7 @@ cd "prometheus-${PROM_VERSION}.linux-amd64"
 若你的系統已透過套件管理器安裝 `prometheus` 指令，也可以在 repository 根目錄執行：
 
 ```bash
-prometheus --config.file=infra/prometheus/prometheus.yml --web.enable-lifecycle
+prometheus --config.file=infra/prometheus/prometheus.linux.yml --web.enable-lifecycle
 ```
 
 其他發行版請參考[官方安裝文件](https://prometheus.io/docs/prometheus/latest/installation/)。
