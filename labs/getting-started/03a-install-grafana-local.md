@@ -3,7 +3,7 @@
 官方文件：[grafana.com/docs/grafana/latest/setup-grafana/installation](https://grafana.com/docs/grafana/latest/setup-grafana/installation/)
 官方下載頁：[grafana.com/grafana/download](https://grafana.com/grafana/download/)
 
-Grafana 安裝後會在本機建立服務、資料庫與登入設定。本課程的 conda 腳本只處理 Python 環境，不會自動安裝 Grafana。
+Grafana 安裝後會在本機建立服務、資料庫與登入設定。本課程的 Python 環境設定只處理 notebook 需要的套件，不會自動安裝 Grafana。
 
 **前置條件：** Prometheus 已安裝並正在運作（[02-install-prometheus.md](02-install-prometheus.md)）。
 

@@ -1,12 +1,12 @@
 # environments/
 
-`environment.yml` at the repository root is the default cross-platform conda environment. Use it unless your setup guide points you to a machine-specific file.
+根目錄的 `environment.yml` 是預設跨平台 conda environment。大多數學員不用手動選這裡的檔案；請先照 [`labs/getting-started/README.md`](../labs/getting-started/README.md) 操作，最後用 `00-check-your-setup.ipynb` 檢查。
 
-| File | Use when |
+| 檔案 | 用途 |
 | --- | --- |
-| `../environment.yml` | Default path for most learners |
-| `environment.macos.yml` | macOS setup or macOS-specific troubleshooting |
-| `environment.linux.yml` | Linux setup or Linux-specific troubleshooting |
-| `environment.windows.yml` | Windows setup or Windows-specific troubleshooting |
+| `../environment.yml` | 預設跨平台版本 |
+| `environment.macos.yml` | macOS setup 或 macOS-specific troubleshooting |
+| `environment.linux.yml` | Linux setup 或 Linux-specific troubleshooting |
+| `environment.windows.yml` | Windows setup 或 Windows-specific troubleshooting |
 
-All files create the same conda environment name: `aiops-anomaly-zero-to-hero`.
+所有檔案都建立同一個 conda environment：`aiops-anomaly-zero-to-hero`。

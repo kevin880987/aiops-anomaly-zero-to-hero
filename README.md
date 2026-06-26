@@ -8,9 +8,9 @@
 
 ## 開始使用
 
-**需要設定環境：** → [`labs/getting-started/`](labs/getting-started/README.md) — 環境設定步驟、路徑選擇、就緒確認，全部在這裡。
+**需要設定環境：** → [`labs/getting-started/`](labs/getting-started/README.md) — 先用 README 判斷起點；已有環境就開 setup check notebook，沒有環境就依 OS 連到對應安裝指南。
 
-**已有自己的環境：** → [`labs/getting-started/05-readiness-check.md`](labs/getting-started/05-readiness-check.md) — 直接確認 Python 套件、Prometheus、Grafana Local 是否符合課程需求。
+**已有自己的環境：** → [`labs/getting-started/00-check-your-setup.ipynb`](labs/getting-started/00-check-your-setup.ipynb) — 直接用 notebook 檢查 kernel、Python packages、course exporter、Prometheus、Grafana Local 與 OS exporter 狀態。
 
 ---
 
@@ -123,7 +123,7 @@ data/synthetic/synthetic_rrd_metrics.csv
 
 | 階段 | 檢核問題 |
 | --- | --- |
-| 環境設定 | conda 環境、notebook JSON、dashboard JSON 是否通過 `validate_setup.py`？ |
+| 環境設定 | `00-check-your-setup.ipynb` 是否通過 Python kernel / packages、course exporter、Prometheus 與 Grafana Local 檢查？ |
 | Observability | Prometheus 的 `up` 是否能看到 exporter 與 OS exporter？ |
 | Feature engineering | `features.csv` 是否產生？欄位是否能追溯到 raw counters？ |
 | Detection | 每種 anomaly flag 是否有明確 threshold 或 score 解釋？ |
@@ -136,18 +136,13 @@ data/synthetic/synthetic_rrd_metrics.csv
 
 ## 驗證指令
 
-從 repository 根目錄執行：
+互動式檢查請開啟：
 
-```bash
-conda activate aiops-anomaly-zero-to-hero
-python labs/getting-started/scripts/validate_setup.py
+```text
+labs/getting-started/00-check-your-setup.ipynb
 ```
 
-只想驗證 repository 結構、暫時跳過 Python 與服務檢查：
-
-```bash
-python labs/getting-started/scripts/validate_setup.py --repo-only
-```
+若要確認本機是否已就緒，請直接執行 setup check notebook。這是唯一建議的檢查入口，可避免 command-line script 與 notebook kernel 使用不同 Python 環境而造成誤判。
 
 Prometheus 設定可用 `promtool` 檢查：
 
@@ -165,7 +160,7 @@ promtool check config infra/prometheus/prometheus.windows.yml
 ├── README.md                    # 本文件
 ├── environment.yml              # conda 課程環境
 ├── labs/
-│   ├── getting-started/         # 設定指南（01a–01c、02–04）與就緒確認（05）
+│   ├── getting-started/         # setup 主入口、互動式檢查 notebook、各平台安裝指南
 │   ├── workshop/                # 工作坊短版 notebooks
 │   └── self-study/              # 完整自學版 notebooks
 ├── data/
@@ -175,7 +170,7 @@ promtool check config infra/prometheus/prometheus.windows.yml
 │   ├── workshop/
 │   └── self-study/
 └── infra/
-    ├── prometheus/              # Prometheus 設定（prometheus.macos.yml / prometheus.windows.yml）
+    ├── prometheus/              # Prometheus 設定（macOS / Linux / Windows）
     ├── grafana/                 # Dashboard JSON 與 datasource 設定
     └── rrd_exporter.py          # CSV-to-Prometheus metrics exporter (self-study)
 ```

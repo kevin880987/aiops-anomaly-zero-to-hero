@@ -3,7 +3,9 @@
 官方文件：[prometheus.io/docs/prometheus/latest/installation](https://prometheus.io/docs/prometheus/latest/installation/)
 官方下載頁：[prometheus.io/download](https://prometheus.io/download/)
 
-Prometheus 是系統級監控服務，安裝方式依作業系統與權限設定而異。本課程的 conda 腳本只處理 Python 環境，不會自動安裝 Prometheus。
+Prometheus 是系統級監控服務，安裝方式依作業系統與權限設定而異。本課程的 Python 環境設定只處理 notebook 需要的套件，不會自動安裝 Prometheus。
+
+本課程還需要一個 course exporter。Prometheus 不會直接讀取 CSV 或 notebook 輸出，它只會定期抓取 HTTP `/metrics` 端點。`infra/rrd_exporter.py` 會把 `data/synthetic/synthetic_rrd_metrics.csv` 轉成 Prometheus 格式，並在 `http://localhost:8000/metrics` 提供給 Prometheus scrape。也就是說，Prometheus 是監控資料庫，course exporter 是課程資料進入 Prometheus 的資料來源。
 
 本課程提供三份 Prometheus 設定檔，每份說明自己適用的平台：
 

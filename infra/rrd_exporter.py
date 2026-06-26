@@ -22,7 +22,7 @@ import pandas as pd
 from prometheus_client import Gauge, start_http_server
 
 # ── Config ────────────────────────────────────────────────────────────────────
-REPO_ROOT = Path(__file__).resolve().parent
+REPO_ROOT = Path(__file__).resolve().parents[1]
 CSV_PATH  = Path(os.environ.get("CSV_PATH",
     REPO_ROOT / "data" / "synthetic" / "synthetic_rrd_metrics.csv"))
 PORT           = int(os.environ.get("EXPORTER_PORT", 8000))

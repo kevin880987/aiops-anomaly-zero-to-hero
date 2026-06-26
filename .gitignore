@@ -26,3 +26,4 @@ outputs/workshop/*
 !outputs/workshop/.gitkeep
 outputs/self-study/*
 !outputs/self-study/.gitkeep
+outputs/setup/*
