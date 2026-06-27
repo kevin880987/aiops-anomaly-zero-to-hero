@@ -29,7 +29,15 @@ conda env update -n aiops-anomaly-zero-to-hero -f environments/environment.linux
 conda activate aiops-anomaly-zero-to-hero
 ```
 
-### 3. 之後每次啟動
+### 3. 註冊 Jupyter kernel
+
+讓 JupyterLab 能在 kernel 選單中找到這個環境：
+
+```bash
+python -m ipykernel install --user --name aiops-anomaly-zero-to-hero --display-name "Python (aiops-anomaly-zero-to-hero)"
+```
+
+### 4. 之後每次啟動
 
 ```bash
 conda activate aiops-anomaly-zero-to-hero

@@ -206,14 +206,23 @@ Grafana Cloud 是選用延伸。課程主線只需要 Grafana Local。
 
 ### notebook 找不到 `aiops-anomaly-zero-to-hero` kernel
 
-先啟用課程環境，再註冊 kernel：
+安裝流程中的 Step 3 可能被略過。先啟用課程環境，再執行一次 kernel 註冊：
+
+macOS / Linux：
 
 ```bash
 conda activate aiops-anomaly-zero-to-hero
-python -m ipykernel install --user --name aiops-anomaly-zero-to-hero
+python -m ipykernel install --user --name aiops-anomaly-zero-to-hero --display-name "Python (aiops-anomaly-zero-to-hero)"
 ```
 
-重新整理 notebook，再選 `aiops-anomaly-zero-to-hero` kernel。
+Windows PowerShell：
+
+```powershell
+conda activate aiops-anomaly-zero-to-hero
+python -m ipykernel install --user --name aiops-anomaly-zero-to-hero --display-name "Python (aiops-anomaly-zero-to-hero)"
+```
+
+重新整理 JupyterLab 的 kernel 選單，再選 `Python (aiops-anomaly-zero-to-hero)`。
 
 ### `localhost:8000` 連不上
 

@@ -33,7 +33,15 @@ conda env update -n aiops-anomaly-zero-to-hero -f environments/environment.macos
 conda activate aiops-anomaly-zero-to-hero
 ```
 
-### 3. 啟動 JupyterLab
+### 3. 註冊 Jupyter kernel
+
+讓 JupyterLab 能在 kernel 選單中找到這個環境：
+
+```bash
+python -m ipykernel install --user --name aiops-anomaly-zero-to-hero --display-name "Python (aiops-anomaly-zero-to-hero)"
+```
+
+### 4. 啟動 JupyterLab
 
 ```bash
 jupyter lab labs/
