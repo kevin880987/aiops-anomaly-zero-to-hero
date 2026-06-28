@@ -6,7 +6,6 @@
 
 - `synthetic/`：主教材使用的 RRD-like network metrics 與資料模擬 notebook。Labs 從這裡讀取原始資料。
 - `sample/`：選讀資料。三竹提供的 LibreNMS / RRDTool sample `.rrd` 檔，用來理解真實原始格式。初學者可略過。
-- `processed/`：舊版遺留目錄，目前不使用。Self-study lab 的執行產物寫入 `outputs/self-study/`（gitignored）。
 
 若要重建 synthetic data，執行：
 
