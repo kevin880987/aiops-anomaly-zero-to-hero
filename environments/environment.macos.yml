@@ -1,5 +1,5 @@
 # macOS course environment.
-# Use this when the macOS bootstrap script is available or when you want platform-explicit setup.
+# Use this when you want platform-explicit macOS setup.
 name: aiops-anomaly-zero-to-hero
 channels:
   - conda-forge

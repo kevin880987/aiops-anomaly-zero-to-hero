@@ -248,7 +248,7 @@ http://localhost:9090
 
 ## Conda environment files
 
-大多數學員不需要手動選這些檔案；setup guide 或 bootstrap script 會處理。
+大多數學員不需要手動選這些檔案；請依本 README 的安裝指南建立環境，最後用 `00-check-your-setup.ipynb` 檢查。
 
 | 檔案 | 用途 |
 | --- | --- |

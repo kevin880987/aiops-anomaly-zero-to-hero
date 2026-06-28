@@ -28,22 +28,40 @@ jobs:
               print(f"ok {path}")
           PY
 
-      - name: Validate startup scripts
+      - name: Validate course files
         run: |
-          bash -n labs/getting-started/scripts/bootstrap_macos.sh
-          python -m py_compile labs/getting-started/scripts/validate_setup.py infra/rrd_exporter.py
-          python labs/getting-started/scripts/validate_setup.py --repo-only
+          python -m py_compile infra/rrd_exporter.py
           python - <<'PY'
+          import json
           from pathlib import Path
-          for path in [
-              "labs/getting-started/scripts/bootstrap_windows.ps1",
-              "labs/getting-started/scripts/bootstrap_macos.sh",
-              "labs/getting-started/scripts/validate_setup.py",
-          ]:
-              data = Path(path).read_bytes()
-              if b"\x00" in data:
-                  raise SystemExit(f"NUL byte found in {path}")
-              if path.endswith(".ps1") and b"\r" in data:
-                  raise SystemExit(f"Unexpected CR byte found in {path}")
-              print(f"ok script bytes {path}")
+
+          legacy_terms = [
+              "labs/getting-started/" + "scripts/",
+              "bootstrap_" + "macos.sh",
+              "bootstrap_" + "windows.ps1",
+              "validate_" + "setup.py",
+              "05-readiness-" + "check.md",
+          ]
+          scan_suffixes = {".md", ".py", ".yml", ".yaml", ".ipynb"}
+          bad = []
+          for path in Path(".").rglob("*"):
+              if ".git" in path.parts or "outputs" in path.parts:
+                  continue
+              if path.is_file() and path.suffix in scan_suffixes:
+                  text = path.read_text(encoding="utf-8")
+                  for term in legacy_terms:
+                      if term in text:
+                          bad.append(f"{path}: stale reference to {term}")
+          if bad:
+              raise SystemExit("\n".join(bad))
+
+          for path in Path("labs").rglob("*.ipynb"):
+              nb = json.loads(path.read_text(encoding="utf-8"))
+              ids = [cell.get("id") for cell in nb.get("cells", [])]
+              if len(ids) != len(set(ids)):
+                  raise SystemExit(f"duplicate notebook cell id in {path}")
+              for idx, cell in enumerate(nb.get("cells", [])):
+                  if cell.get("cell_type") == "code":
+                      compile("".join(cell.get("source", [])), f"{path}:cell{idx}", "exec")
+              print(f"ok notebook code {path}")
           PY
