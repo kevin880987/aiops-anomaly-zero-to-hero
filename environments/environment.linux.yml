@@ -20,5 +20,3 @@ dependencies:
   - pytest>=8.0
   - pytest-cov>=5.0
   - prometheus_client>=0.20
-  - pip:
-      - anthropic>=0.40

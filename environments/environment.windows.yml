@@ -21,5 +21,3 @@ dependencies:
   - pytest-cov>=5.0
   - pywin32>=306
   - prometheus_client>=0.20
-  - pip:
-      - anthropic>=0.40

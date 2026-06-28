@@ -3,6 +3,12 @@
 官方文件：[grafana.com/docs/grafana/latest/setup-grafana/installation](https://grafana.com/docs/grafana/latest/setup-grafana/installation/)
 官方下載頁：[grafana.com/grafana/download](https://grafana.com/grafana/download/)
 
+參考閱讀：
+
+- [普羅米修斯 Prometheus 監控](https://hackmd.io/@cheese-owner/BkF8Kmlc5)
+
+請把 Grafana 理解成視覺化與 dashboard 工具。它不直接取代 Prometheus，也不直接抓 node_exporter 或 course exporter。正確資料流是：exporter 暴露 `/metrics`，Prometheus scrape 並儲存時間序列，Grafana 連到 Prometheus 查詢與畫圖。
+
 Grafana 安裝後會在本機建立服務、資料庫與登入設定。本課程的 Python 環境設定只處理 notebook 需要的套件，不會自動安裝 Grafana。
 
 **前置條件：** Prometheus 已安裝並正在運作（[02-install-prometheus.md](02-install-prometheus.md)）。

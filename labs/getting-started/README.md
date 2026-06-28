@@ -182,6 +182,8 @@ Workshop 若要查自己的電腦網路指標，需要安裝 `node_exporter` 或
 
 連結：[04-install-node-exporter.md](04-install-node-exporter.md)
 
+macOS / Linux 請使用 Prometheus 官方 GitHub release 的 `node_exporter` binary；Windows 請使用 `windows_exporter`。
+
 Self-study 不需要先做這一步。
 
 ---

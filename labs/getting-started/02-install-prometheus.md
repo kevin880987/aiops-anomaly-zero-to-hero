@@ -3,6 +3,13 @@
 官方文件：[prometheus.io/docs/prometheus/latest/installation](https://prometheus.io/docs/prometheus/latest/installation/)
 官方下載頁：[prometheus.io/download](https://prometheus.io/download/)
 
+參考閱讀：
+
+- [普羅米修斯 Prometheus 監控](https://hackmd.io/@cheese-owner/BkF8Kmlc5)
+- [DevOps 課程 Prometheus 1](https://wade-software-study-note.medium.com/devops%E8%AA%B2%E7%A8%8B-prometheus-1-7a690f7d4426)
+
+這兩篇文章的重點是 Prometheus 的 pull model、target、metric、exporter 與 Grafana data source。本課程沿用這個學習順序，但不照抄舊版 binary 與 Raspberry Pi 路徑。請以本頁指令、repository 內的 `infra/prometheus/*.yml`，以及官方下載頁為準。
+
 Prometheus 是系統級監控服務，安裝方式依作業系統與權限設定而異。本課程的 Python 環境設定只處理 notebook 需要的套件，不會自動安裝 Prometheus。
 
 本課程還需要一個 course exporter。Prometheus 不會直接讀取 CSV 或 notebook 輸出，它只會定期抓取 HTTP `/metrics` 端點。`infra/rrd_exporter.py` 會把 `data/synthetic/synthetic_rrd_metrics.csv` 轉成 Prometheus 格式，並在 `http://localhost:8000/metrics` 提供給 Prometheus scrape。也就是說，Prometheus 是監控資料庫，course exporter 是課程資料進入 Prometheus 的資料來源。
@@ -15,7 +22,7 @@ infra/prometheus/prometheus.linux.yml    Linux   — rrd-exporter :8000 + node_e
 infra/prometheus/prometheus.windows.yml  Windows — rrd-exporter :8000 + windows_exporter :9182
 ```
 
-兩個 scrape target 同時設定，Prometheus 對 DOWN 的 target 靜默容忍：
+設定檔會同時放入 Prometheus self target、課程 rrd-exporter target，以及對應作業系統的 OS exporter target。Prometheus 對 DOWN 的 target 會顯示為 `0`，但不會阻止其他 target 正常收集：
 
 ```text
 localhost:9090  Prometheus self

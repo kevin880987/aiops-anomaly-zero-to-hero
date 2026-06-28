@@ -2,7 +2,7 @@
 # macOS:   use prometheus.macos.yml (identical scrape targets).
 # Windows: use prometheus.windows.yml (windows_exporter on :9182).
 #
-# Both scrape targets run simultaneously; Prometheus tolerates DOWN targets silently.
+# Scrape jobs run simultaneously; Prometheus tolerates DOWN targets silently.
 #   rrd-exporter  :8000 — self-study path: synthetic RRD data via infra/rrd_exporter.py
 #   node-exporter :9100 — workshop path:   real PC network interface metrics
 #
