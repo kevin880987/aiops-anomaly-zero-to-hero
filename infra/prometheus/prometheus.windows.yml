@@ -35,3 +35,8 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: ["localhost:9182"]
+
+  - job_name: "python-results-exporter"  # optional: infra/python_results_exporter.py
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["localhost:8010"]

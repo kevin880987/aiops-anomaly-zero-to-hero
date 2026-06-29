@@ -77,7 +77,9 @@ infra/grafana/dashboards/network_metrics.json
 4. 如果 Grafana 要求選擇 Prometheus data source，選剛剛建立的 Prometheus。
 5. 點擊 **Import**。
 
-匯入後若 panel 沒有資料，先確認 Prometheus 的 `up{job="rrd-exporter"}` 是 `1`，並確認 `python infra/rrd_exporter.py` 的終端機仍在執行。
+匯入後若 base metrics panel 沒有資料，先確認 Prometheus 的 `up{job="rrd-exporter"}` 是 `1`，並確認 `python infra/rrd_exporter.py` 的終端機仍在執行。
+
+Dashboard 也包含 `Prometheus Drop Zone Results` 區塊。這個區塊使用 `aiops_python_result`，資料來源是 `infra/python_results_exporter.py` 讀取的 `outputs/prometheus-dropzone/current_results.csv`。剛開始沒有資料是正常的；等後續 notebook 產生 CSV 後，依 [`05-prometheus-dropzone.md`](05-prometheus-dropzone.md) 複製到 Prometheus drop zone 即可。
 
 ## 常見問題
 

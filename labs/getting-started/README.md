@@ -174,6 +174,14 @@ Workshop 開始條件：
 labs/workshop/00_observability_stack_and_promql.ipynb
 ```
 
+如果你想把 notebook 產生的數值結果放到 Grafana，請走 Prometheus drop zone：
+
+```text
+labs/getting-started/05-prometheus-dropzone.md
+```
+
+Cadets 只需要把 notebook 產生的 CSV 複製到 `outputs/prometheus-dropzone/current_results.csv`。`infra/python_results_exporter.py` 會把檔案轉成 Prometheus metrics，Grafana dashboard 再從 Prometheus 顯示結果。
+
 ---
 
 ## Workshop 延伸：即時 OS metrics

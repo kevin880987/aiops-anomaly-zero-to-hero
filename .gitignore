@@ -26,4 +26,6 @@ outputs/workshop/*
 !outputs/workshop/.gitkeep
 outputs/self-study/*
 !outputs/self-study/.gitkeep
+outputs/prometheus-dropzone/*
+!outputs/prometheus-dropzone/.gitkeep
 outputs/setup/*

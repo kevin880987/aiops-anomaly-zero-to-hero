@@ -22,11 +22,12 @@ infra/prometheus/prometheus.linux.yml    Linux   — rrd-exporter :8000 + node_e
 infra/prometheus/prometheus.windows.yml  Windows — rrd-exporter :8000 + windows_exporter :9182
 ```
 
-設定檔會同時放入 Prometheus self target、課程 rrd-exporter target，以及對應作業系統的 OS exporter target。Prometheus 對 DOWN 的 target 會顯示為 `0`，但不會阻止其他 target 正常收集：
+設定檔會同時放入 Prometheus self target、課程 rrd-exporter target、Python results exporter target，以及對應作業系統的 OS exporter target。Prometheus 對 DOWN 的 target 會顯示為 `0`，但不會阻止其他 target 正常收集：
 
 ```text
 localhost:9090  Prometheus self
 localhost:8000  rrd-exporter  ← self-study 路線：infra/rrd_exporter.py 提供合成 RRD 資料
+localhost:8010  python-results-exporter ← 後續 lab：outputs/prometheus-dropzone/current_results.csv drop zone
 localhost:9100  node-exporter ← workshop 路線：真實 PC 網路指標（macOS / Linux）
 localhost:9182  windows-exporter ← workshop 路線：真實 PC 網路指標（Windows）
 ```
@@ -55,6 +56,32 @@ Windows PowerShell 可用：
 ```powershell
 Invoke-WebRequest http://localhost:8000/metrics
 ```
+
+## 選用：先啟動 Python results exporter
+
+後續 labs 會產生 anomaly score、forecast、SPC result 等 CSV。若你想把這些 Python 結果也放到 Grafana，另開一個終端機執行：
+
+macOS / Linux：
+
+```bash
+conda activate aiops-anomaly-zero-to-hero
+python infra/python_results_exporter.py
+```
+
+Windows PowerShell：
+
+```powershell
+conda activate aiops-anomaly-zero-to-hero
+python infra\python_results_exporter.py
+```
+
+這個 exporter 會讀：
+
+```text
+outputs/prometheus-dropzone/current_results.csv
+```
+
+之後 cadets 只要把 lab 產生的 CSV 複製到這個檔名，Prometheus 會 scrape，Grafana 會更新。完整流程見 [05-prometheus-dropzone.md](05-prometheus-dropzone.md)。
 
 ## macOS（Homebrew）
 
@@ -117,6 +144,7 @@ prometheus --config.file=infra/prometheus/prometheus.linux.yml --web.enable-life
 ```promql
 up{job="prometheus"}
 up{job="rrd-exporter"}
+up{job="python-results-exporter"}
 ```
 
 若你已完成 node_exporter 或 windows_exporter 安裝，也查詢對應項目：
@@ -129,7 +157,7 @@ up{job="node-exporter"}
 up{job="windows-exporter"}
 ```
 
-Prometheus、rrd-exporter 與你的 OS exporter 都回傳 `1` 表示設定正確。若 OS exporter 尚未安裝，這個目標會暫時是 `0` 或不存在，完成 [04-install-node-exporter.md](04-install-node-exporter.md) 後再確認即可。
+Prometheus、rrd-exporter 與你的 OS exporter 都回傳 `1` 表示設定正確。`python-results-exporter` 是給後續 lab 結果用的選用 target；如果你還沒有啟動 `python infra/python_results_exporter.py`，它會是 `0`。若 OS exporter 尚未安裝，這個目標也會暫時是 `0` 或不存在，完成 [04-install-node-exporter.md](04-install-node-exporter.md) 後再確認即可。
 
 ## 常見問題
 

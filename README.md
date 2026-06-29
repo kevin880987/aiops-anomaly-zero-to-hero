@@ -52,6 +52,8 @@ getting-started
   -> deployment checks
 ```
 
+Notebook 仍是主要學習介面，因為它能展示資料處理、feature engineering 與演算法判斷。每個結果產生後，cadets 可以選擇直接在 notebook 看圖，或把 CSV 複製到 `outputs/prometheus-dropzone/current_results.csv`，讓 Prometheus scrape 後在 Grafana dashboard 顯示。完整流程見 [`labs/getting-started/05-prometheus-dropzone.md`](labs/getting-started/05-prometheus-dropzone.md)。
+
 ### 路線 A：工作坊短版
 
 位置：`labs/workshop/`
