@@ -1,23 +1,51 @@
-# Python
+# OS and filesystem noise
+.DS_Store
+**/.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+Thumbs.db
+Desktop.ini
+
+# Python caches and build artifacts
 __pycache__/
+**/__pycache__/
 *.py[cod]
+*$py.class
 *.egg-info/
+.eggs/
+build/
+dist/
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
 .coverage
+.coverage.*
+htmlcov/
+
+# Local Python and Conda environments
 .venv/
 venv/
-
-# Local configuration
-.env
-
-# OS
-.DS_Store
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Conda local env (if created in-project)
+env/
 .conda/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Jupyter runtime files
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Editor and runtime scratch
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
 
 # Notebook runtime outputs — written to outputs/ during lab runs, not source data.
 # Source datasets live in data/synthetic/ and data/sample/ (both committed).
