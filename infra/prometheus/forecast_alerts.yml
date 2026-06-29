@@ -1,0 +1,72 @@
+# Forecast risk rules — Notebook 06 (ADDITIVE).
+#
+# Loaded ON TOP OF the existing alerts.yml; it does not modify it.
+# To enable, add one line to prometheus.yml `rule_files:` (the original stays):
+#
+#     rule_files:
+#       - "alerts.yml"
+#       - "forecast_alerts.yml"     # <- new, additive
+#
+# Builds on recording rules already defined in alerts.yml
+# (network:traffic_total, network:traffic_mean_1h, network:traffic_stddev_1h).
+#
+# Two-track design (mirrors Lab 08):
+#   predict_linear()  -> in-database forecaster  (capacity / time-to-threshold)
+#   residual z-score  -> reactive SPC, mirrors Notebook 06's forecast-residual model
+
+groups:
+
+  # ── Recording rules: forecast risk signals (Notebook 06) ────────────────────
+  - name: network_forecast
+    interval: 5s
+    rules:
+
+      # Linear forecast 30 minutes ahead (Prometheus-native predict_linear).
+      - record: network:traffic_predict_30m
+        expr: predict_linear(network:traffic_total[1h], 1800)
+
+      # Port-relative capacity proxy: 7-day high-water mark + 10% headroom.
+      # (In production, replace with the real engineered capacity / SLO limit.)
+      - record: network:traffic_capacity_proxy
+        expr: max_over_time(network:traffic_total[7d]) * 1.1
+
+      # Forecast residual z-score: actual vs the 1h seasonal expectation.
+      # |z| > 3 means the model's expectation was broken (reactive SPC).
+      - record: network:traffic_resid_z
+        expr: >
+          (network:traffic_total - network:traffic_mean_1h)
+          / clamp_min(network:traffic_stddev_1h, 1)
+
+  # ── Alert rules: predictive (future risk) + reactive (broken expectation) ────
+  - name: network_forecast_alerts
+    interval: 5s
+    rules:
+
+      # Predictive: the 30-min forecast is heading toward capacity. Fires BEFORE
+      # the hard limit, giving on-call lead time to act.
+      - alert: PredictiveCapacityWarning
+        expr: network:traffic_predict_30m > 0.8 * network:traffic_capacity_proxy
+        for: 10m
+        labels:
+          severity: warning
+          alert_kind: predictive
+        annotations:
+          summary: "Predicted traffic on {{ $labels.port_id }} approaches capacity within 30m"
+          description: >
+            predict_linear forecast for {{ $labels.port_id }} ({{ $labels.device_id }})
+            exceeds 80% of the capacity proxy. Use the lead time to check scheduled
+            backup jobs, capacity, or upstream routing before the hard limit is reached.
+
+      # Reactive: actual value broke the forecast expectation (residual SPC).
+      # Distinct severity/kind from the predictive alert by design.
+      - alert: ForecastResidualAnomaly
+        expr: abs(network:traffic_resid_z) > 3
+        for: 1m
+        labels:
+          severity: warning
+          alert_kind: reactive
+        annotations:
+          summary: "Traffic deviates from forecast on {{ $labels.port_id }}"
+          description: >
+            Forecast residual z = {{ $value | printf "%.1f" }} sigma vs the 1-hour
+            seasonal baseline. The model expected a different value; investigate.
