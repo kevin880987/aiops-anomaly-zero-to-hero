@@ -1,0 +1,20 @@
+# Week 6 (預警與根因分析) — ADDITIVE add-on for labs/workshop/06_forecasting + 07_root_cause_analysis.
+#
+# These two labs need a few extra packages on top of the base course environment.
+# This file does NOT replace environment.yml; layer it on after creating the base env:
+#
+#     conda env create -f environment.yml            # base course env (unchanged)
+#     conda env update -f environments/environment.week6.yml   # add Week-6 packages
+#
+# scipy / scikit-learn are already in the base env; only the four below are new.
+name: aiops-anomaly-zero-to-hero
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - prophet>=1.1          # Lab 06 — forecasting model (trend + seasonality + event regressor h(t))
+  - networkx>=3.0         # Lab 07 — topology / dependency graph (downstream reach in ranking)
+  - shap>=0.44            # Lab 07 — explainable model (feature contribution; importance != root cause)
+  - pip
+  - pip:
+      - anthropic>=0.40   # OPTIONAL — only needed to wire a real LLM in Lab 07 (offline diagnoser is the default)
