@@ -3,7 +3,7 @@
 # Linux:  use prometheus.linux.yml (node_exporter on :9100).
 #
 # Scrape jobs run simultaneously; Prometheus tolerates DOWN targets silently.
-#   rrd-exporter     :8000 — self-study path: synthetic RRD data via infra/rrd_exporter.py
+#   rrd-exporter     :8000 — self-study path: organized network telemetry CSV via infra/rrd_exporter.py
 #   windows-exporter :9182 — workshop path:   real PC network interface metrics
 #
 # Grafana Cloud remote_write (optional): see labs/getting-started/03b-setup-grafana-cloud.md
@@ -26,7 +26,7 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:9090"]
 
-  - job_name: "rrd-exporter"       # self-study: infra/rrd_exporter.py
+  - job_name: "rrd-exporter"       # self-study: organized telemetry via infra/rrd_exporter.py
     scrape_interval: 5s
     static_configs:
       - targets: ["localhost:8000"]
@@ -36,7 +36,7 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:9182"]
 
-  - job_name: "python-results-exporter"  # optional: infra/python_results_exporter.py
+  - job_name: "python-results-exporter"  # optional: Python result CSV via infra/python_results_exporter.py
     scrape_interval: 5s
     static_configs:
       - targets: ["localhost:8010"]

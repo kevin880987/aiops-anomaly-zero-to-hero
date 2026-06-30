@@ -1,6 +1,6 @@
 # Prometheus drop zone
 
-這份文件只說明一件事：notebook 產生 CSV 後，如何用最少步驟讓 Grafana 看到結果。
+這份文件只說明一件事：Python notebook 產生結果 CSV 後，如何用最少步驟讓 Grafana 看到結果。
 
 Cadets 不需要改 Prometheus 設定，不需要寫 exporter，也不需要碰 Grafana JSON。課程已經把這些設定放好。
 
@@ -10,7 +10,7 @@ Cadets 不需要改 Prometheus 設定，不需要寫 exporter，也不需要碰 
 
 | 選擇 | 做法 | 適合情境 |
 | --- | --- | --- |
-| 直接在 notebook 看 | 執行 notebook 內的圖表與表格 | 學演算法、看中間結果、調參數 |
+| 直接在 notebook 看 | Python 讀取整理好的 telemetry CSV，執行 notebook 內的圖表與表格 | 學演算法、看中間結果、調參數 |
 | 放到 Grafana 看 | 把輸出 CSV 複製到 `outputs/prometheus-dropzone/current_results.csv` | 模擬值班 dashboard、看固定 panel、和 Prometheus/Grafana workflow 對齊 |
 
 課堂上可以先看 notebook。需要示範 operational dashboard 時，再走 drop zone。
@@ -18,7 +18,8 @@ Cadets 不需要改 Prometheus 設定，不需要寫 exporter，也不需要碰 
 ## 完整資料流
 
 ```text
-notebook writes a CSV
+Python notebook reads organized telemetry CSV
+  -> notebook writes a result CSV
   -> cadet copies CSV to outputs/prometheus-dropzone/current_results.csv
   -> infra/python_results_exporter.py reads the CSV
   -> exporter exposes http://localhost:8010/metrics
@@ -26,7 +27,7 @@ notebook writes a CSV
   -> Grafana dashboard shows aiops_python_result
 ```
 
-重點：檔案面向 Prometheus，不是面向 Grafana。Grafana 只查 Prometheus。
+重點：drop zone 檔案面向 Prometheus，不是面向 Grafana。Grafana 只查 Prometheus。Python 的 beginner path 主要讀 CSV；PromQL 是營運查詢語言，不是本課程演算法開發的主要輸入。
 
 ## 一次性 setup
 

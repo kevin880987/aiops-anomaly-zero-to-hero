@@ -86,7 +86,7 @@ jupyter lab labs\
 
 連結：[02-install-prometheus.md](02-install-prometheus.md)
 
-這一步會讓 Prometheus 抓到課程提供的 synthetic RRD-like metrics。course exporter 的作用是把 repository 裡的 CSV 時間序列資料轉成 Prometheus 可以 scrape 的 `/metrics` 端點；沒有它，Prometheus 會啟動，但查不到課程資料。`00-check-your-setup.ipynb` 會先啟動並檢查 course exporter；你仍需要依此文件安裝並啟動 Prometheus。完成後應能確認：
+這一步會讓 Prometheus 抓到兩類資料來源。第一類是真實 OS metrics，由 `node_exporter` 或 `windows_exporter` 提供。第二類是課程準備好的 network telemetry CSV，由 `infra/rrd_exporter.py` 轉成 Prometheus 可以 scrape 的 `/metrics` 端點。這份 CSV 在課堂中是 synthetic data，但它模擬的是真實網路訊號被整理成表格後的形態。`00-check-your-setup.ipynb` 會先啟動並檢查 course exporter；你仍需要依此文件安裝並啟動 Prometheus。完成後應能確認：
 
 ```text
 http://localhost:8000/metrics
@@ -180,7 +180,7 @@ labs/workshop/00_observability_stack_and_promql.ipynb
 labs/getting-started/05-prometheus-dropzone.md
 ```
 
-Cadets 只需要把 notebook 產生的 CSV 複製到 `outputs/prometheus-dropzone/current_results.csv`。`infra/python_results_exporter.py` 會把檔案轉成 Prometheus metrics，Grafana dashboard 再從 Prometheus 顯示結果。
+Cadets 只需要把 notebook 產生的結果 CSV 複製到 `outputs/prometheus-dropzone/current_results.csv`。`infra/python_results_exporter.py` 會把檔案轉成 Prometheus metrics，Grafana dashboard 再從 Prometheus 顯示結果。這表示 Python 的主要輸入仍是整理好的 CSV；Prometheus/Grafana 負責展示與營運化，不是 beginner path 的演算法輸入來源。
 
 ---
 

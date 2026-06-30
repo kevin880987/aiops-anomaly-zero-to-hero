@@ -4,7 +4,7 @@
 
 ## Files
 
-- `simulator_rrd_metrics.ipynb`：依課程設計產生 30 天、5 分鐘解析度的 synthetic RRD-like network metrics。
+- `simulator_rrd_metrics.ipynb`：依課程設計產生 30 天、5 分鐘解析度的 synthetic organized network telemetry。
 - `synthetic_rrd_metrics.csv`：模擬後的主要時間序列資料。
 - `synthetic_event_catalog.csv`：模擬事件 A-J 的事件表。
 

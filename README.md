@@ -1,6 +1,6 @@
 # AIOps Anomaly Detection: Zero to Hero
 
-本課程幫助工程師建立可直接落地的 AIOps 實戰能力。透過本機 Prometheus、Grafana Local 與課程 exporter，學員完整走過特徵工程、異常偵測、告警降噪、預測與根因分析，並理解每個判斷在真實值班環境中的位置與限制。課程著重「可解釋、可驗證、可落地」的方法選擇，幫助工程師完成課程後即能在自己的監控系統中應用所學框架。
+本課程幫助工程師建立可直接落地的 AIOps 實戰能力。課程從真實營運監控的資料流開始：OS 或網路設備產生 telemetry，exporter 暴露 `/metrics`，Prometheus scrape 並儲存時間序列，Grafana 顯示 operational dashboard。Python notebooks 則讀取整理好的 network telemetry CSV，設計特徵工程、異常偵測、告警降噪、預測與 RCA，再把數值結果輸出回 Prometheus / Grafana workflow。課程著重「可解釋、可驗證、可落地」的方法選擇，幫助工程師完成課程後即能在自己的監控系統中應用所學框架。
 
 不需要雲端帳號。完成後可選擇延伸至 Grafana Cloud（選用）。
 
@@ -34,7 +34,7 @@
 4. 比較固定閾值、Z-score、SPC、Isolation Forest 與 forecasting 的適用情境。
 5. 把低階 anomaly flags 聚合成較少、較可處理的 alerts。
 6. 為 RCA 建立結構化 context，並區分證據、假說與可執行行動。
-7. 說明模型輸出如何回到 Prometheus / Grafana / alerting workflow。
+7. 說明 Python 分析結果如何回到 Prometheus / Grafana / alerting workflow。
 
 ---
 
@@ -52,7 +52,7 @@ getting-started
   -> deployment checks
 ```
 
-Notebook 仍是主要學習介面，因為它能展示資料處理、feature engineering 與演算法判斷。每個結果產生後，cadets 可以選擇直接在 notebook 看圖，或把 CSV 複製到 `outputs/prometheus-dropzone/current_results.csv`，讓 Prometheus scrape 後在 Grafana dashboard 顯示。完整流程見 [`labs/getting-started/05-prometheus-dropzone.md`](labs/getting-started/05-prometheus-dropzone.md)。
+Notebook 仍是主要學習介面，因為它能展示資料處理、feature engineering 與演算法判斷。在 beginner path 中，Python 主要讀取整理好的 CSV，不直接以 PromQL 作為演算法輸入。每個結果產生後，cadets 可以選擇直接在 notebook 看圖，或把結果 CSV 複製到 `outputs/prometheus-dropzone/current_results.csv`，讓 Prometheus scrape 後在 Grafana dashboard 顯示。完整流程見 [`labs/getting-started/05-prometheus-dropzone.md`](labs/getting-started/05-prometheus-dropzone.md)。
 
 ### 路線 A：工作坊短版
 
@@ -71,7 +71,7 @@ Notebook 仍是主要學習介面，因為它能展示資料處理、feature eng
 
 位置：`labs/self-study/`
 
-主要使用 repository 內建 synthetic data，輸出可重建，錯誤比較容易定位。
+主要使用 repository 內建 synthetic data。它不是另一條 production 架構，而是用可重建 CSV 模擬真實網路 telemetry 已被整理後的形態，讓 Python 演算法練習可以穩定重跑、容易定位錯誤。
 
 1. `data/synthetic/simulator_rrd_metrics.ipynb`
 2. `labs/self-study/00_observability_stack.ipynb`
@@ -89,17 +89,21 @@ Notebook 仍是主要學習介面，因為它能展示資料處理、feature eng
 ## 資料流
 
 ```text
-data/synthetic/synthetic_rrd_metrics.csv
-  -> outputs/self-study/features.csv
-  -> outputs/self-study/baseline_anomaly_flags.csv
-  -> outputs/self-study/spc_results.csv
-  -> outputs/self-study/ml_anomaly_scores.csv
-  -> outputs/self-study/raw_alerts.csv
-  -> outputs/self-study/reduced_alerts.csv
-  -> outputs/self-study/forecast_results.csv
+actual OS / network telemetry
+  -> exporter exposes /metrics
+  -> Prometheus stores time-series metrics
+  -> Grafana shows the operational dashboard
+
+organized network telemetry CSV
+  -> Python notebooks consume CSV
+  -> outputs/self-study/*.csv or outputs/workshop/*.csv
+  -> optional copy to outputs/prometheus-dropzone/current_results.csv
+  -> python_results_exporter exposes Python results as /metrics
+  -> Prometheus scrapes aiops_python_result
+  -> Grafana shows Python anomaly / forecast / RCA signals
 ```
 
-每個 self-study notebook 會讀取前一步輸出，並把新的中間結果寫回 `outputs/self-study/`（gitignored）。中途失敗時，從失敗 notebook 的前一個 lab 重跑，不要直接跳到後面的 lab。
+本課程的 synthetic CSV 對應的是「organized network telemetry CSV」這一層。它模擬真實營運資料被整理成欄位清楚、時間戳一致、可供 Python 分析的格式。每個 self-study notebook 會讀取前一步輸出，並把新的中間結果寫回 `outputs/self-study/`（gitignored）。中途失敗時，從失敗 notebook 的前一個 lab 重跑，不要直接跳到後面的 lab。
 
 ---
 
@@ -115,7 +119,7 @@ data/synthetic/synthetic_rrd_metrics.csv
 | Lab 05 Alert reduction | 如何把大量 flags 變成可處理事件？ | grouping window、problem taxonomy、suppression rule | Alertmanager、event correlation service |
 | Lab 06 Forecasting | 能否在 SLA 受影響前提早預警？ | horizon、prediction interval、季節性假設 | forecasting service、capacity planning dashboard |
 | Lab 07 RCA | 如何把事件轉成可驗證的根因假說？ | context window、evidence schema、LLM output contract | RCA webhook、ticket enrichment |
-| Lab 08 Deployment | 探索邏輯如何進入 24/7 監控？ | 哪些放在 Prometheus，哪些放在 Python service，哪裡保留 human gate | production monitoring pipeline |
+| Lab 08 Deployment | 探索邏輯如何進入 24/7 監控？ | 哪些放在 Prometheus rules，哪些放在 Python service，哪些先用 CSV 驗證，哪裡保留 human gate | production monitoring pipeline |
 
 這張表是全課的設計骨架。notebook 中的每個參數，都可以回到這張表找它在系統中的位置。
 
@@ -166,15 +170,17 @@ promtool check config infra/prometheus/prometheus.windows.yml
 │   ├── workshop/                # 工作坊短版 notebooks
 │   └── self-study/              # 完整自學版 notebooks
 ├── data/
-│   ├── synthetic/               # 可由 simulator 重建的 RRD-like metrics
+│   ├── synthetic/               # 可重建的 organized network telemetry CSV
 │   └── sample/                  # 原始 LibreNMS/RRDTool sample data（選讀）
 ├── outputs/                     # Labs 產出（gitignored）
 │   ├── workshop/
-│   └── self-study/
+│   ├── self-study/
+│   └── prometheus-dropzone/      # current_results.csv feeds python_results_exporter
 └── infra/
     ├── prometheus/              # Prometheus 設定（macOS / Linux / Windows）
     ├── grafana/                 # Dashboard JSON 與 datasource 設定
-    └── rrd_exporter.py          # CSV-to-Prometheus metrics exporter (self-study)
+    ├── rrd_exporter.py          # organized telemetry CSV to Prometheus metrics
+    └── python_results_exporter.py # Python result CSV to Prometheus metrics
 ```
 
 ---

@@ -12,7 +12,7 @@
 
 Prometheus 是系統級監控服務，安裝方式依作業系統與權限設定而異。本課程的 Python 環境設定只處理 notebook 需要的套件，不會自動安裝 Prometheus。
 
-本課程還需要一個 course exporter。Prometheus 不會直接讀取 CSV 或 notebook 輸出，它只會定期抓取 HTTP `/metrics` 端點。`infra/rrd_exporter.py` 會把 `data/synthetic/synthetic_rrd_metrics.csv` 轉成 Prometheus 格式，並在 `http://localhost:8000/metrics` 提供給 Prometheus scrape。也就是說，Prometheus 是監控資料庫，course exporter 是課程資料進入 Prometheus 的資料來源。
+本課程還需要一個 course exporter。Prometheus 不會直接讀取 CSV 或 notebook 輸出，它只會定期抓取 HTTP `/metrics` 端點。`infra/rrd_exporter.py` 會把 `data/synthetic/synthetic_rrd_metrics.csv` 轉成 Prometheus 格式，並在 `http://localhost:8000/metrics` 提供給 Prometheus scrape。這份 CSV 代表「整理好的 network telemetry」。在真實環境中，它可能來自 SNMP、RRDTool、設備匯出或資料管線；在本課程中，它用 synthetic data 模擬，讓每位 cadet 都能重現同一組訊號。也就是說，Prometheus 是監控資料庫，course exporter 是課程 telemetry 進入 Prometheus 的資料來源。
 
 本課程提供三份 Prometheus 設定檔，每份說明自己適用的平台：
 
@@ -26,7 +26,7 @@ infra/prometheus/prometheus.windows.yml  Windows — rrd-exporter :8000 + window
 
 ```text
 localhost:9090  Prometheus self
-localhost:8000  rrd-exporter  ← self-study 路線：infra/rrd_exporter.py 提供合成 RRD 資料
+localhost:8000  rrd-exporter  ← self-study 路線：整理好的 network telemetry CSV
 localhost:8010  python-results-exporter ← 後續 lab：outputs/prometheus-dropzone/current_results.csv drop zone
 localhost:9100  node-exporter ← workshop 路線：真實 PC 網路指標（macOS / Linux）
 localhost:9182  windows-exporter ← workshop 路線：真實 PC 網路指標（Windows）
@@ -59,7 +59,7 @@ Invoke-WebRequest http://localhost:8000/metrics
 
 ## 選用：先啟動 Python results exporter
 
-後續 labs 會產生 anomaly score、forecast、SPC result 等 CSV。若你想把這些 Python 結果也放到 Grafana，另開一個終端機執行：
+後續 labs 會用 Python 讀取整理好的 CSV，產生 anomaly score、forecast、SPC result 等結果 CSV。若你想把這些 Python 結果也放到 Grafana，另開一個終端機執行：
 
 macOS / Linux：
 
