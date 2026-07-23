@@ -52,19 +52,23 @@ getting-started
   -> deployment checks
 ```
 
-Notebook 仍是主要學習介面，因為它能展示資料處理、feature engineering 與演算法判斷。在 beginner path 中，Python 主要讀取整理好的 CSV，不直接以 PromQL 作為演算法輸入。每個結果產生後，cadets 可以選擇直接在 notebook 看圖，或把結果 CSV 複製到 `outputs/prometheus-dropzone/current_results.csv`，讓 Prometheus scrape 後在 Grafana dashboard 顯示。完整流程見 [`labs/getting-started/05-prometheus-dropzone.md`](labs/getting-started/05-prometheus-dropzone.md)。
+Python 主要讀取整理好的 CSV，不直接以 PromQL 作為演算法輸入。結果產生後寫進
+`outputs/prometheus-dropzone/current_results.csv`，Prometheus scrape 之後在 Grafana dashboard 顯示。
+工作坊路線用 `wk.publish()` 完成這一步並附上 manifest；自學路線仍可手動複製 CSV。完整流程見
+[`labs/getting-started/05-prometheus-dropzone.md`](labs/getting-started/05-prometheus-dropzone.md)。
 
 ### 路線 A：工作坊短版
 
-位置：`labs/workshop/`
+位置：`labs/workshop/`，入口是 [`labs/workshop/README.md`](labs/workshop/README.md)。
 
-使用 Prometheus 查詢即時本機指標，讓工程師先看到自己的機器產生 metrics，再進入特徵工程、異常偵測與 RCA capstone。
+這條路線是 GUI-first 的。Notebook 負責計算與發佈，時間序列圖一律在 Grafana 上看，notebook 不畫圖。
+Grafana 端由 `python infra/setup_grafana.py` 一行建好 datasource、dashboard、alert rule 與 mute timing。
 
 | Lab | 主題 | 建議時間 |
 | --- | --- | --- |
-| `00_observability_stack_and_promql.ipynb` | Prometheus、node_exporter、PromQL | 45–60 分鐘 |
-| `01_network_traffic_feature_engineering.ipynb` | EDA、rate、rolling、lag、多解析度 features | 60–75 分鐘 |
-| `02_anomaly_detection_and_alerting.ipynb` | 固定閾值、Z-score、deadband、change point | 60–75 分鐘 |
+| `00_observability_stack_and_promql.ipynb` | 四跳路徑與 PromQL。把一個數字送上 Grafana，故意弄壞它，再從 dashboard 讀出斷在哪一跳 | 45–60 分鐘 |
+| `01_network_traffic_feature_engineering.ipynb` | 單位契約、資料剖面、四種 baseline（rolling mean、median 與 MAD、seasonal、peer group）與 shape features | 60–75 分鐘 |
+| `02_anomaly_detection_and_alerting.ipynb` | score 收成 label、label 通過 policy 成為 alert，以 event recall、detection delay 與 alerts per day 評估 | 60–75 分鐘 |
 | `08_agentic_ai_rca_capstone.ipynb` | RCA context、agentic loop、human approval gate | 45–60 分鐘 |
 
 ### 路線 B：完整自學版
@@ -176,12 +180,23 @@ promtool check config infra/prometheus/prometheus.windows.yml
 │   ├── workshop/
 │   ├── self-study/
 │   └── prometheus-dropzone/      # current_results.csv feeds python_results_exporter
-└── infra/
-    ├── prometheus/              # Prometheus 設定（macOS / Linux / Windows）
-    ├── grafana/                 # Dashboard JSON 與 datasource 設定
-    ├── rrd_exporter.py          # organized telemetry CSV to Prometheus metrics
-    └── python_results_exporter.py # Python result CSV to Prometheus metrics
+├── diagram/                     # 圖表唯一來源（.drawio），labs 下的 .svg 由 build 產生
+├── infra/
+│   ├── prometheus/              # Prometheus 設定（macOS / Linux / Windows）
+│   ├── grafana/                 # Dashboard JSON 與 datasource 設定
+│   ├── aiopskit/                # 工作坊共用函式庫：載入、baseline、偵測、評估、Grafana 串接
+│   ├── aiops_contract.py        # exporter 與 dashboard 共用的 metric 名稱，單一來源
+│   ├── setup_grafana.py         # 一行建立 folder、dashboard、alert rule 與 mute timing
+│   ├── build_diagrams.py        # diagram/*.drawio -> labs/*/diagrams/*.svg
+│   ├── svg_flatten.py           # build 的第二段，把 draw.io 的雙份標籤攤平成原生 text
+│   ├── rrd_exporter.py          # organized telemetry CSV to Prometheus metrics
+│   └── python_results_exporter.py # Python result CSV to Prometheus metrics
+└── tests/                       # aiopskit 迴歸測試
 ```
+
+圖表改動走 `diagram/*.drawio`，改完跑 `python infra/build_diagrams.py`。
+`labs/*/diagrams/*.svg` 是產生物，手改會在下一次 build 被蓋掉，細節見
+[`diagram/README.md`](diagram/README.md)。
 
 ---
 

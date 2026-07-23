@@ -34,6 +34,20 @@ localhost:9182  windows-exporter ← workshop 路線：真實 PC 網路指標（
 
 先完成 [01a](01a-setup-macos-python-environment.md)、[01b](01b-setup-linux-python-environment.md) 或 [01c](01c-setup-windows-python-environment.md)，確認 conda 環境已建立。
 
+## 啟動方式的陷阱：一定要指定本課程的設定檔
+
+這一節請先讀完再往下做。用套件管理器的 service 方式啟動 Prometheus，例如 `brew services start prometheus` 或 `systemctl start prometheus`，載入的是該套件自己的預設設定檔（macOS 上是 `/opt/homebrew/etc/prometheus.yml`）。那份檔案裡沒有本課程的 `python-results-exporter` job，也沒有 `rrd-exporter` 與 OS exporter。
+
+這個錯誤特別難自己發現，因為它不會報錯。Prometheus 是活的，exporter 是活的，Grafana 是活的，查 `up{job="prometheus"}` 回傳 `1`，每一項單獨看都正常，但沒有任何人去抓 `localhost:8010`，Grafana dashboard 於是永遠空白。判斷依據是 job 存不存在，不是 job 是不是 `1`。
+
+正確的啟動方式一律是明確指定 repository 內的設定檔：
+
+```bash
+prometheus --config.file=infra/prometheus/prometheus.macos.yml
+```
+
+Linux 換成 `prometheus.linux.yml`，Windows 換成 `prometheus.windows.yml`。後續 lab 的 `wk.check_stack()` 會偵測這個狀況並直接印出上面這行指令。
+
 ## 先啟動課程 exporter
 
 開啟第一個終端機，回到 repository 根目錄後執行：
@@ -94,6 +108,8 @@ brew install prometheus
 ```bash
 prometheus --config.file=infra/prometheus/prometheus.macos.yml --web.enable-lifecycle
 ```
+
+不要用 `brew services start prometheus`。它會載入 Homebrew 的預設設定檔，症狀與解法見本頁前面的〈啟動方式的陷阱〉。已經用 service 方式起過的話，先 `brew services stop prometheus`，再執行上面那行。
 
 如果終端機顯示 `prometheus: command not found`，先確認 Homebrew 的 `bin` 目錄已加入 `PATH`：
 
@@ -157,9 +173,12 @@ up{job="node-exporter"}
 up{job="windows-exporter"}
 ```
 
-Prometheus、rrd-exporter 與你的 OS exporter 都回傳 `1` 表示設定正確。`python-results-exporter` 是給後續 lab 結果用的選用 target；如果你還沒有啟動 `python infra/python_results_exporter.py`，它會是 `0`。若 OS exporter 尚未安裝，這個目標也會暫時是 `0` 或不存在，完成 [04-install-node-exporter.md](04-install-node-exporter.md) 後再確認即可。
+Prometheus、rrd-exporter 與你的 OS exporter 都回傳 `1` 表示設定正確。`python-results-exporter` 是給後續 lab 結果用的 target；如果你還沒有啟動 `python infra/python_results_exporter.py`，它會是 `0`。請分辨兩種不同的結果：值是 `0` 代表 job 有被設定、只是 exporter 沒開；查詢結果裡完全沒有 `job="python-results-exporter"` 這一筆，代表 Prometheus 載入了錯的設定檔，回頭看〈啟動方式的陷阱〉。若 OS exporter 尚未安裝，這個目標也會暫時是 `0` 或不存在，完成 [04-install-node-exporter.md](04-install-node-exporter.md) 後再確認即可。
 
 ## 常見問題
+
+**每個服務都活著，但 Grafana dashboard 一直是空的？**
+在 Prometheus 查 `up`，看回傳結果裡有沒有 `job="python-results-exporter"` 這一筆。找不到就是 Prometheus 載入了套件預設設定檔而不是本 repository 的設定檔。停掉舊 process，改用 `prometheus --config.file=infra/prometheus/prometheus.macos.yml` 重新啟動，細節見本頁〈啟動方式的陷阱〉。
 
 **瀏覽器無法開啟 `localhost:9090`？**
 確認 Prometheus 指令視窗仍在執行中。若看到 `address already in use`，表示 9090 連接埠已被占用，請先關閉舊的 Prometheus 程序。
