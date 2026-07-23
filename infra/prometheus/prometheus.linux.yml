@@ -1,12 +1,12 @@
-# Linux — use this file when starting Prometheus on Linux.
-# macOS:   use prometheus.macos.yml (identical scrape targets).
-# Windows: use prometheus.windows.yml (windows_exporter on :9182).
+# Linux. macOS uses prometheus.macos.yml, Windows prometheus.windows.yml.
 #
-# Scrape jobs run simultaneously; Prometheus tolerates DOWN targets silently.
-#   rrd-exporter  :8000 — self-study path: organized network telemetry CSV via infra/rrd_exporter.py
-#   node-exporter :9100 — workshop path:   real PC network interface metrics
+# Two jobs run by default, both official binaries. The workshop track ships no
+# exporter of its own: lab results reach Grafana as CSV read by the Infinity
+# datasource, because a month of history cannot be pushed into a pull-based
+# store without a replay trick that teaches the wrong lesson.
 #
-# Grafana Cloud remote_write (optional): see labs/getting-started/03b-setup-grafana-cloud.md
+# The self-study track does expose its CSVs as metrics. Uncomment the last two
+# jobs when you work through labs/self-study, and start the matching exporter.
 
 global:
   scrape_interval: 5s
@@ -15,28 +15,21 @@ global:
 rule_files:
   - "alerts.yml"
 
-# remote_write:                                    # optional — Grafana Cloud only
-#   - url: https://<YOUR_ORG>.grafana.net/api/prom/push
-#     basic_auth:
-#       username: <YOUR_USER_ID>
-#       password: <YOUR_API_TOKEN>
-
 scrape_configs:
   - job_name: "prometheus"
     static_configs:
       - targets: ["localhost:9090"]
 
-  - job_name: "rrd-exporter"       # self-study: organized telemetry via infra/rrd_exporter.py
-    scrape_interval: 5s
-    static_configs:
-      - targets: ["localhost:8000"]
-
-  - job_name: "node-exporter"      # workshop: node_exporter binary
-    scrape_interval: 5s
+  - job_name: "node-exporter"
     static_configs:
       - targets: ["localhost:9100"]
 
-  - job_name: "python-results-exporter"  # optional: Python result CSV via infra/python_results_exporter.py
-    scrape_interval: 5s
-    static_configs:
-      - targets: ["localhost:8010"]
+  # Self-study only. python infra/rrd_exporter.py
+  # - job_name: "rrd-exporter"
+  #   static_configs:
+  #     - targets: ["localhost:8000"]
+
+  # Self-study only. python infra/python_results_exporter.py
+  # - job_name: "python-results-exporter"
+  #   static_configs:
+  #     - targets: ["localhost:8010"]

@@ -52,21 +52,31 @@ getting-started
   -> deployment checks
 ```
 
-Python 主要讀取整理好的 CSV，不直接以 PromQL 作為演算法輸入。結果產生後寫進
-`outputs/prometheus-dropzone/current_results.csv`，Prometheus scrape 之後在 Grafana dashboard 顯示。
-工作坊路線用 `wk.publish()` 完成這一步並附上 manifest；自學路線仍可手動複製 CSV。完整流程見
+Python 主要讀取整理好的 CSV，不直接以 PromQL 作為演算法輸入。結果送到 Grafana 的方式兩條路線不同。
+
+工作坊路線把結果寫成 `outputs/workshop/*.csv` 與 `*.png`，用 `python -m http.server` 開出資料夾，
+Grafana 端以 Infinity datasource 讀檔案。這條路徑沒有 exporter，寫檔用的就是 `to_csv()` 與 `savefig()`。
+
+自學路線把結果複製到 `outputs/prometheus-dropzone/current_results.csv`，由 `python_results_exporter`
+曝露成 metrics，Prometheus scrape 之後在 Grafana 顯示。它示範的是 pull 模型的完整形狀，流程見
 [`labs/getting-started/05-prometheus-dropzone.md`](labs/getting-started/05-prometheus-dropzone.md)。
 
 ### 路線 A：工作坊短版
 
 位置：`labs/workshop/`，入口是 [`labs/workshop/README.md`](labs/workshop/README.md)。
 
-這條路線是 GUI-first 的。Notebook 負責計算與發佈，時間序列圖一律在 Grafana 上看，notebook 不畫圖。
-Grafana 端由 `python infra/setup_grafana.py` 一行建好 datasource、dashboard、alert rule 與 mute timing。
+這條路線是 GUI-first 的：換 port、拖時間軸、改 alert rule 都在 Grafana 上做。
+Notebook 這一端用 matplotlib 把每一段的結果畫出來，和 self-study 那十份 notebook 同一套寫法。
+兩邊各自獨立，讀的是同一批數字，所以兩張圖對不起來就代表中間那條資料路徑斷了。
+
+Grafana 端全部走官方功能，這門課沒有為它寫過腳本。Datasource 用內建的檔案 provisioning
+（`infra/grafana/provisioning/datasources.yaml`），dashboard 用 UI 的 Import 匯入
+`infra/grafana/dashboards/aiops-workshop.json`，告警規則寫在 `infra/prometheus/alerts.yml`，
+打在 `node_exporter` 的即時指標上，隨時可以用一次下載讓它響。
 
 | Lab | 主題 | 建議時間 |
 | --- | --- | --- |
-| `00_observability_stack_and_promql.ipynb` | 四跳路徑與 PromQL。把一個數字送上 Grafana，故意弄壞它，再從 dashboard 讀出斷在哪一跳 | 45–60 分鐘 |
+| `00_observability_stack_and_promql.ipynb` | 兩條資料路徑與 PromQL。node_exporter 走 Prometheus，分析結果走檔案，故意弄壞再從 dashboard 讀出斷在哪一段 | 45–60 分鐘 |
 | `01_network_traffic_feature_engineering.ipynb` | 單位契約、資料剖面、四種 baseline（rolling mean、median 與 MAD、seasonal、peer group）與 shape features | 60–75 分鐘 |
 | `02_anomaly_detection_and_alerting.ipynb` | score 收成 label、label 通過 policy 成為 alert，以 event recall、detection delay 與 alerts per day 評估 | 60–75 分鐘 |
 | `08_agentic_ai_rca_capstone.ipynb` | RCA context、agentic loop、human approval gate | 45–60 分鐘 |
@@ -115,7 +125,7 @@ organized network telemetry CSV
 
 | 階段 | 實務問題 | 主要設計決策 | 生產環境位置 |
 | --- | --- | --- | --- |
-| Lab 00 Observability | 指標是否真的被收集，且可查詢？ | scrape interval、label 設計、資料來源健康檢查 | Prometheus scrape config、Grafana Local / Grafana Cloud dashboard |
+| Lab 00 Observability | 指標是否真的被收集，且可查詢？ | scrape interval、label 設計、counter 與 rate、資料來源健康檢查 | Prometheus scrape config、Grafana Local / Grafana Cloud dashboard |
 | Lab 01 Feature engineering | raw counters 如何變成可比較的訊號？ | rate、ratio、rolling window、lag、多解析度 | Prometheus recording rules 或 feature service |
 | Lab 02 Baseline detection | 哪些偏離值得告警？ | 閾值、baseline 視窗、deadband、誤報預算 | Prometheus alert rules、Grafana Cloud annotations |
 | Lab 03 SPC | 如何區分隨機波動與製程偏移？ | control limits、EWMA 記憶長度、CUSUM 靈敏度 | rule service 或 batch validation |
@@ -158,8 +168,12 @@ Prometheus 設定可用 `promtool` 檢查：
 
 ```bash
 promtool check config infra/prometheus/prometheus.macos.yml
+promtool check config infra/prometheus/prometheus.linux.yml
 promtool check config infra/prometheus/prometheus.windows.yml
 ```
+
+`alerts.yml` 的 recording 與 alert rules 打在 `node_exporter` 上，所以在自己的機器上就驗得起來：
+下載一個大檔案，`TrafficSurge` 會從 Normal 走到 Pending 再到 Firing。
 
 ---
 
@@ -182,15 +196,15 @@ promtool check config infra/prometheus/prometheus.windows.yml
 │   └── prometheus-dropzone/      # current_results.csv feeds python_results_exporter
 ├── diagram/                     # 圖表唯一來源（.drawio），labs 下的 .svg 由 build 產生
 ├── infra/
-│   ├── prometheus/              # Prometheus 設定（macOS / Linux / Windows）
-│   ├── grafana/                 # Dashboard JSON 與 datasource 設定
-│   ├── aiopskit/                # 工作坊共用函式庫：載入、baseline、偵測、評估、Grafana 串接
-│   ├── aiops_contract.py        # exporter 與 dashboard 共用的 metric 名稱，單一來源
-│   ├── setup_grafana.py         # 一行建立 folder、dashboard、alert rule 與 mute timing
+│   ├── prometheus/              # Prometheus 設定與 node_exporter 上的 recording / alert rules
+│   ├── grafana/
+│   │   ├── provisioning/        # datasource 的 YAML，用 Grafana 內建的 file provisioning
+│   │   └── dashboards/          # dashboard JSON，從 Grafana UI 匯入
+│   ├── aiopskit/                # 工作坊分析函式庫：載入、baseline、偵測、評估
 │   ├── build_diagrams.py        # diagram/*.drawio -> labs/*/diagrams/*.svg
 │   ├── svg_flatten.py           # build 的第二段，把 draw.io 的雙份標籤攤平成原生 text
-│   ├── rrd_exporter.py          # organized telemetry CSV to Prometheus metrics
-│   └── python_results_exporter.py # Python result CSV to Prometheus metrics
+│   ├── rrd_exporter.py          # 自學版：organized telemetry CSV to Prometheus metrics
+│   └── python_results_exporter.py # 自學版：Python result CSV to Prometheus metrics
 └── tests/                       # aiopskit 迴歸測試
 ```
 

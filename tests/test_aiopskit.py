@@ -19,7 +19,7 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "infra"))
 
 import aiopskit as wk  # noqa: E402
-from aiopskit import baselines, data, detect, evaluate, viz  # noqa: E402
+from aiopskit import baselines, data, detect, evaluate, plot  # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -282,76 +282,65 @@ def test_suppressed_alerts_are_counted_not_hidden():
 
 
 # ---------------------------------------------------------------------------
-# One spec, two renderers
+# What reaches Grafana
 # ---------------------------------------------------------------------------
 
-def test_panel_spec_declares_every_column_it_reads():
-    spec = viz.PanelSpec(
-        title="t",
-        series=[viz.Series("a"), viz.Series("b")],
-        band=viz.Band("lo", "hi"),
-        markers="flag", shade="truth",
-    )
-    assert spec.columns() == ["a", "b", "lo", "hi", "flag", "truth"]
+def test_results_round_trip_through_a_plain_csv():
+    """The whole export path: to_csv here, read_csv on Grafana's side.
 
-
-def test_grafana_panel_queries_exactly_the_declared_columns():
-    spec = viz.PanelSpec(title="t", series=[viz.Series("a")], band=viz.Band("lo", "hi"))
-    panel = viz.to_grafana(spec, "prometheus", selector={"port_id": "p1"})
-    expressions = " ".join(t["expr"] for t in panel["targets"])
-    for column in spec.columns():
-        assert f'column="{column}"' in expressions
-    assert 'port_id="p1"' in expressions
-
-
-def test_template_variable_selector_uses_regex_match():
-    """Grafana renders an All variable as an alternation, which "=" never matches.
-
-    Left as equality, a dashboard opened on its default value shows nothing and
-    looks exactly like a broken exporter.
+    Booleans have to survive as something a chart can plot. Grafana's CSV
+    reader types a column by its values, so True/False would arrive as strings
+    and the panel would draw nothing.
     """
-    spec = viz.PanelSpec(title="t", series=[viz.Series("a")])
-    panel = viz.to_grafana(spec, "prometheus", selector={"port_id": "$port"})
-    assert 'port_id=~"$port"' in panel["targets"][0]["expr"]
+    import tempfile
 
-
-def test_dashboard_serialises():
-    import json
-    spec = viz.PanelSpec(title="t", series=[viz.Series("a")])
-    dash = viz.dashboard("T", "uid", viz.layout([spec], "prometheus"),
-                         variables=[viz.port_variable("prometheus")])
-    json.loads(json.dumps(dash))
-    assert dash["templating"]["list"][0]["name"] == "port"
-
-
-def test_stat_panel_aggregates_broadcast_scalars():
-    """Otherwise the tile shows one identical number per port."""
-    panel = viz.stat_panel("Event recall", "eval_event_recall", "prometheus")
-    assert panel["targets"][0]["expr"].startswith("max(")
-
-
-# ---------------------------------------------------------------------------
-# Publishing
-# ---------------------------------------------------------------------------
-
-def test_publish_writes_a_manifest_naming_every_column(tmp_path, monkeypatch):
     frame = pd.DataFrame({
         "timestamp": pd.date_range("2026-02-01", periods=4, freq="5min"),
-        "device_id": "d", "port_id": "p", "value": [1.0, 2.0, 3.0, 4.0],
-        "flag": [True, False, True, False],
+        "score_max": [0.4, 6.2, 6.9, 0.3],
+        "alert": [False, True, True, False],
     })
-    monkeypatch.setattr(data.paths, "OUTPUT_DIR", tmp_path / "out")
-    monkeypatch.setattr(wk.grafana.paths, "OUTPUT_DIR", tmp_path / "out")
-    monkeypatch.setattr(wk.grafana.paths, "DROPZONE_DIR", tmp_path / "drop")
-    monkeypatch.setattr(wk.grafana.paths, "DROPZONE_CSV", tmp_path / "drop" / "current_results.csv")
-    monkeypatch.setattr(wk.grafana.paths, "DROPZONE_MANIFEST",
-                        tmp_path / "drop" / "current_results.manifest.json")
+    frame["alert"] = frame["alert"].astype(float)
 
-    manifest = wk.publish(frame, ["value", "flag"], "unit-test",
-                          labels=["device_id", "port_id"],
-                          scalars={"eval_thing": 0.5}, quiet=True)
+    with tempfile.TemporaryDirectory() as tmp:
+        target = Path(tmp) / "lab02_detection.csv"
+        frame.to_csv(target, index=False)
+        back = pd.read_csv(target, parse_dates=["timestamp"])
 
-    assert manifest["value_columns"] == ["value", "flag", "eval_thing"]
-    written = pd.read_csv(tmp_path / "drop" / "current_results.csv")
-    assert set(written["flag"]) == {0.0, 1.0}, "booleans must become numeric gauges"
-    assert (written["eval_thing"] == 0.5).all(), "scalars broadcast down every row"
+    assert list(back.columns) == ["timestamp", "score_max", "alert"]
+    assert set(back["alert"]) == {0.0, 1.0}, "booleans must be numeric to plot"
+    assert pd.api.types.is_datetime64_any_dtype(back["timestamp"])
+
+
+def test_shade_truth_draws_one_span_per_run_not_one_per_sample():
+    """Eleven true samples in two runs must produce two rectangles, not eleven.
+
+    The naive loop is per-sample, which renders identically at a glance and
+    then puts eleven copies of the same entry in the legend.
+    """
+    matplotlib = pytest.importorskip("matplotlib")
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    time = pd.date_range("2026-02-01", periods=20, freq="5min")
+    mask = pd.Series([False] * 3 + [True] * 4 + [False] * 6 + [True] * 7)
+
+    fig, ax = plt.subplots()
+    plot.shade_truth(ax, time, mask)
+    spans = [p for p in ax.patches]
+    labelled = [p for p in spans if p.get_label() == "ground truth"]
+    plt.close(fig)
+
+    assert len(spans) == 2, "two contiguous runs, two rectangles"
+    assert len(labelled) == 1, "one legend entry for all of them"
+
+
+def test_shade_truth_tolerates_an_all_false_mask():
+    matplotlib = pytest.importorskip("matplotlib")
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots()
+    plot.shade_truth(ax, pd.date_range("2026-02-01", periods=5, freq="5min"),
+                     pd.Series([False] * 5))
+    assert len(ax.patches) == 0
+    plt.close(fig)

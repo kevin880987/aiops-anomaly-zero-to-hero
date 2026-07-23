@@ -1,0 +1,38 @@
+# Grafana's built-in file provisioning. Copy this into Grafana's provisioning
+# directory and restart; nothing here needs an API call or a script.
+#
+#   macOS (homebrew)
+#     cp infra/grafana/provisioning/datasources.yaml \
+#        /opt/homebrew/share/grafana/conf/provisioning/datasources/aiops.yaml
+#     brew services restart grafana
+#
+#   Linux
+#     sudo cp ... /etc/grafana/provisioning/datasources/aiops.yaml
+#     sudo systemctl restart grafana-server
+#
+# Adding both datasources by hand in Connections > Data sources works too and
+# takes about a minute. This file only saves the clicking.
+
+apiVersion: 1
+
+datasources:
+
+  # Live metrics from node_exporter, scraped by Prometheus. This is what the
+  # PromQL exercises query.
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    url: http://localhost:9090
+    isDefault: true
+
+  # Lab results. The notebooks write CSV into outputs/workshop/ and a plain
+  # `python -m http.server` serves that folder; Infinity reads the files over
+  # HTTP. Grafana proxies the request server-side, so there is no CORS setup.
+  - name: Lab outputs
+    uid: lab-outputs
+    type: yesoreyeram-infinity-datasource
+    access: proxy
+    jsonData:
+      auth_method: none
+      global_queries: []

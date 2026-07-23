@@ -1,0 +1,241 @@
+{
+  "uid": "aiops-workshop",
+  "title": "AIOps workshop",
+  "tags": ["aiops", "workshop"],
+  "timezone": "browser",
+  "editable": true,
+  "schemaVersion": 39,
+  "time": { "from": "now-30m", "to": "now" },
+  "refresh": "10s",
+  "templating": {
+    "list": [
+      {
+        "name": "iface",
+        "label": "Interface",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(node_network_receive_bytes_total, device)",
+        "refresh": 1,
+        "includeAll": false,
+        "current": { "text": "en0", "value": "en0" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Live metrics from node_exporter",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "text",
+      "title": "What this row is for",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 1 },
+      "options": {
+        "mode": "markdown",
+        "content": "These panels query **Prometheus**, which scrapes `node_exporter` on your own machine. Nothing here comes from the course; the exporter is the official binary and the metrics are your real interface counters.\n\nEvery expression uses `rate()` because the underlying series are counters. Removing `rate()` gives a line that only ever climbs, which is the first thing to check when a panel looks wrong.\n\nDownload something large and watch all three panels move together."
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Throughput, receive and transmit",
+      "description": "rate() over a counter. Compare with traffic_bps in Lab 01, which is the same idea computed as a per-interval delta in pandas.",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 5, "w": 9, "x": 6, "y": 1 },
+      "fieldConfig": {
+        "defaults": { "unit": "Bps", "custom": { "fillOpacity": 8, "lineWidth": 1 } },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(node_network_receive_bytes_total{device=\"$iface\"}[1m])",
+          "legendFormat": "receive",
+          "editorMode": "code",
+          "range": true
+        },
+        {
+          "refId": "B",
+          "expr": "rate(node_network_transmit_bytes_total{device=\"$iface\"}[1m])",
+          "legendFormat": "transmit",
+          "editorMode": "code",
+          "range": true
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Mean packet size",
+      "description": "Bytes per second divided by packets per second. Lab 01 event B moves this hard while leaving throughput almost flat.",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 5, "w": 9, "x": 15, "y": 1 },
+      "fieldConfig": {
+        "defaults": { "unit": "bytes", "custom": { "fillOpacity": 0, "lineWidth": 1 } },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(rate(node_network_receive_bytes_total{device=\"$iface\"}[1m]) + rate(node_network_transmit_bytes_total{device=\"$iface\"}[1m])) / clamp_min(rate(node_network_receive_packets_total{device=\"$iface\"}[1m]) + rate(node_network_transmit_packets_total{device=\"$iface\"}[1m]), 1)",
+          "legendFormat": "avg packet bytes",
+          "editorMode": "code",
+          "range": true
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single" }
+      }
+    },
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Lab results, read straight from outputs/workshop/*.csv",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 6 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 11,
+      "type": "text",
+      "title": "Where this data comes from",
+      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 7 },
+      "options": {
+        "mode": "markdown",
+        "content": "These panels query the **Lab outputs** datasource, which is the Infinity plugin reading CSV over HTTP.\n\nStart the file server from the repository root before opening this dashboard:\n\n```bash\npython -m http.server 8080 \\\n  --directory outputs/workshop\n```\n\nRe-run a notebook cell, refresh the panel, and the line changes. There is no exporter, no drop zone and no Prometheus in this path: the notebook writes a file and Grafana reads it.\n\nEmpty panels almost always mean the file server is not running. Open <http://localhost:8080> and check."
+      }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Lab 01  traffic against its rolling robust baseline",
+      "description": "outputs/workshop/lab01_baselines.csv. The shaded band is the baseline plus and minus three MAD; watch it widen around an event it failed to catch.",
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "lab-outputs" },
+      "gridPos": { "h": 7, "w": 9, "x": 6, "y": 7 },
+      "fieldConfig": {
+        "defaults": { "unit": "Bps", "custom": { "fillOpacity": 0, "lineWidth": 1 } },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "robust_hi" },
+            "properties": [
+              { "id": "custom.fillBelowTo", "value": "robust_lo" },
+              { "id": "custom.fillOpacity", "value": 16 },
+              { "id": "custom.lineWidth", "value": 0 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "robust_lo" },
+            "properties": [{ "id": "custom.lineWidth", "value": 0 }]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "type": "csv",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://localhost:8080/lab01_baselines.csv",
+          "url_options": { "method": "GET" },
+          "columns": [
+            { "selector": "timestamp", "text": "time", "type": "timestamp" },
+            { "selector": "traffic_bps", "text": "traffic_bps", "type": "number" },
+            { "selector": "robust_center", "text": "robust_center", "type": "number" },
+            { "selector": "robust_lo", "text": "robust_lo", "type": "number" },
+            { "selector": "robust_hi", "text": "robust_hi", "type": "number" }
+          ],
+          "filters": []
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Lab 02  anomaly score, and what survived the policy",
+      "description": "outputs/workshop/lab02_detection.csv. score_max is Layer 1; label is Layer 2 after consecutive confirmation; alert is Layer 3 after the full policy.",
+      "datasource": { "type": "yesoreyeram-infinity-datasource", "uid": "lab-outputs" },
+      "gridPos": { "h": 7, "w": 9, "x": 15, "y": 7 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": { "fillOpacity": 0, "lineWidth": 1, "thresholdsStyle": { "mode": "line" } },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "transparent", "value": null },
+              { "color": "red", "value": 4 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "type": "csv",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "http://localhost:8080/lab02_detection.csv",
+          "url_options": { "method": "GET" },
+          "columns": [
+            { "selector": "timestamp", "text": "time", "type": "timestamp" },
+            { "selector": "score_max", "text": "score_max", "type": "number" },
+            { "selector": "label", "text": "label", "type": "number" },
+            { "selector": "alert", "text": "alert", "type": "number" }
+          ],
+          "filters": []
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      }
+    },
+    {
+      "id": 20,
+      "type": "row",
+      "title": "Notebook charts, served as PNG from the same folder",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 21,
+      "type": "text",
+      "title": "Lab 01  four baselines on one traffic series",
+      "description": "Written by the notebook with fig.savefig(). A core Text panel in markdown mode will render any image the file server can reach.",
+      "gridPos": { "h": 12, "w": 12, "x": 0, "y": 15 },
+      "options": {
+        "mode": "markdown",
+        "content": "![four baselines](http://localhost:8080/lab01_baselines.png)\n\nThe rolling band swallows the event it is supposed to flag. The seasonal band does not."
+      }
+    },
+    {
+      "id": 22,
+      "type": "text",
+      "title": "Lab 02  score, label, alert",
+      "description": "Written by the notebook with fig.savefig().",
+      "gridPos": { "h": 12, "w": 12, "x": 12, "y": 15 },
+      "options": {
+        "mode": "markdown",
+        "content": "![three layers](http://localhost:8080/lab02_layers.png)\n\nFind the isolated breach that produced no label and no alert. That gap is the deadband."
+      }
+    }
+  ]
+}

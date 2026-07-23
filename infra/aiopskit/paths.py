@@ -45,15 +45,10 @@ TELEMETRY_CSV = DATA_DIR / "synthetic_rrd_metrics.csv"
 EVENT_CATALOG_CSV = DATA_DIR / "synthetic_event_catalog.csv"
 CHANGE_CALENDAR_CSV = DATA_DIR / "change_calendar.csv"
 
+# Everything the workshop produces lands here, CSV and PNG alike, and this is
+# the folder `python -m http.server 8080` serves for Grafana to read.
 OUTPUT_DIR = ROOT / "outputs" / "workshop"
-DROPZONE_DIR = ROOT / "outputs" / "prometheus-dropzone"
-DROPZONE_CSV = DROPZONE_DIR / "current_results.csv"
-DROPZONE_MANIFEST = DROPZONE_DIR / "current_results.manifest.json"
-REPLAY_STATE = DROPZONE_DIR / "replay_state.json"
-
-GRAFANA_DASHBOARD_DIR = ROOT / "infra" / "grafana" / "dashboards"
 
 
 def ensure_dirs() -> None:
-    for directory in (OUTPUT_DIR, DROPZONE_DIR, GRAFANA_DASHBOARD_DIR):
-        directory.mkdir(parents=True, exist_ok=True)
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

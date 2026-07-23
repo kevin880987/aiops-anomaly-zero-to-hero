@@ -1,147 +1,126 @@
+# Recording and alert rules over node_exporter, the same official exporter the
+# workshop scrapes. Every metric here comes from a real interface on the machine
+# running Prometheus, so a cadet can make these rules fire by downloading a file.
+#
+# The features mirror what Lab 01 computes on the telemetry CSV. Reading the two
+# side by side is the point: a rate in PromQL and a per-interval delta in pandas
+# are the same idea expressed against different storage.
+#
+# IFACE is en0 on macOS. Linux is usually eth0 or enp*s*, Windows an adapter
+# description. Change the device matcher below to whichever carries your traffic;
+# `topk(3, rate(node_network_receive_bytes_total[5m]))` in Explore will tell you.
+
 groups:
 
-  # ── Recording rules: pre-compute features (equivalent to Notebook 01) ────────
   - name: network_features
     interval: 5s
     rules:
 
-      # Total traffic (IN + OUT bytes)
-      - record: network:traffic_total
-        expr: network_rrd_inoctets + network_rrd_outoctets
+      # Counters must be differenced before they mean anything. rate() over a
+      # 1m window is the PromQL spelling of the per-interval delta in Lab 01.
+      - record: net:rx_bytes:rate1m
+        expr: rate(node_network_receive_bytes_total{device=~"en0|eth0"}[1m])
 
-      # Total errors and discards
-      - record: network:errors_total
-        expr: network_rrd_inerrors + network_rrd_outerrors
+      - record: net:tx_bytes:rate1m
+        expr: rate(node_network_transmit_bytes_total{device=~"en0|eth0"}[1m])
 
-      - record: network:discards_total
-        expr: network_rrd_indiscards + network_rrd_outdiscards
+      - record: net:traffic_bps
+        expr: net:rx_bytes:rate1m + net:tx_bytes:rate1m
 
-      # Total unicast packets (denominator for rates)
-      - record: network:ucast_total
-        expr: network_rrd_inucastpkts + network_rrd_outucastpkts
-
-      # Error rate = errors / unicast packets
-      - record: network:error_rate
-        expr: network:errors_total / clamp_min(network:ucast_total, 1)
-
-      # Discard rate
-      - record: network:discard_rate
-        expr: network:discards_total / clamp_min(network:ucast_total, 1)
-
-      # Broadcast total
-      - record: network:broadcast_total
-        expr: network_rrd_inbroadcastpkts + network_rrd_outbroadcastpkts
-
-      # Rolling 1-hour mean and stddev (12 × 5-min intervals)
-      - record: network:traffic_mean_1h
-        expr: avg_over_time(network:traffic_total[1h])
-
-      - record: network:traffic_stddev_1h
-        expr: stddev_over_time(network:traffic_total[1h])
-
-      - record: network:error_rate_mean_1h
-        expr: avg_over_time(network:error_rate[1h])
-
-      - record: network:error_rate_stddev_1h
-        expr: stddev_over_time(network:error_rate[1h])
-
-      - record: network:discard_rate_mean_1h
-        expr: avg_over_time(network:discard_rate[1h])
-
-      - record: network:discard_rate_stddev_1h
-        expr: stddev_over_time(network:discard_rate[1h])
-
-      - record: network:broadcast_mean_1h
-        expr: avg_over_time(network:broadcast_total[1h])
-
-      - record: network:broadcast_stddev_1h
-        expr: stddev_over_time(network:broadcast_total[1h])
-
-      # Z-scores (equivalent to Notebook 02 z-score calculation)
-      - record: network:traffic_zscore
+      - record: net:packets_pps
         expr: >
-          (network:traffic_total - network:traffic_mean_1h)
-          / clamp_min(network:traffic_stddev_1h, 1)
+          rate(node_network_receive_packets_total{device=~"en0|eth0"}[1m])
+          + rate(node_network_transmit_packets_total{device=~"en0|eth0"}[1m])
 
-      - record: network:error_rate_zscore
+      # Mean packet size. Lab 01 shows this is the feature that sees a scan when
+      # byte volume does not, because packet count and packet size move against
+      # each other and their product barely changes.
+      - record: net:avg_pkt_bytes
+        expr: net:traffic_bps / clamp_min(net:packets_pps, 1)
+
+      - record: net:error_rate
         expr: >
-          (network:error_rate - network:error_rate_mean_1h)
-          / clamp_min(network:error_rate_stddev_1h, 0.0001)
+          (rate(node_network_receive_errs_total{device=~"en0|eth0"}[1m])
+           + rate(node_network_transmit_errs_total{device=~"en0|eth0"}[1m]))
+          / clamp_min(net:packets_pps, 1)
 
-      - record: network:discard_rate_zscore
+      - record: net:discard_rate
         expr: >
-          (network:discard_rate - network:discard_rate_mean_1h)
-          / clamp_min(network:discard_rate_stddev_1h, 0.0001)
+          rate(node_network_receive_drop_total{device=~"en0|eth0"}[1m])
+          / clamp_min(net:packets_pps, 1)
 
-      - record: network:broadcast_zscore
+      - record: net:multicast_ratio
         expr: >
-          (network:broadcast_total - network:broadcast_mean_1h)
-          / clamp_min(network:broadcast_stddev_1h, 1)
+          rate(node_network_receive_multicast_total{device=~"en0|eth0"}[1m])
+          / clamp_min(net:packets_pps, 1)
 
-  # ── Alert rules: anomaly detection (equivalent to Notebook 02 flags) ─────────
+      # A rolling baseline and its spread, which is Lab 01's rolling mean written
+      # as a recording rule. stddev_over_time is the fragile half: the very spike
+      # you want to catch inflates the denominator that would have caught it.
+      - record: net:traffic_bps:mean30m
+        expr: avg_over_time(net:traffic_bps[30m])
+
+      - record: net:traffic_bps:stddev30m
+        expr: stddev_over_time(net:traffic_bps[30m])
+
+      - record: net:traffic_bps:zscore
+        expr: >
+          (net:traffic_bps - net:traffic_bps:mean30m)
+          / clamp_min(net:traffic_bps:stddev30m, 1)
+
   - name: network_anomaly_detection
     interval: 5s
     rules:
 
+      # `for:` is the duration gate. It is the same deadband Lab 02 applies as
+      # "n consecutive samples", and it is why a single scrape over the line does
+      # not page anyone.
       - alert: TrafficSurge
-        expr: network:traffic_zscore > 3
+        expr: net:traffic_bps:zscore > 3
         for: 1m
         labels:
           severity: warning
           anomaly_type: traffic_surge
         annotations:
-          summary: "Traffic surge on {{ $labels.port_id }}"
+          summary: "Traffic surge on {{ $labels.device }}"
           description: >
-            Port {{ $labels.port_id }} ({{ $labels.device_id }}) traffic z-score
-            = {{ $value | printf "%.1f" }}σ above 1-hour baseline.
-            Notebook 02 threshold: z > 3.0
+            {{ $labels.device }} is {{ $value | printf "%.1f" }} standard
+            deviations above its 30 minute mean. Lab 02 threshold: z > 3.
 
       - alert: TrafficDrop
-        expr: network:traffic_zscore < -3
+        expr: net:traffic_bps:zscore < -3
         for: 2m
         labels:
           severity: warning
           anomaly_type: traffic_drop
         annotations:
-          summary: "Traffic drop on {{ $labels.port_id }}"
+          summary: "Traffic drop on {{ $labels.device }}"
           description: >
-            Port {{ $labels.port_id }} traffic dropped to
-            {{ $value | printf "%.1f" }}σ below 1-hour baseline.
-            Possible: link failure, upstream routing change.
+            {{ $labels.device }} fell to {{ $value | printf "%.1f" }} standard
+            deviations below its 30 minute mean. Check link state and routing.
+
+      - alert: PacketSizeCollapse
+        expr: net:avg_pkt_bytes < 200 and net:packets_pps > 100
+        for: 2m
+        labels:
+          severity: warning
+          anomaly_type: small_packet_flood
+        annotations:
+          summary: "Mean packet size collapsed on {{ $labels.device }}"
+          description: >
+            {{ $value | printf "%.0f" }} bytes per packet while packet rate is
+            high. This is the shape Lab 01 event B has, and byte volume alone
+            does not show it.
 
       - alert: ErrorRateSurge
-        expr: network:error_rate_zscore > 3
+        expr: net:error_rate > 0.01
         for: 1m
         labels:
           severity: critical
           anomaly_type: error_burst
         annotations:
-          summary: "Error rate spike on {{ $labels.port_id }}"
+          summary: "Error rate above 1% on {{ $labels.device }}"
           description: >
-            Port {{ $labels.port_id }} error rate z-score = {{ $value | printf "%.1f" }}σ.
-            Check: cable, SFP, NIC, duplex/speed mismatch.
-
-      - alert: DiscardRateSurge
-        expr: network:discard_rate_zscore > 3
-        for: 1m
-        labels:
-          severity: warning
-          anomaly_type: discard_spike
-        annotations:
-          summary: "Discard rate spike on {{ $labels.port_id }}"
-          description: >
-            Port {{ $labels.port_id }} discard rate z-score = {{ $value | printf "%.1f" }}σ.
-            Check: queue congestion, QoS policy, buffer exhaustion.
-
-      - alert: BroadcastStorm
-        expr: network:broadcast_zscore > 3
-        for: 30s
-        labels:
-          severity: critical
-          anomaly_type: broadcast_storm
-        annotations:
-          summary: "Broadcast storm suspected on {{ $labels.port_id }}"
-          description: >
-            Port {{ $labels.port_id }} broadcast z-score = {{ $value | printf "%.1f" }}σ.
-            Check: ARP storm, switch loop, DHCP storm.
-            Cross-port: look for simultaneous spikes on multiple ports.
+            {{ $value | printf "%.3f" }} errors per packet. A fixed threshold is
+            correct here: Lab 01 shows error rate is zero almost always, so it
+            has no spread for a z-score to divide by.
