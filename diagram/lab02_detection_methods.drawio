@@ -1,0 +1,19 @@
+<mxfile host="app.diagrams.net" modified="2026-06-16T00:00:00.000Z" agent="diagrams.net" version="21.0.0">
+  <diagram name="Lab02 Detection Methods" id="lab02-detection-methods">
+    <mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="600" pageHeight="250" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="t0" value="fixed threshold&#xa;Threshold" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="10" y="10" width="180" height="60" as="geometry"/></mxCell>
+        <mxCell id="b0" value="value &gt; X -> anomaly&#xa;Benefit: simple and readable&#xa;Tradeoff: ignores normal variation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f7ff;strokeColor=#6c8ebf;fontSize=14;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="10" y="100" width="180" height="80" as="geometry"/></mxCell>
+        <mxCell id="u0" value="Use: bandwidth / CPU hard limits" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=2;fontColor=#666666;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="10" y="210" width="180" height="30" as="geometry"/></mxCell>
+        <mxCell id="t1" value="statistical baseline&#xa;Z-score" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="210" y="10" width="180" height="60" as="geometry"/></mxCell>
+        <mxCell id="b1" value="deviation &gt; N sigma -> anomaly&#xa;Benefit: tracks variation&#xa;Tradeoff: baseline warm-up" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f2f9f1;strokeColor=#82b366;fontSize=14;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="210" y="100" width="180" height="80" as="geometry"/></mxCell>
+        <mxCell id="u1" value="Use: spike anomaly (general)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=2;fontColor=#666666;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="210" y="210" width="180" height="30" as="geometry"/></mxCell>
+        <mxCell id="t2" value="change point detection&#xa;Change Point" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=14;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="410" y="10" width="180" height="60" as="geometry"/></mxCell>
+        <mxCell id="b2" value="Behavior regime shift&#xa;Benefit: detects state shifts&#xa;Tradeoff: slower response by design" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffdf0;strokeColor=#d6b656;fontSize=14;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="410" y="100" width="180" height="80" as="geometry"/></mxCell>
+        <mxCell id="u2" value="Use: slow drift / regime shift" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=2;fontColor=#666666;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="410" y="210" width="180" height="30" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

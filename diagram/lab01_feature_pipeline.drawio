@@ -1,0 +1,26 @@
+<mxfile host="app.diagrams.net" modified="2026-06-16T00:00:00.000Z" agent="diagrams.net" version="21.0.0">
+  <diagram name="Lab 01 Feature Engineering" id="lab-01-feature-engineering">
+    <mxGraphModel dx="0" dy="0" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="420" pageHeight="580" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="in2" value="Raw metrics&#xa;Counter (monotonic)&#xa;node_network_receive_bytes_total" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=14;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="10" y="10" width="400" height="60" as="geometry"/></mxCell>
+        <mxCell id="lab00b" value="Collection layer - Lab 00&#xa;Prometheus scrape" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=14;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="10" y="110" width="400" height="60" as="geometry"/></mxCell>
+        <mxCell id="lab01b" value="▶ Feature engineering - Lab 01" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="10" y="210" width="400" height="60" as="geometry"/></mxCell>
+        <mxCell id="f1" value="rate() signal&#xa;rx_rate / tx_rate&#xa;traffic_total" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="10" y="310" width="120" height="90" as="geometry"/></mxCell>
+        <mxCell id="f2" value="composite ratios&#xa;error_rate&#xa;tx_ratio" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="150" y="310" width="120" height="90" as="geometry"/></mxCell>
+        <mxCell id="f3" value="time features&#xa;rolling stats&#xa;lag / z_score" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="290" y="310" width="120" height="90" as="geometry"/></mxCell>
+        <mxCell id="det2" value="Detection layer - Labs 02 / 03 / 04" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=14;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="10" y="440" width="400" height="60" as="geometry"/></mxCell>
+        <mxCell id="note" value="Feature design determines what detection can see" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=2;fontColor=#666666;fontFamily=Georgia;" vertex="1" parent="1"><mxGeometry x="10" y="510" width="400" height="30" as="geometry"/></mxCell>
+        <mxCell id="ea" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="in2" target="lab00b" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="eb" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="lab00b" target="lab01b" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ec1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="lab01b" target="f1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ec2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="lab01b" target="f2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ec3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="lab01b" target="f3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="f1" target="det2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="f2" target="det2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ed3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="f3" target="det2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
