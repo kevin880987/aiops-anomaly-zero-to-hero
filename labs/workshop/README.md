@@ -78,14 +78,14 @@ Dashboard 只有一張，網址是 <http://localhost:3000/d/aiops-workshop>。�
 
 順序不能跳。Lab 02 的 evidence panel 畫的是 Lab 01 算出來的 baseline 欄位。
 
-## `aiopskit` 是什麼
+## notebook 裡的 toolkit
 
-`infra/aiopskit/`，notebook 裡 `import aiopskit as wk`。這門課自己寫的模組，不是套件。它只做分析：讀資料與單位契約、四種 baseline、偵測器與告警政策、事件層級的評估指標。這些東西共用是為了讓兩個人比較門檻的時候，比的是門檻，不是兩份不同的 rolling median。
+每一份 notebook 開頭有一個 toolkit cell，載入、baseline、偵測器、alert policy、事件評估的函式都寫在那裡，直接讀得到也改得動。這門課不把它們收進一個要另外理解的函式庫，`toy_health_indicators_and_phm.ipynb` 就是這個做法的範本：資料科學的邏輯留在 notebook 裡，不藏在 `import` 後面。
 
-它不畫圖，也不跟 Grafana 說話。畫圖是 notebook 裡的 matplotlib，送資料是 `to_csv()`。唯一的例外是 `wk.shade_truth()`，它把布林遮罩收成連續區段再畫，自己寫容易變成每個樣本一個矩形加四百個圖例。
+四份 notebook 各自帶自己用得到的那部分，所以有些函式會重複出現。這是刻意的取捨：每一份 notebook 都能單獨打開、單獨讀完，不需要先搞懂一個共用套件。畫圖是 notebook 裡的 matplotlib，送資料是 `to_csv()`；toolkit 不畫圖，也不跟 Grafana 說話。
 
 ## 這個目錄裡另外兩份 notebook
 
-`toy_health_indicators_and_phm.ipynb` 是二十分鐘的獨立走查，讀同一份 telemetry，但不使用 `aiopskit`、不寫檔案、不碰 Grafana。它處理的是下午三節沒有時間展開的那一段：把多變量偏離收成一個有界的健康指標，再問這個資產的軌跡適不適合外推。第 6 節那個 monotonicity 與 prognosability 的篩選是重點，多數 PHM 展示會跳過它，然後對一個根本不單調的指標做剩餘壽命預測。想接 RUL 的人從那一節開始讀。
+`toy_health_indicators_and_phm.ipynb` 是二十分鐘的獨立走查，讀同一份 telemetry，但不寫檔案、不碰 Grafana。它處理的是下午三節沒有時間展開的那一段：把多變量偏離收成一個有界的健康指標，再問這個資產的軌跡適不適合外推。第 6 節那個 monotonicity 與 prognosability 的篩選是重點，多數 PHM 展示會跳過它，然後對一個根本不單調的指標做剩餘壽命預測。想接 RUL 的人從那一節開始讀。
 
-`08_agentic_ai_rca_capstone.ipynb` 不屬於下午這三節，時間也排不進去。它接在 Lab 02 的 alert 之後，處理的是「告警發出來以後怎麼查」：把偵測結果整理成 incident context，交給一個在課堂版裡以 deterministic mock 執行的 agent 做 root cause analysis，不需要任何 API token。它跟前三節共用同一份 telemetry 與同一個 `aiopskit`，寫出去的是自己的檔名，不會蓋掉前面的畫面。
+`08_agentic_ai_rca_capstone.ipynb` 不屬於下午這三節，時間也排不進去。它接在 Lab 02 的 alert 之後，處理的是「告警發出來以後怎麼查」：把偵測結果整理成 incident context，交給一個在課堂版裡以 deterministic mock 執行的 agent 做 root cause analysis，不需要任何 API token。它跟前三節共用同一份 telemetry，寫出去的是自己的檔名，不會蓋掉前面的畫面。

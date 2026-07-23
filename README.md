@@ -200,13 +200,15 @@ promtool check config infra/prometheus/prometheus.windows.yml
 │   ├── grafana/
 │   │   ├── provisioning/        # datasource 的 YAML，用 Grafana 內建的 file provisioning
 │   │   └── dashboards/          # dashboard JSON，從 Grafana UI 匯入
-│   ├── aiopskit/                # 工作坊分析函式庫：載入、baseline、偵測、評估
 │   ├── build_diagrams.py        # diagram/*.drawio -> labs/*/diagrams/*.svg
 │   ├── svg_flatten.py           # build 的第二段，把 draw.io 的雙份標籤攤平成原生 text
 │   ├── rrd_exporter.py          # 自學版：organized telemetry CSV to Prometheus metrics
 │   └── python_results_exporter.py # 自學版：Python result CSV to Prometheus metrics
-└── tests/                       # aiopskit 迴歸測試
+└── environments/               # 各平台環境檢查
 ```
+
+工作坊 notebook 是自足的：載入、baseline、偵測、評估的函式就寫在每一份 notebook 開頭的
+toolkit cell 裡，可以讀、可以改，沒有另外一個要先理解的函式庫。
 
 圖表改動走 `diagram/*.drawio`，改完跑 `python infra/build_diagrams.py`。
 `labs/*/diagrams/*.svg` 是產生物，手改會在下一次 build 被蓋掉，細節見
