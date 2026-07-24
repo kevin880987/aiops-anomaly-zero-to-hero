@@ -7,7 +7,9 @@
 
 - [普羅米修斯 Prometheus 監控](https://hackmd.io/@cheese-owner/BkF8Kmlc5)
 
-請把 Grafana 理解成視覺化與 dashboard 工具。它不直接取代 Prometheus，也不直接抓 node_exporter 或 course exporter。正確資料流是：exporter 暴露 `/metrics`，Prometheus scrape 並儲存時間序列，Grafana 連到 Prometheus 查詢與畫圖。
+請把 Grafana 理解成視覺化與 dashboard 工具。它不直接取代 Prometheus，也不自己去抓 node_exporter。即時指標的資料流是：exporter 暴露 `/metrics`，Prometheus scrape 並儲存時間序列，Grafana 連到 Prometheus 查詢與畫圖。
+
+工作坊 dashboard 還有第二種資料來源。Notebook 寫出來的 CSV 與 PNG 放在 `outputs/workshop/`，用一行 `python -m http.server` 開出來，Grafana 用 Infinity datasource 直接讀那些檔案。所以本機要裝兩個 datasource：Prometheus 給即時指標，Infinity 給 lab 結果。
 
 Grafana 安裝後會在本機建立服務、資料庫與登入設定。本課程的 Python 環境設定只處理 notebook 需要的套件，不會自動安裝 Grafana。
 

@@ -1,4 +1,4 @@
-# 啟動課程 exporter，安裝並啟動 Prometheus
+# 安裝並啟動 Prometheus
 
 官方文件：[prometheus.io/docs/prometheus/latest/installation](https://prometheus.io/docs/prometheus/latest/installation/)
 官方下載頁：[prometheus.io/download](https://prometheus.io/download/)
@@ -12,90 +12,83 @@
 
 Prometheus 是系統級監控服務，安裝方式依作業系統與權限設定而異。本課程的 Python 環境設定只處理 notebook 需要的套件，不會自動安裝 Prometheus。
 
-本課程還需要一個 course exporter。Prometheus 不會直接讀取 CSV 或 notebook 輸出，它只會定期抓取 HTTP `/metrics` 端點。`infra/rrd_exporter.py` 會把 `data/synthetic/synthetic_rrd_metrics.csv` 轉成 Prometheus 格式，並在 `http://localhost:8000/metrics` 提供給 Prometheus scrape。這份 CSV 代表「整理好的 network telemetry」。在真實環境中，它可能來自 SNMP、RRDTool、設備匯出或資料管線；在本課程中，它用 synthetic data 模擬，讓每位 cadet 都能重現同一組訊號。也就是說，Prometheus 是監控資料庫，course exporter 是課程 telemetry 進入 Prometheus 的資料來源。
+## 這門課的 Prometheus 抓什麼
 
-本課程提供三份 Prometheus 設定檔，每份說明自己適用的平台：
+工作坊路線只有兩個 scrape target：Prometheus 自己，以及 `node_exporter`（Windows 上是 `windows_exporter`）。兩個都是官方 binary，這門課沒有為它們寫過任何一行程式。
 
-```text
-infra/prometheus/prometheus.macos.yml    macOS   — rrd-exporter :8000 + node_exporter :9100
-infra/prometheus/prometheus.linux.yml    Linux   — rrd-exporter :8000 + node_exporter :9100
-infra/prometheus/prometheus.windows.yml  Windows — rrd-exporter :8000 + windows_exporter :9182
-```
+Notebook 算出來的結果不經過 Prometheus。它用 `to_csv()` 與 `savefig()` 寫進 `outputs/workshop/`，一行 `python -m http.server` 把資料夾開出來，Grafana 端用 Infinity datasource 讀檔案。分開的理由是儲存模型。Prometheus 是 pull 模型，時間戳來自 scrape 的當下，一個月份的歷史分數推不進去，硬要推就得寫重播器，而重播器會讓時間軸變成假的。
 
-設定檔會同時放入 Prometheus self target、課程 rrd-exporter target、Python results exporter target，以及對應作業系統的 OS exporter target。Prometheus 對 DOWN 的 target 會顯示為 `0`，但不會阻止其他 target 正常收集：
+自學路線另外有兩個 Python exporter，把課程 CSV 轉成 `/metrics`。設定檔裡這兩個 job 預設被註解掉，走到 `labs/self-study/` 時再打開，做法見本頁最後一節。
+
+本課程提供三份 Prometheus 設定檔：
 
 ```text
-localhost:9090  Prometheus self
-localhost:8000  rrd-exporter  ← self-study 路線：整理好的 network telemetry CSV
-localhost:8010  python-results-exporter ← 後續 lab：outputs/prometheus-dropzone/current_results.csv drop zone
-localhost:9100  node-exporter ← workshop 路線：真實 PC 網路指標（macOS / Linux）
-localhost:9182  windows-exporter ← workshop 路線：真實 PC 網路指標（Windows）
+infra/prometheus/prometheus.macos.yml    macOS
+infra/prometheus/prometheus.linux.yml    Linux
+infra/prometheus/prometheus.windows.yml  Windows
 ```
+
+三份都定義同一組預設 target：
+
+```text
+localhost:9090  prometheus        Prometheus 自己
+localhost:9100  node-exporter     這台機器的真實網路指標（macOS / Linux）
+localhost:9182  windows-exporter  這台機器的真實網路指標（Windows）
+```
+
+以下兩個 job 在設定檔裡是註解，自學路線才需要打開：
+
+```text
+localhost:8000  rrd-exporter             課程整理好的 network telemetry CSV
+localhost:8010  python-results-exporter  notebook 結果 CSV 的 drop zone
+```
+
+Prometheus 對 DOWN 的 target 會顯示為 `0`，不會阻止其他 target 正常收集。
+
+三份設定檔都帶一行 `rule_files: ["alerts.yml"]`。這個相對路徑是相對設定檔自己的目錄解析的，所以指到的是 `infra/prometheus/alerts.yml`，不管你從哪個目錄啟動 Prometheus。那份檔案裡是打在 `node_exporter` 指標上的 recording rules 與 alert rules，工作坊 Lab 01 與 Lab 02 會拿它跟 pandas 那一邊對照。設定檔與規則檔可以先驗一次：
+
+```bash
+promtool check config infra/prometheus/prometheus.macos.yml
+```
+
+看到 `SUCCESS: 1 rule files found` 與 `SUCCESS: 15 rules found` 就表示規則檔被正確找到。
 
 先完成 [01a](01a-setup-macos-python-environment.md)、[01b](01b-setup-linux-python-environment.md) 或 [01c](01c-setup-windows-python-environment.md)，確認 conda 環境已建立。
 
-## 啟動方式的陷阱：一定要指定本課程的設定檔
+## 啟動方式的陷阱：Prometheus 一定要載到本 repository 的設定檔
 
-這一節請先讀完再往下做。用套件管理器的 service 方式啟動 Prometheus，例如 `brew services start prometheus` 或 `systemctl start prometheus`，載入的是該套件自己的預設設定檔（macOS 上是 `/opt/homebrew/etc/prometheus.yml`）。那份檔案裡沒有本課程的 `python-results-exporter` job，也沒有 `rrd-exporter` 與 OS exporter。
+這一節請先讀完再往下做。用套件管理器的 service 方式啟動 Prometheus，例如 `brew services start prometheus` 或 `systemctl start prometheus`，載入的是該套件自己的預設設定檔（macOS 上是 `/opt/homebrew/etc/prometheus.yml`）。那份檔案只有 Prometheus 自己一個 target，沒有 `node-exporter`，也沒有 `alerts.yml` 的規則。
 
-這個錯誤特別難自己發現，因為它不會報錯。Prometheus 是活的，exporter 是活的，Grafana 是活的，查 `up{job="prometheus"}` 回傳 `1`，每一項單獨看都正常，但沒有任何人去抓 `localhost:8010`，Grafana dashboard 於是永遠空白。判斷依據是 job 存不存在，不是 job 是不是 `1`。
+這個錯誤特別難自己發現，因為它不會報錯。Prometheus 是活的，node_exporter 是活的，Grafana 是活的，查 `up{job="prometheus"}` 回傳 `1`，每一項單獨看都正常，但沒有任何人去抓 `localhost:9100`，dashboard 第一列於是永遠空白。要看的是 job 存不存在，不是 job 的值是不是 `1`。
 
-正確的啟動方式一律是明確指定 repository 內的設定檔：
+兩種啟動方式都可以，選一種做到底。
 
-```bash
-prometheus --config.file=infra/prometheus/prometheus.macos.yml
-```
-
-Linux 換成 `prometheus.linux.yml`，Windows 換成 `prometheus.windows.yml`。後續 lab 的 `wk.check_stack()` 會偵測這個狀況並直接印出上面這行指令。
-
-## 先啟動課程 exporter
-
-開啟第一個終端機，回到 repository 根目錄後執行：
+**方式一，直接指定 repository 內的設定檔。** 從 repository 根目錄執行，不需要複製任何檔案，改設定檔之後重啟就生效：
 
 ```bash
-conda activate aiops-anomaly-zero-to-hero
-python infra/rrd_exporter.py
+prometheus --config.file=infra/prometheus/prometheus.macos.yml --web.enable-lifecycle
 ```
 
-看到 `Exporting metrics on http://localhost:8000/metrics` 後保持這個終端機開著。另開一個終端機繼續安裝與啟動 Prometheus。
+Linux 換成 `prometheus.linux.yml`，Windows 換成 `prometheus.windows.yml`。
 
-驗證 exporter：
+**方式二，把設定檔複製到套件的預設位置，再用 service 啟動。** 工作坊 notebook 用的是這一種，因為服務起來以後整個下午都不用管：
 
 ```bash
-curl http://localhost:8000/metrics
+cp infra/prometheus/prometheus.macos.yml /opt/homebrew/etc/prometheus.yml
+cp infra/prometheus/alerts.yml           /opt/homebrew/etc/alerts.yml
+brew services restart prometheus
 ```
 
-Windows PowerShell 可用：
+兩份都要複製。`rule_files` 是相對設定檔的目錄解析的，設定檔搬到 `/opt/homebrew/etc/` 之後，它找的就是 `/opt/homebrew/etc/alerts.yml`。之後每次改了 repository 裡的設定，都要重新複製一次。
 
-```powershell
-Invoke-WebRequest http://localhost:8000/metrics
-```
-
-## 選用：先啟動 Python results exporter
-
-後續 labs 會用 Python 讀取整理好的 CSV，產生 anomaly score、forecast、SPC result 等結果 CSV。若你想把這些 Python 結果也放到 Grafana，另開一個終端機執行：
-
-macOS / Linux：
+方式二還要多做一件事。Homebrew 的 service 不是直接讀命令列參數，而是讀 `/opt/homebrew/etc/prometheus.args`，這份檔案預設沒有 `--web.enable-lifecycle`，於是 `curl -X POST http://localhost:9090/-/reload` 會回 `405 Method Not Allowed`。Lab 02 會用到那個 reload，所以先補上一行：
 
 ```bash
-conda activate aiops-anomaly-zero-to-hero
-python infra/python_results_exporter.py
+echo "--web.enable-lifecycle" >> /opt/homebrew/etc/prometheus.args
+brew services restart prometheus
 ```
 
-Windows PowerShell：
-
-```powershell
-conda activate aiops-anomaly-zero-to-hero
-python infra\python_results_exporter.py
-```
-
-這個 exporter 會讀：
-
-```text
-outputs/prometheus-dropzone/current_results.csv
-```
-
-之後 cadets 只要把 lab 產生的 CSV 複製到這個檔名，Prometheus 會 scrape，Grafana 會更新。完整流程見 [05-prometheus-dropzone.md](05-prometheus-dropzone.md)。
+Intel Mac 的 Homebrew 前綴是 `/usr/local`，用 `brew --prefix` 確認自己那台是哪一個。
 
 ## macOS（Homebrew）
 
@@ -103,13 +96,11 @@ outputs/prometheus-dropzone/current_results.csv
 brew install prometheus
 ```
 
-安裝後開啟第二個終端機，回到 repository 根目錄，使用本課程提供的設定檔啟動：
+安裝後開一個新終端機，回到 repository 根目錄，用上一節任一種方式啟動。前景執行是最直接的：
 
 ```bash
 prometheus --config.file=infra/prometheus/prometheus.macos.yml --web.enable-lifecycle
 ```
-
-不要用 `brew services start prometheus`。它會載入 Homebrew 的預設設定檔，症狀與解法見本頁前面的〈啟動方式的陷阱〉。已經用 service 方式起過的話，先 `brew services stop prometheus`，再執行上面那行。
 
 如果終端機顯示 `prometheus: command not found`，先確認 Homebrew 的 `bin` 目錄已加入 `PATH`：
 
@@ -137,6 +128,8 @@ cd "prometheus-${PROM_VERSION}.linux-amd64"
 prometheus --config.file=infra/prometheus/prometheus.linux.yml --web.enable-lifecycle
 ```
 
+用 `systemd` 服務啟動的話，跟 macOS 方式二一樣要把 `prometheus.linux.yml` 與 `alerts.yml` 一起複製到該服務讀的設定目錄（通常是 `/etc/prometheus/`），再 `sudo systemctl restart prometheus`。
+
 其他發行版請參考[官方安裝文件](https://prometheus.io/docs/prometheus/latest/installation/)。
 
 ## Windows
@@ -153,32 +146,46 @@ prometheus --config.file=infra/prometheus/prometheus.linux.yml --web.enable-life
 
 ## 確認安裝成功
 
-瀏覽器開啟 [http://localhost:9090](http://localhost:9090)，在 Expression 欄位輸入 `up`，點擊 **Execute**。回傳結果中看到任何一筆 `value="1"` 即表示 Prometheus 正在收集資料。
+瀏覽器開啟 [http://localhost:9090](http://localhost:9090)，在 Expression 欄位輸入 `up`，點擊 **Execute**。
 
-建議逐一查詢：
+先看 job 清單，再看值：
 
 ```promql
 up{job="prometheus"}
-up{job="rrd-exporter"}
-up{job="python-results-exporter"}
 ```
-
-若你已完成 node_exporter 或 windows_exporter 安裝，也查詢對應項目：
 
 ```promql
 up{job="node-exporter"}
 ```
 
+Windows 改查：
+
 ```promql
 up{job="windows-exporter"}
 ```
 
-Prometheus、rrd-exporter 與你的 OS exporter 都回傳 `1` 表示設定正確。`python-results-exporter` 是給後續 lab 結果用的 target；如果你還沒有啟動 `python infra/python_results_exporter.py`，它會是 `0`。請分辨兩種不同的結果：值是 `0` 代表 job 有被設定、只是 exporter 沒開；查詢結果裡完全沒有 `job="python-results-exporter"` 這一筆，代表 Prometheus 載入了錯的設定檔，回頭看〈啟動方式的陷阱〉。若 OS exporter 尚未安裝，這個目標也會暫時是 `0` 或不存在，完成 [04-install-node-exporter.md](04-install-node-exporter.md) 後再確認即可。
+`job="prometheus"` 應該是 `1`。`job="node-exporter"` 在你完成 [04-install-node-exporter.md](04-install-node-exporter.md) 之前會是 `0`，那是正常的；重點是這一筆要存在。查詢結果裡完全沒有這個 job，表示 Prometheus 載入了套件預設設定檔，回頭看〈啟動方式的陷阱〉。
+
+規則檔有沒有載進來，查一條 recording rule 就知道：
+
+```promql
+net:traffic_bps
+```
+
+node_exporter 起來幾分鐘後這條應該有值。查不到而 `up{job="node-exporter"}` 是 `1`，表示設定檔載到了但 `alerts.yml` 沒跟著搬過去。
+
+Prometheus 的 target 頁面（`http://localhost:9090/targets`）是同一件事的圖形版，卡住的時候看那一頁最快。
 
 ## 常見問題
 
-**每個服務都活著，但 Grafana dashboard 一直是空的？**
-在 Prometheus 查 `up`，看回傳結果裡有沒有 `job="python-results-exporter"` 這一筆。找不到就是 Prometheus 載入了套件預設設定檔而不是本 repository 的設定檔。停掉舊 process，改用 `prometheus --config.file=infra/prometheus/prometheus.macos.yml` 重新啟動，細節見本頁〈啟動方式的陷阱〉。
+**Grafana dashboard 第一列一直是空的？**
+在 Prometheus 查 `up`，看回傳結果裡有沒有 `job="node-exporter"` 這一筆。找不到就是 Prometheus 載入了套件預設設定檔而不是本 repository 的設定檔，細節見〈啟動方式的陷阱〉。有這一筆但值是 `0`，代表設定對了，exporter 還沒起來，去做 [04-install-node-exporter.md](04-install-node-exporter.md)。
+
+**Grafana dashboard 第二列與第三列一直是空的？**
+那兩列讀的是 `outputs/workshop/` 裡的檔案，跟 Prometheus 無關。確認 `python -m http.server 8080 --directory outputs/workshop` 這個終端機還開著，並且對應的 lab 已經跑完寫出 CSV。
+
+**`curl -X POST http://localhost:9090/-/reload` 回 405？**
+Prometheus 啟動時沒有帶 `--web.enable-lifecycle`。前景啟動就直接加這個參數；`brew services` 啟動就把它加進 `/opt/homebrew/etc/prometheus.args` 再重啟服務。
 
 **瀏覽器無法開啟 `localhost:9090`？**
 確認 Prometheus 指令視窗仍在執行中。若看到 `address already in use`，表示 9090 連接埠已被占用，請先關閉舊的 Prometheus 程序。
@@ -186,10 +193,62 @@ Prometheus、rrd-exporter 與你的 OS exporter 都回傳 `1` 表示設定正確
 **macOS 顯示 `brew: command not found`？**
 請先安裝 Homebrew：[https://brew.sh](https://brew.sh)，或改用 Prometheus 官方下載頁的 binary 安裝方式。
 
+## 自學路線：打開兩個 Python exporter
+
+工作坊路線不需要這一節，直接跳到〈下一步〉。
+
+`labs/self-study/` 會示範 pull 模型的完整形狀，從 exporter 曝露 `/metrics`，到 Prometheus scrape，到 Grafana 查詢。要走這條路，先把設定檔裡兩個註解掉的 job 打開：
+
+```yaml
+  - job_name: "rrd-exporter"
+    static_configs:
+      - targets: ["localhost:8000"]
+
+  - job_name: "python-results-exporter"
+    static_configs:
+      - targets: ["localhost:8010"]
+```
+
+改完重啟 Prometheus，或在有 `--web.enable-lifecycle` 的情況下 `curl -X POST http://localhost:9090/-/reload`。
+
+`infra/rrd_exporter.py` 把 `data/synthetic/synthetic_rrd_metrics.csv` 轉成 Prometheus 格式，在 `http://localhost:8000/metrics` 曝露出來。這份 CSV 代表整理好的 network telemetry；在真實環境中它可能來自 SNMP、RRDTool、設備匯出或資料管線，課程裡用 synthetic data 模擬，讓每位 cadet 重現同一組訊號。另開一個終端機執行：
+
+```bash
+conda activate aiops-anomaly-zero-to-hero
+python infra/rrd_exporter.py
+```
+
+看到 `Exporting metrics on http://localhost:8000/metrics` 後保持這個終端機開著。驗證：
+
+```bash
+curl http://localhost:8000/metrics
+```
+
+Windows PowerShell 用 `Invoke-WebRequest http://localhost:8000/metrics`。
+
+`infra/python_results_exporter.py` 讀 `outputs/prometheus-dropzone/current_results.csv`，把 notebook 產生的 anomaly score、forecast、SPC result 曝露在 `http://localhost:8010/metrics`。同樣另開一個終端機：
+
+```bash
+conda activate aiops-anomaly-zero-to-hero
+python infra/python_results_exporter.py
+```
+
+還沒有 CSV 時 exporter 會等待，這是正常狀態。完整流程見 [05-prometheus-dropzone.md](05-prometheus-dropzone.md)。
+
+兩個 job 都打開之後，這兩條查詢應該都是 `1`：
+
+```promql
+up{job="rrd-exporter"}
+```
+
+```promql
+up{job="python-results-exporter"}
+```
+
 ## 下一步
 
-Prometheus 本機安裝完成後，繼續 [03a-install-grafana-local.md](03a-install-grafana-local.md) 安裝 Grafana Local。
+繼續 [03a-install-grafana-local.md](03a-install-grafana-local.md) 安裝 Grafana Local，並裝好工作坊 dashboard 需要的 Infinity datasource。
 
-工作坊短版也需要 node_exporter，可以同步完成 [04-install-node-exporter.md](04-install-node-exporter.md)。
+工作坊也需要 node_exporter，可以同步完成 [04-install-node-exporter.md](04-install-node-exporter.md)。`alerts.yml` 的規則全部打在 node_exporter 指標上，沒有它，recording rule 與 alert rule 都不會有值。
 
 完成 Grafana Local 後，若想額外把指標推送到雲端，可選擇繼續 [03b-setup-grafana-cloud.md](03b-setup-grafana-cloud.md)（選用）。
