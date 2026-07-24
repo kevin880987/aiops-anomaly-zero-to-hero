@@ -194,25 +194,19 @@ promtool check config infra/prometheus/prometheus.windows.yml
 │   ├── workshop/
 │   ├── self-study/
 │   └── prometheus-dropzone/      # current_results.csv feeds python_results_exporter
-├── diagram/                     # 圖表唯一來源（.drawio），labs 下的 .svg 由 build 產生
 ├── infra/
 │   ├── prometheus/              # Prometheus 設定與 node_exporter 上的 recording / alert rules
 │   ├── grafana/
 │   │   ├── provisioning/        # datasource 的 YAML，用 Grafana 內建的 file provisioning
 │   │   └── dashboards/          # dashboard JSON，從 Grafana UI 匯入
-│   ├── build_diagrams.py        # diagram/*.drawio -> labs/*/diagrams/*.svg
-│   ├── svg_flatten.py           # build 的第二段，把 draw.io 的雙份標籤攤平成原生 text
-│   ├── rrd_exporter.py          # 自學版：organized telemetry CSV to Prometheus metrics
-│   └── python_results_exporter.py # 自學版：Python result CSV to Prometheus metrics
+│   ├── rrd_exporter.py          # organized telemetry CSV to Prometheus metrics
+│   └── python_results_exporter.py # Python result CSV to Prometheus metrics
 └── environments/               # 各平台環境檢查
 ```
 
 工作坊 notebook 是自足的：載入、baseline、偵測、評估的函式就寫在每一份 notebook 開頭的
-toolkit cell 裡，可以讀、可以改，沒有另外一個要先理解的函式庫。
-
-圖表改動走 `diagram/*.drawio`，改完跑 `python infra/build_diagrams.py`。
-`labs/*/diagrams/*.svg` 是產生物，手改會在下一次 build 被蓋掉，細節見
-[`diagram/README.md`](diagram/README.md)。
+toolkit cell 裡，可以讀、可以改，沒有另外一個要先理解的函式庫。架構圖以 `labs/*/diagrams/*.svg`
+直接附在 repository 裡，不需要任何 build 步驟。
 
 ---
 
