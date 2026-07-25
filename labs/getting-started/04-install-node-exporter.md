@@ -9,7 +9,11 @@ node_exporter 是 Prometheus 的官方 OS metrics 代理人，負責把 CPU、�
 - Prometheus node_exporter guide：[prometheus.io/docs/guides/node-exporter](https://prometheus.io/docs/guides/node-exporter/)
 - windows_exporter：[github.com/prometheus-community/windows_exporter](https://github.com/prometheus-community/windows_exporter)
 
-本指南採用 Prometheus 官方 GitHub release 的 node_exporter binary，下載 URL 使用 `https://github.com/prometheus/node_exporter/releases/download/v<version>/...`。不要把 node_exporter 跟課程的 `infra/rrd_exporter.py` 混在一起：前者讀取你的真實作業系統指標，後者把課程準備好的 network telemetry CSV 轉成 Prometheus 可抓取的 metrics。課程 CSV 是 synthetic data，但它模擬的是整理後的真實網路訊號。
+本指南採用 Prometheus 官方 GitHub release 的 node_exporter binary，下載 URL 使用 `https://github.com/prometheus/node_exporter/releases/download/v<version>/...`。
+
+工作坊路線需要這一步。三份 Prometheus 設定檔預設就帶 OS exporter 的 job，`infra/prometheus/alerts.yml` 裡的 recording rules 與 alert rules 也全部打在 `node_network_*` 指標上，所以沒有 node_exporter 的話，dashboard 第一列與所有規則都不會有值。自學路線可以先跳過。
+
+不要把 node_exporter 跟自學路線的 `infra/rrd_exporter.py` 混在一起。前者讀取你的真實作業系統指標，後者把課程準備好的 network telemetry CSV 轉成 Prometheus 可抓取的 metrics。課程 CSV 是 synthetic data，但它模擬的是整理後的真實網路訊號。
 
 ---
 
@@ -167,7 +171,19 @@ Invoke-WebRequest -Method Post http://localhost:9090/-/reload
 
 在 Prometheus UI（`http://localhost:9090`）查詢 `up{job="node-exporter"}` 確認值為 `1`。
 
-Windows 使用 windows_exporter 時，預設 port 是 `9182`，而且指標名稱與 node_exporter 不完全相同。請直接使用 `infra/prometheus/prometheus.windows.yml`，不要修改 macOS / Linux 設定檔。初學者若使用 Windows，建議先完成 self-study 合成資料路徑；若要跑 workshop 即時 OS 指標，依 notebook 提示調整 PromQL 指標名稱。
+若 `curl -X POST http://localhost:9090/-/reload` 回 `405`，表示 Prometheus 啟動時沒有帶 `--web.enable-lifecycle`，處理方式見 [02-install-prometheus.md](02-install-prometheus.md)。直接重啟 Prometheus 也有同樣效果。
+
+## 規則檔看的是哪一張網卡
+
+`infra/prometheus/alerts.yml` 的 recording rules 目前比對 `device=~"en0|eth0"`。macOS 的無線網卡通常就是 `en0`，Linux 則可能是 `enp3s0`、`ens33` 之類的名字。查一次就知道自己這台是哪一張：
+
+```promql
+topk(3, rate(node_network_receive_bytes_total[5m]))
+```
+
+如果前三名裡沒有 `en0` 或 `eth0`，把 `alerts.yml` 裡的 device 比對式改成你那張網卡的名字，再重新載入 Prometheus。`up{job="node-exporter"}` 是 `1` 但 `net:traffic_bps` 查不到值，多半就是這個原因。
+
+Windows 使用 windows_exporter 時，預設 port 是 `9182`，指標名稱是 `windows_net_*`，與 node_exporter 不同。請直接使用 `infra/prometheus/prometheus.windows.yml`，不要修改 macOS / Linux 設定檔。`alerts.yml` 的規則寫的是 node_exporter 的指標名稱，在 Windows 上不會有值；工作坊 dashboard 第一列的兩張 panel 同理，要自己把 PromQL 換成 `windows_net_bytes_received_total` 這一組。
 
 ---
 

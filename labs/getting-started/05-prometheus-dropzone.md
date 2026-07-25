@@ -43,14 +43,17 @@ Python notebook reads organized telemetry CSV
 1. [02-install-prometheus.md](02-install-prometheus.md)
 2. [03a-install-grafana-local.md](03a-install-grafana-local.md)
 
-Prometheus 設定檔已經包含：
+設定檔裡這個 job 預設是註解掉的，因為工作坊路線不需要它。先在自己作業系統對應的 `infra/prometheus/prometheus.*.yml` 裡把它打開：
 
-```text
-job_name: python-results-exporter
-target: localhost:8010
+```yaml
+  - job_name: "python-results-exporter"
+    static_configs:
+      - targets: ["localhost:8010"]
 ```
 
-另開一個終端機，從 repository 根目錄啟動 exporter。
+改完重啟 Prometheus，或在有 `--web.enable-lifecycle` 的情況下 `curl -X POST http://localhost:9090/-/reload`。用 `brew services` 啟動的話，記得設定檔改的是 `/opt/homebrew/etc/prometheus.yml` 那一份，或重新複製一次。
+
+接著另開一個終端機，從 repository 根目錄啟動 exporter。
 
 macOS / Linux：
 
