@@ -57,3 +57,9 @@ outputs/self-study/*
 outputs/prometheus-dropzone/*
 !outputs/prometheus-dropzone/.gitkeep
 outputs/setup/*
+
+# Slide decks. The deck lives outside this repo in ../slide/ and is rebuilt from
+# slide/build_deck.py; binary Office files do not belong in the course history.
+*.pptx
+*.pptx#
+~$*.pptx
