@@ -65,13 +65,9 @@ Get-Location
 
 ## Step 2. 建立 Python / conda 環境
 
-依你的作業系統選一份文件：
+照這份文件做：[01-setup-python-environment.md](01-setup-python-environment.md)
 
-| 作業系統 | 文件 |
-| --- | --- |
-| macOS | [01a-setup-macos-python-environment.md](01a-setup-macos-python-environment.md) |
-| Linux | [01b-setup-linux-python-environment.md](01b-setup-linux-python-environment.md) |
-| Windows | [01c-setup-windows-python-environment.md](01c-setup-windows-python-environment.md) |
+三個平台共用那一頁，每一步都先列 macOS / Linux 再列 Windows PowerShell。
 
 完成後，確認你能啟用課程環境：
 
@@ -95,7 +91,7 @@ conda activate aiops-anomaly-zero-to-hero
 
 照這份文件做：[02-install-prometheus.md](02-install-prometheus.md)
 
-這一步有一個容易踩的坑，那份文件用一整節寫它：Prometheus 必須載到本 repository 的設定檔。用套件管理器的 service 方式啟動，載入的是套件自己的預設設定，裡面沒有 `node-exporter` 這個 job，也沒有 `alerts.yml` 的規則。它不會報錯，只會讓 dashboard 永遠空白。
+這一步有一個容易踩的坑，那份文件用一整節寫它：Prometheus 必須載到本 repository 的設定檔。用套件管理器的 service 方式啟動，載入的是套件自己的預設設定，裡面沒有 `node-exporter` 這個 job，也沒有 `alerts.yml` 的規則。它不會出錯，只會讓 dashboard 永遠空白。
 
 完成後應能打開 <http://localhost:9090>，並且查得到這一筆：
 
@@ -198,11 +194,7 @@ Grafana Cloud 是選用延伸。課程主線只需要 Grafana Local。
 
 ### `conda` 找不到
 
-先重新開一個 terminal。若仍失敗，回到你的 OS 專用 Python setup 文件：
-
-- [macOS](01a-setup-macos-python-environment.md)
-- [Linux](01b-setup-linux-python-environment.md)
-- [Windows](01c-setup-windows-python-environment.md)
+先重新開一個 terminal。若仍失敗，回到 [01-setup-python-environment.md](01-setup-python-environment.md) 的〈常見問題〉。
 
 ### notebook 找不到 `aiops-anomaly-zero-to-hero` kernel
 

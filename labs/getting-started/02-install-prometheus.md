@@ -44,13 +44,13 @@ promtool check config infra/prometheus/prometheus.macos.yml
 
 看到 `SUCCESS: 1 rule files found` 與 `SUCCESS: 15 rules found` 就表示規則檔被正確找到。
 
-先完成 [01a](01a-setup-macos-python-environment.md)、[01b](01b-setup-linux-python-environment.md) 或 [01c](01c-setup-windows-python-environment.md)，確認 conda 環境已建立。
+先完成 [01-setup-python-environment.md](01-setup-python-environment.md)，確認 conda 環境已建立。
 
 ## 啟動方式的陷阱：Prometheus 一定要載到本 repository 的設定檔
 
 這一節請先讀完再往下做。用套件管理器的 service 方式啟動 Prometheus，例如 `brew services start prometheus` 或 `systemctl start prometheus`，載入的是該套件自己的預設設定檔（macOS 上是 `/opt/homebrew/etc/prometheus.yml`）。那份檔案只有 Prometheus 自己一個 target，沒有 `node-exporter`，也沒有 `alerts.yml` 的規則。
 
-這個錯誤特別難自己發現，因為它不會報錯。Prometheus 是活的，node_exporter 是活的，Grafana 是活的，查 `up{job="prometheus"}` 回傳 `1`，每一項單獨看都正常，但沒有任何人去抓 `localhost:9100`，dashboard 第一列於是永遠空白。要看的是 job 存不存在，不是 job 的值是不是 `1`。
+這個錯誤特別難自己發現，因為它不會出錯。Prometheus 是活的，node_exporter 是活的，Grafana 是活的，查 `up{job="prometheus"}` 回傳 `1`，每一項單獨看都正常，但沒有任何人去抓 `localhost:9100`，dashboard 第一列於是永遠空白。要看的是 job 存不存在，不是 job 的值是不是 `1`。
 
 兩種啟動方式都可以，選一種做到底。
 
