@@ -1,0 +1,36 @@
+{
+  "_contract": "mind.policy.entries.prose.banned_vocabulary",
+  "_note": "Candidates reviewed against the contract and kept on purpose. A record covers `count` occurrences of that rule in that file and no more, so a new instance pushes the count higher and blocks again. `reason` is required; a record without one is ignored.",
+  "accepted": [
+    {
+      "file": "README.md",
+      "rule": "三段排比／規則三",
+      "count": 1,
+      "reason": "表格欄位裡的內容清單，實際列的是四項（單位契約、資料剖面、四種 baseline、shape features），偵測器命中的是其中三項的子字串"
+    },
+    {
+      "file": "README.md",
+      "rule": "虛假範圍",
+      "count": 1,
+      "reason": "從 Normal 走到 Pending 再到 Firing 是 Prometheus alert 的狀態機名稱，照抄自工具本身"
+    },
+    {
+      "file": "README.md",
+      "rule": "比喻當骨架",
+      "count": 1,
+      "reason": "「這條路徑」全文出現一次，契約對持續性比喻的門檻是超過兩次才要換成機制"
+    },
+    {
+      "file": "labs/workshop/README.md",
+      "rule": "虛假範圍",
+      "count": 1,
+      "reason": "「從 telemetry 到 alert」是文件標題，指的是課程實際涵蓋的管線兩端"
+    },
+    {
+      "file": "data/sample/README.md",
+      "rule": "`性` `化` `度` 構詞濫用",
+      "count": 1,
+      "reason": "解析度是訊號處理的領域術語，不是用「度」自造的抽象名詞"
+    }
+  ]
+}
