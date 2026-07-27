@@ -1,6 +1,5 @@
 # Python 環境設定
 
-
 ## 前置條件
 
 | 作業系統 | 需求 |
@@ -9,7 +8,7 @@
 | Linux | Ubuntu、Debian、Fedora、Rocky Linux 等發行版，Bash terminal |
 | Windows | Windows 10 21H2 以上或 Windows 11，PowerShell 5.1 以上（內建版本即可） |
 
-本課程使用 conda 管理 Python 套件，Python 直譯器由 conda 環境提供，不需要另外安裝系統 Python。尚未安裝 conda 的話，先照官方安裝指南裝好再回來：
+本課程使用 conda 管理 Python 套件，Python 直譯器由 conda 環境提供，不需要另外安裝系統 Python。尚未安裝 conda 的話，先照官方安裝指南完成安裝再回來：
 
 - [Miniconda 安裝指南](https://www.anaconda.com/docs/getting-started/miniconda/install)（本課程建議，體積小）
 - [conda 官方安裝文件](https://docs.conda.io/projects/conda/en/stable/user-guide/install/index.html)（三個平台的完整說明）
@@ -25,33 +24,25 @@ cd aiops-anomaly-zero-to-hero
 
 ### 2. 建立 conda 環境
 
-執行 OS 系統對應的environment環境檔。三份建立的是同一個 conda environment：`aiops-anomaly-zero-to-hero`。
+環境檔按平台分成三份，建立出來的是同一個 conda environment：`aiops-anomaly-zero-to-hero`。執行你這個作業系統對應的那一份：
 
-macOS：
+| 作業系統 | 環境檔 |
+| --- | --- |
+| macOS | `environments/environment.macos.yml` |
+| Linux | `environments/environment.linux.yml` |
+| Windows | `environments\environment.windows.yml` |
 
 ```bash
 conda env create -f environments/environment.macos.yml
 ```
 
-Linux：
-
-```bash
-conda env create -f environments/environment.linux.yml
-```
-
-Windows PowerShell：
-
-```powershell
-conda env create -f environments\environment.windows.yml
-```
-
-環境已存在時改用更新指令，把上面的 `create` 換成 `update -n aiops-anomaly-zero-to-hero`，結尾加 `--prune`：
+環境已存在時改用更新指令，`create` 換成 `update -n aiops-anomaly-zero-to-hero`，結尾加 `--prune`：
 
 ```bash
 conda env update -n aiops-anomaly-zero-to-hero -f environments/environment.macos.yml --prune
 ```
 
-啟用環境，三個平台指令相同：
+啟用環境：
 
 ```bash
 conda activate aiops-anomaly-zero-to-hero
@@ -61,6 +52,9 @@ conda activate aiops-anomaly-zero-to-hero
 
 用你慣用的 IDE 或 notebook 工具開啟 `labs/getting-started/00-check-your-setup.ipynb`，kernel 選擇課程環境，然後逐格執行。這份 notebook 是最終檢查入口，缺少任何項目時它會指向對應的安裝指南。
 
+## IDE 與 notebook 工具
+
+工具只要連得上上一步啟用的 conda 環境就可以用。三者的官方安裝說明：
 
 | 工具 | 安裝指南 | 開啟 notebook 的方式 |
 | --- | --- | --- |
@@ -112,4 +106,4 @@ conda env remove -n aiops-anomaly-zero-to-hero
 conda env create -f environments/environment.macos.yml
 ```
 
-Windows 的環境檔路徑是 `environments\environment.windows.yml`，Linux 是 `environments/environment.linux.yml`。
+環境檔路徑換成上表你那一列。

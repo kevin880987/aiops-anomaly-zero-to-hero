@@ -19,7 +19,7 @@
 
 前三個是官方 binary，這門課沒有為它們寫過任何一行程式。第四個是 Python 標準函式庫的 `http.server`，把 notebook 寫出來的 CSV 與 PNG 開給 Grafana 讀。
 
-Notebook 本身是自足的，載入、baseline、偵測、評估的函式都寫在每一份 notebook 開頭，不 import 這個 repository 裡的任何模組。上面四個服務是為了讓結果上得了 dashboard，不是 notebook 跑起來的前提。
+Notebook 本身是自足的，載入、baseline、偵測、評估的函式都寫在每一份 notebook 開頭，不 import 這個 repository 裡的任何模組。上面四個服務是為了讓結果上得了 dashboard，不是 notebook 執行起來的前提。
 
 ## Step 1. 進入 course repo
 
@@ -41,7 +41,7 @@ Windows PowerShell 用 `cd C:\path\to\aiops-anomaly-zero-to-hero`。
 
 照 [02-install-prometheus.md](02-install-prometheus.md) 做。那份文件用一整節寫這一步唯一的坑：Prometheus 必須載到本 repository 的設定檔，否則它照樣活著、照樣回答查詢，只是永遠抓不到 node_exporter。
 
-驗收：<http://localhost:9090> 打得開，`up{job="prometheus"}` 查得到值。
+驗收：<http://localhost:9090> 打得開，`up{job="prometheus"}` 查詢得到值。
 
 ## Step 4. 安裝並啟動 node_exporter
 
@@ -53,7 +53,7 @@ Windows PowerShell 用 `cd C:\path\to\aiops-anomaly-zero-to-hero`。
 
 ## Step 5. 安裝 Grafana Local，接上兩個資料來源
 
-照 [03a-install-grafana-local.md](03a-install-grafana-local.md) 做。Infinity 是外掛，要另外裝。
+照 [03a-install-grafana-local.md](03a-install-grafana-local.md) 做。Infinity 是外掛，要另外安裝。
 
 驗收：<http://localhost:3000/d/aiops-workshop> 打得開，Prometheus data source 指向 `http://localhost:9090`。填成 `3000` 是最常見的失敗，`3000` 是 Grafana 自己。
 
@@ -71,13 +71,13 @@ Windows PowerShell 的路徑是 `outputs\workshop`。
 
 驗收：<http://localhost:8080/> 看得到檔案清單。剛開始資料夾是空的，那是正常的。
 
-## Step 7. 跑 setup check notebook
+## Step 7. 執行 setup check notebook
 
 逐格執行 `00-check-your-setup.ipynb`，四格都要通過：repo 路徑、Python 環境、Prometheus 與 Grafana 與 node_exporter、準備完成。
 
-某一格失敗時，它會列出對應的安裝指南。補齊之後重跑整份。
+某一格失敗時，它會列出對應的安裝指南。補齊之後重新執行整份。
 
-請以這份 notebook 的結果為準。terminal Python、conda environment 與 notebook kernel 三者不一致時，在終端機另跑一支檢查腳本會給出誤判。
+請以這份 notebook 的結果為準。terminal Python、conda environment 與 notebook kernel 三者不一致時，在終端機另外執行一支檢查腳本會給出誤判。
 
 ## Step 8. 開始 labs
 
@@ -95,7 +95,7 @@ Lab 00 唯一要證明的事，就是即時指標與分析結果這兩條路徑�
 
 每一份安裝文件末尾都有自己的〈常見問題〉，先看那裡。下面三種是跨文件的：
 
-`up` 查得到 `job="prometheus"`，查不到 `job="node-exporter"`，表示 Prometheus 載入的是套件的預設設定檔。見 [02-install-prometheus.md](02-install-prometheus.md)〈啟動方式的陷阱〉。
+`up` 查詢得到 `job="prometheus"`，查詢不到 `job="node-exporter"`，表示 Prometheus 載入的是套件的預設設定檔。見 [02-install-prometheus.md](02-install-prometheus.md)〈啟動方式的陷阱〉。
 
 dashboard 第一列空白走 Prometheus 那條線查，第二列與第三列空白則跟 Prometheus 無關，先確認 Step 6 的終端機還開著。
 

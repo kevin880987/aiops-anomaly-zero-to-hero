@@ -1,154 +1,63 @@
 # 安裝 node_exporter
 
-node_exporter 是 Prometheus 的官方 OS metrics 代理人，負責把 CPU、記憶體、網路等系統指標暴露為 Prometheus 格式。工作坊使用它把你的 PC 變成被監控目標。
+官方來源：[node_exporter](https://github.com/prometheus/node_exporter)、[releases](https://github.com/prometheus/node_exporter/releases)、[Prometheus 官方 guide](https://prometheus.io/docs/guides/node-exporter/)、[windows_exporter](https://github.com/prometheus-community/windows_exporter)
 
-官方來源：
+node_exporter 把這台機器的 CPU、記憶體、網路指標曝露成 Prometheus 格式，讓你的 PC 成為被監控目標。三份 Prometheus 設定檔預設就帶它的 job，`infra/prometheus/alerts.yml` 的 recording rules 與 alert rules 也全部打在 `node_network_*` 上，所以沒有它，dashboard 第一列與所有規則都不會有值。
 
-- node_exporter：[github.com/prometheus/node_exporter](https://github.com/prometheus/node_exporter)
-- node_exporter releases：[github.com/prometheus/node_exporter/releases](https://github.com/prometheus/node_exporter/releases)
-- Prometheus node_exporter guide：[prometheus.io/docs/guides/node-exporter](https://prometheus.io/docs/guides/node-exporter/)
-- windows_exporter：[github.com/prometheus-community/windows_exporter](https://github.com/prometheus-community/windows_exporter)
+它讀的是真實作業系統指標，跟 notebook 讀的 `data/synthetic/synthetic_rrd_metrics.csv` 是兩回事。後者是 synthetic data，模擬的是整理後的真實網路訊號。
 
-本指南採用 Prometheus 官方 GitHub release 的 node_exporter binary，下載 URL 使用 `https://github.com/prometheus/node_exporter/releases/download/v<version>/...`。
+## macOS / Linux
 
-三份 Prometheus 設定檔預設就帶 OS exporter 的 job，`infra/prometheus/alerts.yml` 裡的 recording rules 與 alert rules 也全部打在 `node_network_*` 指標上，所以沒有 node_exporter 的話，dashboard 第一列與所有規則都不會有值。
-
-node_exporter 讀的是你這台機器的真實作業系統指標，跟 notebook 讀的 `data/synthetic/synthetic_rrd_metrics.csv` 是兩回事。後者是 synthetic data，模擬的是整理後的真實網路訊號。
-
----
-
-## 先確認你的 CPU 架構
+到 [releases](https://github.com/prometheus/node_exporter/releases) 確認最新版本。先看自己的 CPU 架構：
 
 ```bash
 uname -m
 ```
 
-常見結果：
+`arm64` 是 Apple Silicon Mac，`x86_64` 是 Intel Mac 或多數 Linux PC。對照下表填入 `PLATFORM`：
 
-```text
-arm64   Apple Silicon Mac
-x86_64  Intel Mac 或多數 Linux PC
-```
-
----
-
-## macOS（官方 release）
-
-到 [node_exporter releases](https://github.com/prometheus/node_exporter/releases) 確認最新版本。以下用 `1.11.1` 作為可直接執行的範例。
-
-Apple Silicon Mac：
+| 機器 | `PLATFORM` |
+| --- | --- |
+| Apple Silicon Mac | `darwin-arm64` |
+| Intel Mac | `darwin-amd64` |
+| x86_64 Linux | `linux-amd64` |
+| ARM64 Linux | `linux-arm64` |
 
 ```bash
-NODE_EXPORTER_VERSION="1.11.1"
-curl -LO "https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.darwin-arm64.tar.gz"
-tar xvf "node_exporter-${NODE_EXPORTER_VERSION}.darwin-arm64.tar.gz"
+VERSION="1.11.1"
+PLATFORM="darwin-arm64"
+curl -LO "https://github.com/prometheus/node_exporter/releases/download/v${VERSION}/node_exporter-${VERSION}.${PLATFORM}.tar.gz"
+tar xvf "node_exporter-${VERSION}.${PLATFORM}.tar.gz"
 sudo mkdir -p /usr/local/bin
-sudo mv "node_exporter-${NODE_EXPORTER_VERSION}.darwin-arm64/node_exporter" /usr/local/bin/
-```
-
-Intel Mac：
-
-```bash
-NODE_EXPORTER_VERSION="1.11.1"
-curl -LO "https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.darwin-amd64.tar.gz"
-tar xvf "node_exporter-${NODE_EXPORTER_VERSION}.darwin-amd64.tar.gz"
-sudo mkdir -p /usr/local/bin
-sudo mv "node_exporter-${NODE_EXPORTER_VERSION}.darwin-amd64/node_exporter" /usr/local/bin/
-```
-
-啟動：
-
-```bash
+sudo mv "node_exporter-${VERSION}.${PLATFORM}/node_exporter" /usr/local/bin/
 node_exporter
 ```
 
-看到 `Listening on` 或類似訊息後保持這個終端機開著。另開一個終端機做驗證。
-
----
-
-## Linux（官方 release）
-
-到 [node_exporter releases](https://github.com/prometheus/node_exporter/releases) 確認最新版本。以下用 `1.11.1` 作為可直接執行的範例。
-
-大多數 x86_64 Linux PC：
-
-```bash
-NODE_EXPORTER_VERSION="1.11.1"
-curl -LO "https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz"
-tar xvf "node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz"
-sudo mkdir -p /usr/local/bin
-sudo mv "node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64/node_exporter" /usr/local/bin/
-```
-
-ARM64 Linux：
-
-```bash
-NODE_EXPORTER_VERSION="1.11.1"
-curl -LO "https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-arm64.tar.gz"
-tar xvf "node_exporter-${NODE_EXPORTER_VERSION}.linux-arm64.tar.gz"
-sudo mkdir -p /usr/local/bin
-sudo mv "node_exporter-${NODE_EXPORTER_VERSION}.linux-arm64/node_exporter" /usr/local/bin/
-```
-
-啟動：
-
-```bash
-node_exporter
-```
-
-看到 `Listening on` 或類似訊息後保持這個終端機開著。其他發行版服務化方式請參考[官方安裝說明](https://prometheus.io/docs/guides/node-exporter/)。
-
----
-
-## 驗證 macOS / Linux node_exporter
-
-如果啟動時顯示 `command not found`，改用完整路徑：
-
-```bash
-/usr/local/bin/node_exporter
-```
-
-另開一個終端機：
-
-```bash
-curl -s http://localhost:9100/metrics | head
-```
-
-再確認網路指標：
+看到 `Listening on` 之後保持這個終端機開著，另外開啟一個做驗證：
 
 ```bash
 curl -s http://localhost:9100/metrics | grep node_network_receive_bytes_total | head -5
 ```
 
-有輸出表示 node_exporter 正常運行。
+有輸出就表示它正常運作。要停止前景執行的 node_exporter，回到該終端機按 `Ctrl+C`。
 
-如果 `node_exporter` 出現 macOS 安全性阻擋，請到 **System Settings → Privacy & Security** 允許執行。完成後重新啟動 `node_exporter`。
+啟動時顯示 `command not found` 就改用完整路徑 `/usr/local/bin/node_exporter`。macOS 出現安全性阻擋時，到 **System Settings → Privacy & Security** 允許執行，再重新啟動。
 
-要停止前景執行的 `node_exporter`，回到該終端機按 `Ctrl+C`。
+其他發行版的服務化方式見[官方 guide](https://prometheus.io/docs/guides/node-exporter/)。
 
----
+## Windows
 
-## Windows（windows_exporter）
+Windows 用的是 [windows_exporter](https://github.com/prometheus-community/windows_exporter/releases)，在 Windows 上負責同一件事。
 
-Windows 使用 [windows_exporter](https://github.com/prometheus-community/windows_exporter/releases)。它不是 node_exporter，但在 Windows 上負責同一件事：把 OS metrics 暴露給 Prometheus。
+1. 從 Releases 頁面下載最新的 `.msi`（例如 `windows_exporter-0.x.x-amd64.msi`）。
+2. 雙擊安裝。預設 port 是 **9182**，不是 9100。
+3. 瀏覽器開啟 <http://localhost:9182/metrics> 驗證。
 
-1. 到 Releases 頁面下載最新 `.msi` 安裝檔（例如 `windows_exporter-0.x.x-amd64.msi`）
-2. 雙擊安裝，預設 port 是 **9182**（不是 9100）
-3. 驗證：在瀏覽器開啟 `http://localhost:9182/metrics`
+Windows 的指標名稱前綴是 `windows_net_*` 而不是 `node_network_*`，Prometheus 請直接使用 `infra/prometheus/prometheus.windows.yml`，不要修改 macOS / Linux 設定檔。`alerts.yml` 的規則寫的是 node_exporter 的指標名稱，在 Windows 上不會有值；工作坊 dashboard 第一列的兩張 panel 與 Lab 00 的 PromQL 同理，要自己換成 `windows_net_bytes_received_total` 這一組。
 
-> 若使用 windows_exporter，Lab 00 的 PromQL 中將 `:9100` 改為 `:9182`，指標名稱前綴為 `windows_net_*` 而非 `node_network_*`。
+## 讓 Prometheus 抓到它
 
-Prometheus 請使用 Windows 專用設定檔：
-
-```powershell
-.\prometheus.exe --config.file="C:\path\to\aiops-anomaly-zero-to-hero\infra\prometheus\prometheus.windows.yml" --web.enable-lifecycle
-```
-
----
-
-## 設定 Prometheus 抓取 node_exporter
-
-本 repository 的 `prometheus.macos.yml` 和 `prometheus.linux.yml` 都已包含 node_exporter 目標：
+設定檔裡本來就有這個 job：
 
 ```yaml
 scrape_configs:
@@ -157,52 +66,30 @@ scrape_configs:
       - targets: ["localhost:9100"]
 ```
 
-如果 Prometheus 已經依 [02-install-prometheus.md](02-install-prometheus.md) 啟動，安裝 node_exporter 後通常等待幾秒就能看到目標變成 `up`。也可以手動重新載入 Prometheus：
+Prometheus 已經依 [02-install-prometheus.md](02-install-prometheus.md) 啟動的話，安裝完等幾秒 target 就會變成 `up`。要立刻生效就重新載入：
 
 ```bash
-# macOS / Linux
 curl -X POST http://localhost:9090/-/reload
 ```
 
-```powershell
-# Windows
-Invoke-WebRequest -Method Post http://localhost:9090/-/reload
-```
-
-在 Prometheus UI（`http://localhost:9090`）查詢 `up{job="node-exporter"}` 確認值為 `1`。
-
-若 `curl -X POST http://localhost:9090/-/reload` 回 `405`，表示 Prometheus 啟動時沒有帶 `--web.enable-lifecycle`，處理方式見 [02-install-prometheus.md](02-install-prometheus.md)。直接重啟 Prometheus 也有同樣效果。
-
-## 規則檔看的是哪一張網卡
-
-`infra/prometheus/alerts.yml` 的 recording rules 目前比對 `device=~"en0|eth0"`。macOS 的無線網卡通常就是 `en0`，Linux 則可能是 `enp3s0`、`ens33` 之類的名字。查一次就知道自己這台是哪一張：
-
-```promql
-topk(3, rate(node_network_receive_bytes_total[5m]))
-```
-
-如果前三名裡沒有 `en0` 或 `eth0`，把 `alerts.yml` 裡的 device 比對式改成你那張網卡的名字，再重新載入 Prometheus。`up{job="node-exporter"}` 是 `1` 但 `net:traffic_bps` 查不到值，多半就是這個原因。
-
-Windows 使用 windows_exporter 時，預設 port 是 `9182`，指標名稱是 `windows_net_*`，與 node_exporter 不同。請直接使用 `infra/prometheus/prometheus.windows.yml`，不要修改 macOS / Linux 設定檔。`alerts.yml` 的規則寫的是 node_exporter 的指標名稱，在 Windows 上不會有值；工作坊 dashboard 第一列的兩張 panel 同理，要自己把 PromQL 換成 `windows_net_bytes_received_total` 這一組。
-
----
+Windows PowerShell 是 `Invoke-WebRequest -Method Post http://localhost:9090/-/reload`。回 `405` 表示啟動時沒有帶 `--web.enable-lifecycle`，處理方式見 [02-install-prometheus.md](02-install-prometheus.md)，直接重啟 Prometheus 也有同樣效果。
 
 ## 確認網路指標可用
 
-在 `http://localhost:9090` 執行以下 PromQL，確認能看到你的網路介面。
-
-**macOS / Linux（node_exporter）：**
+在 <http://localhost:9090> 查詢：
 
 ```promql
 node_network_receive_bytes_total{device!~"lo|docker.*|veth.*"}
 ```
 
-有結果（macOS 通常看到 `en0`，Linux 通常看到 `eth0` / `ens3` 等）即可進入 `labs/workshop/00_observability_stack_and_promql.ipynb`。
+macOS 通常看到 `en0`，Linux 通常是 `eth0` 或 `ens3`。Windows 改為查詢 `windows_net_bytes_received_total`。有結果就可以進入 `labs/workshop/00_observability_stack_and_promql.ipynb`。
 
-**Windows（windows_exporter）：**
+## 規則檔看的是哪一張網卡
+
+`alerts.yml` 的 recording rules 比對的是 `device=~"en0|eth0"`。macOS 的無線網卡通常就是 `en0`，Linux 則可能是 `enp3s0`、`ens33` 之類的名字。查詢一次就知道自己這台是哪一張：
 
 ```promql
-windows_net_bytes_received_total
+topk(3, rate(node_network_receive_bytes_total[5m]))
 ```
 
-有結果即可確認 windows_exporter 已被 Prometheus 抓取。
+前三名裡沒有 `en0` 或 `eth0` 的話，把 `alerts.yml` 裡的 device 比對式改成你那張網卡的名字，再重新載入 Prometheus。`up{job="node-exporter"}` 是 `1` 但 `net:traffic_bps` 查詢不到值，多半就是這個原因。
