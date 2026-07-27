@@ -10,7 +10,7 @@
 | Linux | Ubuntu、Debian、Fedora、Rocky Linux 等發行版，Bash terminal |
 | Windows | Windows 10 21H2 以上或 Windows 11，PowerShell 5.1 以上（內建版本即可） |
 
-本課程使用 conda 管理 Python 套件。若尚未安裝 conda，請先安裝 [Miniconda](https://docs.conda.io/en/latest/miniconda.html)。Linux 發行版很多，本課程不假設你使用哪一個套件管理器，因此不提供自動安裝 conda 的 Linux 腳本。
+本課程使用 conda 管理 Python 套件。若尚未安裝 conda，請先安裝 [Miniconda](https://docs.conda.io/en/latest/miniconda.html)。Linux 發行版很多，套件管理器各不相同，所以 Linux 這一端請照 Miniconda 官方頁面的步驟自己裝。
 
 ## 步驟
 
