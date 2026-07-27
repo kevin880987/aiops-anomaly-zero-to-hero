@@ -17,9 +17,9 @@
 | Grafana | <http://localhost:3000> | Step 5 |
 | 檔案伺服器 | <http://localhost:8080> | Step 6 |
 
-前三個是官方 binary，這門課沒有為它們寫過任何一行程式。第四個是 Python 標準函式庫的 `http.server`，把 notebook 寫出來的 CSV 與 PNG 開給 Grafana 讀。
+前三個是官方 binary。第四個是 Python 標準函式庫的 `http.server`，把 notebook 寫出來的 CSV 與 PNG 開給 Grafana 讀。
 
-Notebook 本身是自足的，載入、baseline、偵測、評估的函式都寫在每一份 notebook 開頭，不 import 這個 repository 裡的任何模組。上面四個服務是為了讓結果上得了 dashboard，不是 notebook 執行起來的前提。
+上面四個服務是為了讓結果上得了 dashboard，不是 notebook 執行起來的前提。
 
 ## Step 1. 進入 course repo
 
