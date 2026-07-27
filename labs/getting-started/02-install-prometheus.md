@@ -74,7 +74,11 @@ Intel Mac 的前綴是 `/usr/local`，用 `brew --prefix` 確認。Linux 的 sys
 | `localhost:9100` | `node-exporter` | 這台機器的真實網路指標（macOS / Linux） |
 | `localhost:9182` | `windows-exporter` | 這台機器的真實網路指標（Windows） |
 
-Notebook 算出來的結果不經過 Prometheus，而是用 `to_csv()` 與 `savefig()` 寫進 `outputs/workshop/`，由 Grafana 的 Infinity datasource 讀檔案。分開的理由是儲存模型：Prometheus 是 pull 模型，時間戳來自 scrape 的當下，一整個月的歷史分數推不進去，硬要推就得寫重播器，而重播器會讓時間軸變成假的。
+Notebook 算出來的結果不經過 Prometheus，而是用 `to_csv()` 與 `savefig()` 寫進 `outputs/workshop/`，由 Grafana 的 Infinity datasource 讀檔案。
+
+灌得進去，只是課堂上划不來。`promtool tsdb create-blocks-from openmetrics` 可以把帶時間戳的歷史樣本壓成 TSDB block，時間戳完整保留；代價是一整個月的分數會產生數百個 block，而且要把 block 搬進 Prometheus 的 data 目錄再重啟，每調一次參數重新執行 notebook 就得再走一次。
+
+真實部署走的是上面那條路：分數由服務算完曝露在 `/metrics`，Prometheus scrape，Grafana 查詢。所以課程的 dashboard 把 Infinity 面板的欄位命名成 `aiops_*` 的 metric 名，port 用 dashboard 變數篩選，對應的就是 PromQL 的 label selector。上線時把 datasource 換成 Prometheus，面板不用重做。
 
 三份設定檔都帶一行 `rule_files: ["alerts.yml"]`，指到的永遠是 `infra/prometheus/alerts.yml`，跟你從哪個目錄啟動無關。那份檔案裡是打在 `node_exporter` 指標上的 recording rules 與 alert rules，工作坊 Lab 01 與 Lab 02 會拿它跟 pandas 那一邊對照。要先驗設定檔與規則檔：
 

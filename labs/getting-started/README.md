@@ -45,7 +45,7 @@ Windows PowerShell 用 `cd C:\path\to\aiops-anomaly-zero-to-hero`。
 
 ## Step 4. 安裝並啟動 node_exporter
 
-照 [04-install-node-exporter.md](04-install-node-exporter.md) 做。Windows 用的是 windows_exporter，聽在 9182。
+照 [04-install-node-exporter.md](04-install-node-exporter.md) 做。Windows 用的是 windows_exporter，listening port 為 9182。
 
 工作坊的即時指標與 `alerts.yml` 的所有規則都打在這個 exporter 曝露的 `node_network_*` 上。
 
@@ -90,13 +90,3 @@ Lab 00 唯一要證明的事，就是即時指標與分析結果這兩條路徑�
 ## 選用：Grafana Cloud
 
 課程主線只需要 Grafana Local。想把指標推上雲端再看 [03b-setup-grafana-cloud.md](03b-setup-grafana-cloud.md)。
-
-## 卡住的時候
-
-每一份安裝文件末尾都有自己的〈常見問題〉，先看那裡。下面三種是跨文件的：
-
-`up` 查詢得到 `job="prometheus"`，查詢不到 `job="node-exporter"`，表示 Prometheus 載入的是套件的預設設定檔。見 [02-install-prometheus.md](02-install-prometheus.md)〈啟動方式的陷阱〉。
-
-dashboard 第一列空白走 Prometheus 那條線查，第二列與第三列空白則跟 Prometheus 無關，先確認 Step 6 的終端機還開著。
-
-notebook 的 kernel 選單裡找不到課程環境，見 [01-setup-python-environment.md](01-setup-python-environment.md)〈常見問題〉最後一則。

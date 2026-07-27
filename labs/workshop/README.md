@@ -10,7 +10,9 @@
 
 **分析路徑。** Notebook 算完之後用 `to_csv()` 寫檔案、用 `savefig()` 寫圖，兩個都落在 `outputs/workshop/`。一行 `python -m http.server` 把那個資料夾開出來，Grafana 用 Infinity datasource 讀 CSV，用內建的 Text panel 讀 PNG。一樣沒有 exporter，沒有中介服務。
 
-一整個月的歷史分數推不進 Prometheus，因為它是 pull 模型，時間戳來自 scrape 的當下。硬要推就得寫重播器，而重播器會讓時間軸變成假的，在上面做的每一個視窗計算都要先換算一次才能讀。所以歷史結果走檔案，即時指標走 Prometheus。
+一整個月的歷史分數不容易進 Prometheus，因為它是 pull 模型，時間戳來自 scrape 的當下。`promtool tsdb create-blocks-from openmetrics` 做得到，時間戳也保得住，但一整個月會產生數百個 block，還要搬進 data 目錄重啟，每次重新執行 notebook 都得再來一次。所以課堂上歷史結果走檔案，即時指標走 Prometheus。
+
+Infinity 在這裡是課堂用的替身。真實系統裡這些分數由服務算完曝露在 `/metrics`，跟其他指標一樣被 scrape。所以 dashboard 刻意讓 Grafana 這一側長得一樣：欄位名是 `aiops_*` 的 metric 名，port 用 dashboard 變數篩選，對應 PromQL 的 label selector。上線時換掉 datasource，面板不動。
 
 Notebook 這一端也看得到圖，用的是 matplotlib，離開這個 repo 也還用得上。兩邊分工：notebook 的圖定住不動，適合逐條比較；dashboard 的 panel 可以互動，適合換條件驗證。兩邊沒有共用的繪圖程式碼，只共用同一批數字，所以兩張圖對不起來就是中間那條路徑斷了。
 
