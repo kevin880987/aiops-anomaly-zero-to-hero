@@ -8,7 +8,7 @@
 
 ## 課堂上要準備的東西
 
-課堂走的是工作坊路線（`labs/workshop/`）。它需要四個東西同時活著，最後一個要自己在終端機開，而且整個下午都不能關。
+課堂用的是 `labs/workshop/`。它需要四個東西同時活著，最後一個要自己在終端機開，而且整個下午都不能關。
 
 | 元件 | 位址 | 這一頁的哪一步 |
 | --- | --- | --- |
@@ -176,32 +176,13 @@ labs/getting-started/00-check-your-setup.ipynb
 
 ## Step 8. 開始 labs
 
-工作坊路線從這裡開始：
+從這裡開始：
 
 ```text
 labs/workshop/00_observability_stack_and_promql.ipynb
 ```
 
 Lab 00 唯一要證明的事，就是即時指標與分析結果這兩條路徑都通。順序不能跳，Lab 02 的 panel 畫的是 Lab 01 算出來的欄位。四份 notebook 的分工見 [`labs/workshop/README.md`](../workshop/README.md)。
-
-自學路線（`labs/self-study/`）從這裡開始：
-
-```text
-labs/self-study/00_observability_stack.ipynb
-```
-
-自學路線只需要 Step 1 到 Step 3 與 Step 5 的 Prometheus data source，`node_exporter` 與檔案伺服器都可以略過，但要多做下一節那兩個 exporter。
-
----
-
-## 自學路線延伸：兩個 Python exporter
-
-`labs/self-study/` 示範的是 pull 模型的完整形狀，從 exporter 曝露 `/metrics`，到 Prometheus scrape，到 Grafana 查詢。它需要兩個工作坊路線用不到的東西：
-
-- `infra/rrd_exporter.py` 把 `data/synthetic/synthetic_rrd_metrics.csv` 曝露在 `localhost:8000`。
-- `infra/python_results_exporter.py` 把 notebook 結果曝露在 `localhost:8010`。
-
-這兩個 job 在 `infra/prometheus/prometheus.*.yml` 裡預設是註解掉的，要自己打開再重啟 Prometheus。做法寫在 [02-install-prometheus.md](02-install-prometheus.md) 最後一節，結果 CSV 怎麼送進 Grafana 見 [05-prometheus-dropzone.md](05-prometheus-dropzone.md)。
 
 ---
 
@@ -268,10 +249,6 @@ http://localhost:9090
 ### Grafana 的 Add data source 裡找不到 Infinity
 
 外掛沒裝，或裝完沒重啟 Grafana。見 [03a-install-grafana-local.md](03a-install-grafana-local.md)〈安裝 Infinity 外掛〉。
-
-### `localhost:8000` 連不上
-
-`infra/rrd_exporter.py` 沒有啟動。這是自學路線才需要的 exporter，工作坊路線不會用到它。
 
 ---
 

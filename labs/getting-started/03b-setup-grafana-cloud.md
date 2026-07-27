@@ -78,26 +78,22 @@ prometheus --config.file=infra/prometheus/prometheus.macos.yml --web.enable-life
 3. 資料來源選 **Prometheus**（Grafana Cloud 已預先設定）。
 4. 在 Metrics browser 輸入 `up`，點擊 **Run query**。
 
-看到 `up{job="rrd-exporter"}` 值為 `1` 即表示 remote_write 設定正確。
+看到 `up{job="node-exporter"}` 值為 `1` 即表示 remote_write 設定正確。
 
 ---
 
 ## 步驟 7 — 匯入課程 Dashboard
 
-本 repository 提供一份 Grafana dashboard JSON：
-
-```text
-infra/grafana/dashboards/network_metrics.json
-```
-
-匯入方式：
+課程 dashboard 的 JSON 在 `infra/grafana/dashboards/aiops-workshop.json`。
 
 1. 左側選單 → **Dashboards → New → Import**。
-2. 點擊 **Upload dashboard JSON file**，選擇 `infra/grafana/dashboards/network_metrics.json`。
+2. 點擊 **Upload dashboard JSON file**，選擇該檔案。
 3. 在 **Prometheus** 欄位選擇 Grafana Cloud 預設的 Prometheus datasource。
 4. 點擊 **Import**。
 
-匯入後若 panel 顯示 `No data`，先確認 `up{job="rrd-exporter"}` 在 Explore 中值為 `1`。
+第一列的即時指標走 Prometheus，會跟著 remote_write 上雲。第二列與第三列讀本機檔案伺服器上的 lab 結果，Grafana Cloud 連不到 `localhost:8080`，所以那兩列只在 Grafana Local 有資料。
+
+匯入後若第一列顯示 `No data`，先確認 `up{job="node-exporter"}` 在 Explore 中值為 `1`。
 
 ---
 
@@ -112,5 +108,5 @@ URL 一定要以 `/api/prom/push` 結尾。從 My Account → Stack → Promethe
 **token 只顯示一次，我沒複製到？**
 回到 My Account → Stack → Prometheus Details → Access Policies，建立一個新 token。
 
-**Dashboard panel 一直 `No data`，但 `up` 可以查到？**
-確認 exporter 正在執行（`python infra/rrd_exporter.py`）。Dashboard 使用的指標是 `network_rrd_*`，這些指標由 exporter 提供。
+**第一列 panel 一直 `No data`，但 `up` 可以查到？**
+Dashboard 第一列用的是 `node_network_*`，由 node_exporter 提供。確認它正在執行，做法見 [04-install-node-exporter.md](04-install-node-exporter.md)。

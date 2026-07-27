@@ -30,7 +30,6 @@ jobs:
 
       - name: Validate course files
         run: |
-          python -m py_compile infra/rrd_exporter.py
           python - <<'PY'
           import json
           from pathlib import Path

@@ -11,9 +11,9 @@ node_exporter 是 Prometheus 的官方 OS metrics 代理人，負責把 CPU、�
 
 本指南採用 Prometheus 官方 GitHub release 的 node_exporter binary，下載 URL 使用 `https://github.com/prometheus/node_exporter/releases/download/v<version>/...`。
 
-工作坊路線需要這一步。三份 Prometheus 設定檔預設就帶 OS exporter 的 job，`infra/prometheus/alerts.yml` 裡的 recording rules 與 alert rules 也全部打在 `node_network_*` 指標上，所以沒有 node_exporter 的話，dashboard 第一列與所有規則都不會有值。自學路線可以先跳過。
+三份 Prometheus 設定檔預設就帶 OS exporter 的 job，`infra/prometheus/alerts.yml` 裡的 recording rules 與 alert rules 也全部打在 `node_network_*` 指標上，所以沒有 node_exporter 的話，dashboard 第一列與所有規則都不會有值。
 
-不要把 node_exporter 跟自學路線的 `infra/rrd_exporter.py` 混在一起。前者讀取你的真實作業系統指標，後者把課程準備好的 network telemetry CSV 轉成 Prometheus 可抓取的 metrics。課程 CSV 是 synthetic data，但它模擬的是整理後的真實網路訊號。
+node_exporter 讀的是你這台機器的真實作業系統指標，跟 notebook 讀的 `data/synthetic/synthetic_rrd_metrics.csv` 是兩回事。後者是 synthetic data，模擬的是整理後的真實網路訊號。
 
 ---
 

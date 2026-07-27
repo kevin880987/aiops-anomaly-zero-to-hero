@@ -52,22 +52,19 @@ getting-started
   -> deployment checks
 ```
 
-Python 主要讀取整理好的 CSV，不直接以 PromQL 作為演算法輸入。結果送到 Grafana 的方式兩條路線不同。
+Python 主要讀取整理好的 CSV，不直接以 PromQL 作為演算法輸入。結果送到 Grafana 的路徑是這樣：
 
-工作坊路線把結果寫成 `outputs/workshop/*.csv` 與 `*.png`，用 `python -m http.server` 開出資料夾，
+Notebook 把結果寫成 `outputs/workshop/*.csv` 與 `*.png`，用 `python -m http.server` 開出資料夾，
 Grafana 端以 Infinity datasource 讀檔案。這條路徑沒有 exporter，寫檔用的就是 `to_csv()` 與 `savefig()`。
 
-自學路線把結果複製到 `outputs/prometheus-dropzone/current_results.csv`，由 `python_results_exporter`
-曝露成 metrics，Prometheus scrape 之後在 Grafana 顯示。它示範的是 pull 模型的完整形狀，流程見
-[`labs/getting-started/05-prometheus-dropzone.md`](labs/getting-started/05-prometheus-dropzone.md)。
 
-### 路線 A：工作坊短版
+## Labs
 
 位置：`labs/workshop/`，入口是 [`labs/workshop/README.md`](labs/workshop/README.md)。
 
 這條路線是 GUI-first 的：換 port、拖時間軸、改 alert rule 都在 Grafana 上做。
-Notebook 這一端用 matplotlib 把每一段的結果畫出來，和 self-study 那十份 notebook 同一套寫法。
-兩邊各自獨立，讀的是同一批數字，所以兩張圖對不起來就代表中間那條資料路徑斷了。
+Notebook 這一端用 matplotlib 把每一段的結果畫出來。Notebook 的圖與 Grafana 的 panel 各自獨立，
+讀的是同一批數字，所以兩張圖對不起來就代表中間那條資料路徑斷了。
 
 Grafana 端全部走官方功能，這門課沒有為它寫過腳本。Datasource 用內建的檔案 provisioning
 （`infra/grafana/provisioning/datasources.yaml`），dashboard 用 UI 的 Import 匯入
@@ -81,23 +78,6 @@ Grafana 端全部走官方功能，這門課沒有為它寫過腳本。Datasourc
 | `02_anomaly_detection_and_alerting.ipynb` | score 收成 label、label 通過 policy 成為 alert，以 event recall、detection delay 與 alerts per day 評估 | 60–75 分鐘 |
 | `08_agentic_ai_rca_capstone.ipynb` | RCA context、agentic loop、human approval gate | 45–60 分鐘 |
 
-### 路線 B：完整自學版
-
-位置：`labs/self-study/`
-
-主要使用 repository 內建 synthetic data。它不是另一條 production 架構，而是用可重建 CSV 模擬真實網路 telemetry 已被整理後的形態，讓 Python 演算法練習可以穩定重跑、容易定位錯誤。
-
-1. `data/synthetic/simulator_rrd_metrics.ipynb`
-2. `labs/self-study/00_observability_stack.ipynb`
-3. `labs/self-study/01_time_series_features.ipynb`
-4. `labs/self-study/02_baseline_anomaly_detection.ipynb`
-5. `labs/self-study/03_spc_anomaly_detection.ipynb`
-6. `labs/self-study/04_ml_anomaly_detection.ipynb`
-7. `labs/self-study/05_alert_reduction.ipynb`
-8. `labs/self-study/06_forecasting.ipynb`
-9. `labs/self-study/07_root_cause_analysis.ipynb`
-10. `labs/self-study/08_deploy_to_production.ipynb`
-
 ---
 
 ## 資料流
@@ -110,14 +90,12 @@ actual OS / network telemetry
 
 organized network telemetry CSV
   -> Python notebooks consume CSV
-  -> outputs/self-study/*.csv or outputs/workshop/*.csv
-  -> optional copy to outputs/prometheus-dropzone/current_results.csv
-  -> python_results_exporter exposes Python results as /metrics
-  -> Prometheus scrapes aiops_python_result
-  -> Grafana shows Python anomaly / forecast / RCA signals
+  -> outputs/workshop/*.csv and *.png
+  -> python -m http.server serves that folder
+  -> Grafana reads the files with the Infinity datasource
 ```
 
-本課程的 synthetic CSV 對應的是「organized network telemetry CSV」這一層。它模擬真實營運資料被整理成欄位清楚、時間戳一致、可供 Python 分析的格式。每個 self-study notebook 會讀取前一步輸出，並把新的中間結果寫回 `outputs/self-study/`（gitignored）。中途失敗時，從失敗 notebook 的前一個 lab 重跑，不要直接跳到後面的 lab。
+本課程的 synthetic CSV 對應的是「organized network telemetry CSV」這一層。它模擬真實營運資料被整理成欄位清楚、時間戳一致、可供 Python 分析的格式。每份 notebook 讀取前一步的輸出，並把新的中間結果寫回 `outputs/workshop/`（gitignored）。中途失敗時，從失敗 notebook 的前一個 lab 重跑，不要直接跳到後面的 lab。
 
 ---
 
@@ -185,22 +163,17 @@ promtool check config infra/prometheus/prometheus.windows.yml
 ├── environments/                # conda 課程環境，三個平台各一份
 ├── labs/
 │   ├── getting-started/         # setup 主入口、互動式檢查 notebook、各平台安裝指南
-│   ├── workshop/                # 工作坊短版 notebooks
-│   └── self-study/              # 完整自學版 notebooks
+│   └── workshop/                # 工作坊 notebooks
 ├── data/
 │   ├── synthetic/               # 可重建的 organized network telemetry CSV
 │   └── sample/                  # 原始 LibreNMS/RRDTool sample data（選讀）
 ├── outputs/                     # Labs 產出（gitignored）
-│   ├── workshop/
-│   ├── self-study/
-│   └── prometheus-dropzone/      # current_results.csv feeds python_results_exporter
+│   └── workshop/
 ├── infra/
 │   ├── prometheus/              # Prometheus 設定與 node_exporter 上的 recording / alert rules
 │   ├── grafana/
 │   │   ├── provisioning/        # datasource 的 YAML，用 Grafana 內建的 file provisioning
-│   │   └── dashboards/          # dashboard JSON，從 Grafana UI 匯入
-│   ├── rrd_exporter.py          # organized telemetry CSV to Prometheus metrics
-│   └── python_results_exporter.py # Python result CSV to Prometheus metrics
+│       └── dashboards/          # dashboard JSON，從 Grafana UI 匯入
 └── environments/               # 各平台環境檢查
 ```
 

@@ -52,10 +52,6 @@ env/
 # .gitkeep files anchor the directories in git; all generated content is ignored.
 outputs/workshop/*
 !outputs/workshop/.gitkeep
-outputs/self-study/*
-!outputs/self-study/.gitkeep
-outputs/prometheus-dropzone/*
-!outputs/prometheus-dropzone/.gitkeep
 outputs/setup/*
 
 # Slide decks. The deck lives outside this repo in ../slide/ and is rebuilt from

@@ -5,5 +5,4 @@
 | 目錄 | 用途 |
 | --- | --- |
 | [getting-started/](getting-started/) | setup 主入口、互動式檢查 notebook、各平台安裝指南 — 從這裡開始 |
-| [workshop/](workshop/) | 工作坊短版 notebooks（Lab 00–02, 08） |
-| [self-study/](self-study/) | 完整自學版 notebooks（Lab 00–08） |
+| [workshop/](workshop/) | 工作坊 notebooks（Lab 00–02, 08） |

@@ -14,11 +14,9 @@ Prometheus 是系統級監控服務，安裝方式依作業系統與權限設定
 
 ## 這門課的 Prometheus 抓什麼
 
-工作坊路線只有兩個 scrape target：Prometheus 自己，以及 `node_exporter`（Windows 上是 `windows_exporter`）。兩個都是官方 binary，這門課沒有為它們寫過任何一行程式。
+這門課只有兩個 scrape target：Prometheus 自己，以及 `node_exporter`（Windows 上是 `windows_exporter`）。兩個都是官方 binary，這門課沒有為它們寫過任何一行程式。
 
 Notebook 算出來的結果不經過 Prometheus。它用 `to_csv()` 與 `savefig()` 寫進 `outputs/workshop/`，一行 `python -m http.server` 把資料夾開出來，Grafana 端用 Infinity datasource 讀檔案。分開的理由是儲存模型。Prometheus 是 pull 模型，時間戳來自 scrape 的當下，一個月份的歷史分數推不進去，硬要推就得寫重播器，而重播器會讓時間軸變成假的。
-
-自學路線另外有兩個 Python exporter，把課程 CSV 轉成 `/metrics`。設定檔裡這兩個 job 預設被註解掉，走到 `labs/self-study/` 時再打開，做法見本頁最後一節。
 
 本課程提供三份 Prometheus 設定檔：
 
@@ -28,19 +26,12 @@ infra/prometheus/prometheus.linux.yml    Linux
 infra/prometheus/prometheus.windows.yml  Windows
 ```
 
-三份都定義同一組預設 target：
+三份都定義同一組 target：
 
 ```text
 localhost:9090  prometheus        Prometheus 自己
 localhost:9100  node-exporter     這台機器的真實網路指標（macOS / Linux）
 localhost:9182  windows-exporter  這台機器的真實網路指標（Windows）
-```
-
-以下兩個 job 在設定檔裡是註解，自學路線才需要打開：
-
-```text
-localhost:8000  rrd-exporter             課程整理好的 network telemetry CSV
-localhost:8010  python-results-exporter  notebook 結果 CSV 的 drop zone
 ```
 
 Prometheus 對 DOWN 的 target 會顯示為 `0`，不會阻止其他 target 正常收集。
@@ -192,58 +183,6 @@ Prometheus 啟動時沒有帶 `--web.enable-lifecycle`。前景啟動就直接�
 
 **macOS 顯示 `brew: command not found`？**
 請先安裝 Homebrew：[https://brew.sh](https://brew.sh)，或改用 Prometheus 官方下載頁的 binary 安裝方式。
-
-## 自學路線：打開兩個 Python exporter
-
-工作坊路線不需要這一節，直接跳到〈下一步〉。
-
-`labs/self-study/` 會示範 pull 模型的完整形狀，從 exporter 曝露 `/metrics`，到 Prometheus scrape，到 Grafana 查詢。要走這條路，先把設定檔裡兩個註解掉的 job 打開：
-
-```yaml
-  - job_name: "rrd-exporter"
-    static_configs:
-      - targets: ["localhost:8000"]
-
-  - job_name: "python-results-exporter"
-    static_configs:
-      - targets: ["localhost:8010"]
-```
-
-改完重啟 Prometheus，或在有 `--web.enable-lifecycle` 的情況下 `curl -X POST http://localhost:9090/-/reload`。
-
-`infra/rrd_exporter.py` 把 `data/synthetic/synthetic_rrd_metrics.csv` 轉成 Prometheus 格式，在 `http://localhost:8000/metrics` 曝露出來。這份 CSV 代表整理好的 network telemetry；在真實環境中它可能來自 SNMP、RRDTool、設備匯出或資料管線，課程裡用 synthetic data 模擬，讓每位 cadet 重現同一組訊號。另開一個終端機執行：
-
-```bash
-conda activate aiops-anomaly-zero-to-hero
-python infra/rrd_exporter.py
-```
-
-看到 `Exporting metrics on http://localhost:8000/metrics` 後保持這個終端機開著。驗證：
-
-```bash
-curl http://localhost:8000/metrics
-```
-
-Windows PowerShell 用 `Invoke-WebRequest http://localhost:8000/metrics`。
-
-`infra/python_results_exporter.py` 讀 `outputs/prometheus-dropzone/current_results.csv`，把 notebook 產生的 anomaly score、forecast、SPC result 曝露在 `http://localhost:8010/metrics`。同樣另開一個終端機：
-
-```bash
-conda activate aiops-anomaly-zero-to-hero
-python infra/python_results_exporter.py
-```
-
-還沒有 CSV 時 exporter 會等待，這是正常狀態。完整流程見 [05-prometheus-dropzone.md](05-prometheus-dropzone.md)。
-
-兩個 job 都打開之後，這兩條查詢應該都是 `1`：
-
-```promql
-up{job="rrd-exporter"}
-```
-
-```promql
-up{job="python-results-exporter"}
-```
 
 ## 下一步
 

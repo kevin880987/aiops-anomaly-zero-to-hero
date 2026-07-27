@@ -112,7 +112,7 @@
       "gridPos": { "h": 7, "w": 6, "x": 0, "y": 7 },
       "options": {
         "mode": "markdown",
-        "content": "These panels query the **Lab outputs** datasource, which is the Infinity plugin reading CSV over HTTP.\n\nStart the file server from the repository root before opening this dashboard:\n\n```bash\npython -m http.server 8080 \\\n  --directory outputs/workshop\n```\n\nRe-run a notebook cell, refresh the panel, and the line changes. There is no exporter, no drop zone and no Prometheus in this path: the notebook writes a file and Grafana reads it.\n\nEmpty panels almost always mean the file server is not running. Open <http://localhost:8080> and check."
+        "content": "These panels query the **Lab outputs** datasource, which is the Infinity plugin reading CSV over HTTP.\n\nStart the file server from the repository root before opening this dashboard:\n\n```bash\npython -m http.server 8080 \\\n  --directory outputs/workshop\n```\n\nRe-run a notebook cell, refresh the panel, and the line changes: the notebook writes a file and Grafana reads it over HTTP.\n\nEmpty panels almost always mean the file server is not running. Open <http://localhost:8080> and check."
       }
     },
     {
