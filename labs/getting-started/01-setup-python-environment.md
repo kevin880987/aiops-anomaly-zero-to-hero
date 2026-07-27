@@ -1,36 +1,31 @@
 # Python 環境設定
 
-三個平台共用這一頁。每一步都先列 macOS / Linux，再列 Windows PowerShell，只跑自己作業系統的那一塊。
 
 ## 前置條件
 
-| 作業系統 | 需要 |
+| 作業系統 | 需求 |
 | --- | --- |
 | macOS | macOS 12 Monterey 以上，終端機（Terminal 或 iTerm2） |
 | Linux | Ubuntu、Debian、Fedora、Rocky Linux 等發行版，Bash terminal |
 | Windows | Windows 10 21H2 以上或 Windows 11，PowerShell 5.1 以上（內建版本即可） |
 
-本課程使用 conda 管理 Python 套件。若尚未安裝 conda，請先安裝 [Miniconda](https://docs.conda.io/en/latest/miniconda.html)。Linux 發行版很多，套件管理器各不相同，所以 Linux 這一端請照 Miniconda 官方頁面的步驟自己裝。
+本課程使用 conda 管理 Python 套件，Python 直譯器由 conda 環境提供，不需要另外安裝系統 Python。尚未安裝 conda 的話，先照官方安裝指南裝好再回來：
+
+- [Miniconda 安裝指南](https://www.anaconda.com/docs/getting-started/miniconda/install)（本課程建議，體積小）
+- [conda 官方安裝文件](https://docs.conda.io/projects/conda/en/stable/user-guide/install/index.html)（三個平台的完整說明）
+- [Python 官方下載頁](https://www.python.org/downloads/)（不使用 conda 時的來源）
 
 ## 步驟
 
 ### 1. 進入專案根目錄
 
-macOS / Linux：
-
 ```bash
-cd aiops-anomaly-zero-to-hero
-```
-
-Windows PowerShell：
-
-```powershell
 cd aiops-anomaly-zero-to-hero
 ```
 
 ### 2. 建立 conda 環境
 
-環境檔按平台分成三份，跑自己那一份。三份建立的是同一個 conda environment：`aiops-anomaly-zero-to-hero`。
+執行 OS 系統對應的environment環境檔。三份建立的是同一個 conda environment：`aiops-anomaly-zero-to-hero`。
 
 macOS：
 
@@ -64,15 +59,14 @@ conda activate aiops-anomaly-zero-to-hero
 
 ### 3. 開啟 labs
 
-用你慣用的 notebook 工具開啟 `labs/getting-started/00-check-your-setup.ipynb`（Windows 是 `labs\getting-started\00-check-your-setup.ipynb`），kernel 選課程環境，然後逐格執行。這份 notebook 是最終檢查入口；若缺少任何項目，它會指向對應安裝指南。
+用你慣用的 IDE 或 notebook 工具開啟 `labs/getting-started/00-check-your-setup.ipynb`，kernel 選擇課程環境，然後逐格執行。這份 notebook 是最終檢查入口，缺少任何項目時它會指向對應的安裝指南。
 
-## Labs 工具選項
 
-工具只要連得上上一步啟用的 conda 環境就可以用：
-
-- [Visual Studio Code](https://code.visualstudio.com/)，安裝 Python 與 Jupyter 擴充套件後直接開啟 `.ipynb`。
-- [PyCharm](https://www.jetbrains.com/pycharm/)，Professional 版內建 notebook 支援。
-- [JupyterLab](https://jupyter.org/)，`conda install -n aiops-anomaly-zero-to-hero jupyterlab` 後執行 `jupyter lab labs/`。
+| 工具 | 安裝指南 | 開啟 notebook 的方式 |
+| --- | --- | --- |
+| Visual Studio Code | [Setup overview](https://code.visualstudio.com/docs/setup/setup-overview) | 安裝 Python 與 Jupyter 擴充套件後直接開啟 `.ipynb`，做法見 [Jupyter Notebooks in VS Code](https://code.visualstudio.com/docs/datascience/jupyter-notebooks) |
+| PyCharm | [Installation guide](https://www.jetbrains.com/help/pycharm/installation-guide.html) | Professional 版內建 notebook 支援 |
+| JupyterLab | [Installation](https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html) | `conda install -n aiops-anomaly-zero-to-hero jupyterlab` 之後執行 `jupyter lab labs/` |
 
 ## 常見問題
 
@@ -109,7 +103,7 @@ conda activate aiops-anomaly-zero-to-hero
 python -m ipykernel install --user --name aiops-anomaly-zero-to-hero --display-name "Python (aiops-anomaly-zero-to-hero)"
 ```
 
-重新載入編輯器的 kernel 選單，再選 `Python (aiops-anomaly-zero-to-hero)`。
+重新載入編輯器的 kernel 選單，再選擇 `Python (aiops-anomaly-zero-to-hero)`。
 
 **環境要怎麼完全刪除重建？**
 
