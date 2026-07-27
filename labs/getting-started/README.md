@@ -73,23 +73,21 @@ Get-Location
 | Linux | [01b-setup-linux-python-environment.md](01b-setup-linux-python-environment.md) |
 | Windows | [01c-setup-windows-python-environment.md](01c-setup-windows-python-environment.md) |
 
-完成後，確認你能啟動課程環境：
+完成後，確認你能啟用課程環境：
 
 macOS / Linux：
 
 ```bash
 conda activate aiops-anomaly-zero-to-hero
-jupyter lab labs/
 ```
 
 Windows PowerShell：
 
 ```powershell
 conda activate aiops-anomaly-zero-to-hero
-jupyter lab labs\
 ```
 
-你可以使用 JupyterLab、VS Code、PyCharm 或其他支援 Jupyter notebook 的工具。重點是 notebook kernel 要選到 `aiops-anomaly-zero-to-hero`。
+接著用你慣用的 notebook 工具開啟 `.ipynb`，VS Code、PyCharm、JupyterLab 或其他支援 Jupyter kernel 的工具都可以。重點是 notebook kernel 要選到 `Python (aiops-anomaly-zero-to-hero)`。
 
 ---
 
@@ -172,7 +170,7 @@ labs/getting-started/00-check-your-setup.ipynb
 
 如果某一格失敗，notebook 會列出對應安裝指南。先補齊缺項，再重新跑這份 notebook。
 
-請以 notebook 的結果為準。本課程不再提供另一套檢查腳本，避免 terminal Python、conda environment 與 notebook kernel 不一致時產生誤判。
+請以 notebook 的結果為準。terminal Python、conda environment 與 notebook kernel 三者不一致時，在終端機另跑一支檢查腳本會給出誤判。
 
 ---
 
@@ -243,7 +241,7 @@ conda activate aiops-anomaly-zero-to-hero
 python -m ipykernel install --user --name aiops-anomaly-zero-to-hero --display-name "Python (aiops-anomaly-zero-to-hero)"
 ```
 
-重新整理 JupyterLab 的 kernel 選單，再選 `Python (aiops-anomaly-zero-to-hero)`。
+重新載入編輯器的 kernel 選單，再選 `Python (aiops-anomaly-zero-to-hero)`。
 
 ### `localhost:9090` 連不上
 
@@ -283,7 +281,6 @@ http://localhost:9090
 
 | 檔案 | 用途 |
 | --- | --- |
-| `environment.yml` | 預設跨平台版本 |
 | `environments/environment.macos.yml` | macOS 版本 |
 | `environments/environment.linux.yml` | Linux 版本 |
 | `environments/environment.windows.yml` | Windows 版本 |

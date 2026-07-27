@@ -31,34 +31,37 @@ conda activate aiops-anomaly-zero-to-hero
 
 ### 3. 註冊 Jupyter kernel
 
-讓 JupyterLab 能在 kernel 選單中找到這個環境：
+讓 notebook 工具在 kernel 選單中找到這個環境：
 
 ```bash
 python -m ipykernel install --user --name aiops-anomaly-zero-to-hero --display-name "Python (aiops-anomaly-zero-to-hero)"
 ```
 
-### 4. 之後每次啟動
+### 4. 開啟 labs
+
+用你慣用的 notebook 工具開啟 `labs/getting-started/00-check-your-setup.ipynb`，kernel 選 `Python (aiops-anomaly-zero-to-hero)`，然後逐格執行。這份 notebook 是最終檢查入口；若缺少任何項目，它會指向對應安裝指南。
+
+在終端機跑課程腳本時，記得先啟用環境：
 
 ```bash
 conda activate aiops-anomaly-zero-to-hero
-jupyter lab labs/
 ```
 
 ## Labs 工具選項
 
-JupyterLab 是預設路徑，但任何支援 Jupyter kernel 的工具都可以使用：
+只要工具連得上第 3 步註冊的 kernel 就可以用：
 
-- [JupyterLab](https://jupyter.org/) — 本指南的預設。
-- [Visual Studio Code](https://code.visualstudio.com/) — 開啟 `.ipynb`，在右上角的 kernel 選單選擇 `aiops-anomaly-zero-to-hero`。
-- [PyCharm](https://www.jetbrains.com/pycharm/) — Professional 版支援 Jupyter labs。
+- [Visual Studio Code](https://code.visualstudio.com/)，安裝 Python 與 Jupyter 擴充套件後直接開啟 `.ipynb`。
+- [PyCharm](https://www.jetbrains.com/pycharm/)，Professional 版內建 notebook 支援。
+- [JupyterLab](https://jupyter.org/)，`conda install -n aiops-anomaly-zero-to-hero jupyterlab` 後執行 `jupyter lab labs/`。
 
 ## 常見問題
 
 **conda activate 沒有作用？**
 執行 `conda init bash`，重新開啟 terminal，再試一次。
 
-**指令顯示 `environment.yml not found`？**
-請確認你目前在專案根目錄，也就是可以看到 `environment.yml` 與 `labs/` 的那一層。
+**指令顯示找不到環境檔？**
+請確認你目前在專案根目錄，也就是可以看到 `environments/` 與 `labs/` 的那一層。
 
 **環境已存在想更新套件版本？**
 

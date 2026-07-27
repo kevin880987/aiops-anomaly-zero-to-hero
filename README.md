@@ -182,7 +182,7 @@ promtool check config infra/prometheus/prometheus.windows.yml
 ```text
 .
 ├── README.md                    # 本文件
-├── environment.yml              # conda 課程環境
+├── environments/                # conda 課程環境，三個平台各一份
 ├── labs/
 │   ├── getting-started/         # setup 主入口、互動式檢查 notebook、各平台安裝指南
 │   ├── workshop/                # 工作坊短版 notebooks
