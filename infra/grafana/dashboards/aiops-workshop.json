@@ -75,7 +75,7 @@
     {
       "id": 1,
       "type": "row",
-      "title": "Live metrics from node_exporter, the real deployment path",
+      "title": "Lab 00  live metrics through Prometheus, the deployment path",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -97,7 +97,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "These panels query **Prometheus**, which scrapes `node_exporter` on your own machine. This is the shape a real deployment has: exporter exposes `/metrics`, Prometheus scrapes and stores, Grafana queries.\n\nPick an interface with real traffic in the **Interface** dropdown, then download something large and watch it move."
+        "content": "These panels query **Prometheus**, which scrapes `node_exporter` on your own machine: exporter exposes `/metrics`, Prometheus scrapes and stores, Grafana queries. That is the shape a real deployment has, and Lab 00 is where the course exercises it end to end.\n\nLabs 01, 02 and 08 never query Prometheus. They read CSV, and the row below stands in.\n\nPick an interface with real traffic in the **Interface** dropdown, then download something large and watch it move."
       }
     },
     {
@@ -202,7 +202,7 @@
     {
       "id": 10,
       "type": "row",
-      "title": "Lab results, read from outputs/workshop/*.csv",
+      "title": "Lab 01 and 02  results read from CSV",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -224,7 +224,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "This row stands in for Prometheus. Each piece has a counterpart in the\ndeployment path above:\n\n| here | in production |\n| --- | --- |\n| `outputs/workshop/*.csv` | a service exposing `/metrics` |\n| `python -m http.server` | the exporter endpoint |\n| Infinity plugin | Prometheus |\n| **Port** dropdown filtering `port_id` | a PromQL label selector |\n| a CSV column | a metric name |\n\nThe stand-in exists because a scrape timestamps a sample at the moment it happens,\nso a month of history has nowhere to go. In production these numbers are computed\nby a service, exposed on `/metrics`, scraped, and this row queries Prometheus like\nthe one above it.\n\nStart the file server from the repository root:\n\n```\npython -m http.server 8080 \\\n  --directory outputs/workshop\n```\n\nLab timestamps are February 2026, so set an Absolute range."
+        "content": "Lab 00 proved the path above works. From Lab 01 onward the numbers come\nfrom CSV instead, and this row stands in for Prometheus. Each piece has a\ncounterpart up there:\n\n| here | in production |\n| --- | --- |\n| `outputs/workshop/*.csv` | a service exposing `/metrics` |\n| `python -m http.server` | the exporter endpoint |\n| Infinity plugin | Prometheus |\n| **Port** dropdown filtering `port_id` | a PromQL label selector |\n| a CSV column | a metric name |\n\nThe stand-in exists because a scrape timestamps a sample at the moment it happens,\nso a month of history has nowhere to go. In production these numbers are computed\nby a service, exposed on `/metrics`, scraped, and this row queries Prometheus like\nthe one above it.\n\nStart the file server from the repository root:\n\n```\npython -m http.server 8080 \\\n  --directory outputs/workshop\n```\n\nLab timestamps are February 2026, so set an Absolute range."
       }
     },
     {
@@ -813,7 +813,7 @@
     {
       "id": 30,
       "type": "row",
-      "title": "Notebook charts, served as PNG from the same folder",
+      "title": "Lab 01 and 02  notebook charts, served as PNG",
       "gridPos": {
         "h": 1,
         "w": 24,
