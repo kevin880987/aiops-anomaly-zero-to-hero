@@ -1,8 +1,10 @@
 # AIOps Anomaly Detection: Zero to Hero
 
-這門課走一遍營運監控的完整資料流。OS 或網路設備產生 telemetry，exporter 曝露 `/metrics`，Prometheus scrape 並儲存時間序列，Grafana 顯示 dashboard。Python notebook 這一端讀整理好的 network telemetry CSV，做特徵工程、異常偵測與 RCA，結果再回到同一張 dashboard 上。
+這門課走一遍營運監控的完整資料流。OS 或網路設備產生 telemetry，exporter 曝露 `/metrics`，Prometheus scrape 並儲存時間序列，Grafana 顯示 dashboard。Python notebook 這一端讀整理好的 network telemetry CSV，做特徵工程與異常偵測，結果再回到同一張 dashboard 上。
 
 每個方法都要能解釋它為什麼被選、用什麼數字驗證，以及在真實系統裡該放在哪一層。不需要雲端帳號，Grafana Cloud 是選用延伸。
+
+教材按課程進度釋出。這一份涵蓋環境設定與 Lab 00 到 Lab 02，也就是第一天要用到的全部內容；RCA capstone 與自學路線在後續梯次發布。
 
 ## 開始使用
 
@@ -22,14 +24,13 @@
 2. 用 PromQL 查詢 counter、rate、label filtering 與 aggregation。
 3. 從 raw network counters 建立可解釋的 time-series features，並比較四種 baseline。
 4. 把偏離量收斂成 score、設門檻得到 label、加上 policy 成為 alert，並用 event recall、detection delay 與 alerts per day 評估這組設定。
-5. 為 RCA 建立結構化 context，區分證據、假說與可執行行動。
-6. 說明 Python 分析結果如何回到 Prometheus 與 Grafana 的 workflow。
+5. 說明 Python 分析結果如何回到 Prometheus 與 Grafana 的 workflow。
 
 ## 教材路線
 
 ```text
 getting-started -> observability stack 與 PromQL -> feature engineering
-  -> anomaly detection 與 alerting -> RCA capstone
+  -> anomaly detection 與 alerting
 ```
 
 Python 主要讀取整理好的 CSV，不直接以 PromQL 作為演算法輸入。Notebook 把結果寫成 `outputs/workshop/*.csv` 與 `*.png`，用 `python -m http.server` 開啟資料夾，Grafana 端以 Infinity datasource 讀檔案。這條路徑沒有 exporter，寫檔用的就是 `to_csv()` 與 `savefig()`。
@@ -47,7 +48,6 @@ Grafana 端全部走官方功能。Datasource 用內建的檔案 provisioning（
 | `00_observability_stack_and_promql.ipynb` | 兩條資料路徑與 PromQL。node_exporter 走 Prometheus，分析結果走檔案，故意弄壞再從 dashboard 讀出斷在哪一段 | 45–60 分鐘 |
 | `01_network_traffic_feature_engineering.ipynb` | 單位契約、資料剖面、四種 baseline（rolling mean、median 與 MAD、seasonal、peer group）與 shape features | 60–75 分鐘 |
 | `02_anomaly_detection_and_alerting.ipynb` | score 收成 label、label 通過 policy 成為 alert，以 event recall、detection delay 與 alerts per day 評估 | 60–75 分鐘 |
-| `08_agentic_ai_rca_capstone.ipynb` | RCA context、agentic loop、human approval gate | 45–60 分鐘 |
 
 ## 資料流
 
@@ -75,7 +75,6 @@ notebook 裡的每個參數，都可以回到這張表找它在真實系統中�
 | 00 Observability | 指標是否真的被收集，且可查詢 | scrape interval、label 設計、counter 與 rate、資料來源健康檢查 | Prometheus scrape config、Grafana dashboard |
 | 01 Feature engineering | raw counters 如何變成可比較的訊號 | rate、ratio、rolling window、lag、多解析度 | Prometheus recording rules 或 feature service |
 | 02 Detection 與 alerting | 哪些偏離值得告警，代價是多少 | 閾值、baseline 視窗、deadband、duration、誤報預算 | Prometheus alert rules、Alertmanager |
-| 08 RCA | 如何把事件轉成可驗證的根因假說 | context window、evidence schema、LLM output contract、human gate | RCA webhook、ticket enrichment |
 
 ## 每章自我檢核
 
@@ -86,7 +85,6 @@ notebook 裡的每個參數，都可以回到這張表找它在真實系統中�
 | Feature engineering | `features.csv` 是否產生，欄位是否能追溯到 raw counters |
 | Detection | 每種 anomaly flag 是否有明確 threshold 或 score 解釋 |
 | Alerting | alert 是否被合理聚合，是否犧牲了需要立即處理的訊號 |
-| RCA | RCA output 是否區分 evidence、hypothesis、recommended action |
 | Deployment | Grafana dashboard、Prometheus rules 與 notebook 輸出是否對得起來 |
 
 ## 驗證指令

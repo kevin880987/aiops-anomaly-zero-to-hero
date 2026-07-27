@@ -10,6 +10,8 @@
 
 **分析路徑。** Notebook 算完之後用 `to_csv()` 寫檔案、用 `savefig()` 寫圖，兩個都落在 `outputs/workshop/`。一行 `python -m http.server` 把那個資料夾開出來，Grafana 用 Infinity datasource 讀 CSV，用內建的 Text panel 讀 PNG。一樣沒有 exporter，沒有中介服務。
 
+兩條路徑與它們在 Grafana 上的對應，見 [`diagrams/lab00_observability_stack_arch.svg`](diagrams/lab00_observability_stack_arch.svg)。
+
 一整個月的歷史分數不容易進 Prometheus，因為它是 pull 模型，時間戳來自 scrape 的當下。`promtool tsdb create-blocks-from openmetrics` 做得到，時間戳也保得住，但一整個月會產生數百個 block，還要搬進 data 目錄重啟，每次重新執行 notebook 都得再來一次。所以課堂上歷史結果走檔案，即時指標走 Prometheus。
 
 Infinity 在這裡是課堂用的替身。真實系統裡這些分數由服務算完曝露在 `/metrics`，跟其他指標一樣被 scrape。所以 dashboard 刻意讓 Grafana 這一側長得一樣：欄位名是 `aiops_*` 的 metric 名，port 用 dashboard 變數篩選，對應 PromQL 的 label selector。上線時換掉 datasource，面板不動。
@@ -74,6 +76,8 @@ Lab 00 要先執行完，它唯一要證明的事是兩條路徑都通。這兩�
 | 01 | 網路流量 feature engineering。同一段流量對四種 baseline 比較：rolling mean、median 與 MAD、same seasonal position、peer group | `01_network_traffic_feature_engineering.ipynb` |
 | 02 | 偵測與告警。偏離量收斂成 score，設門檻得到 label，加上 duration、minimum volume 與 maintenance exclusion 才成為 alert，最後用 scorecard 檢查代價 | `02_anomaly_detection_and_alerting.ipynb` |
 
+四種偵測方法的取捨見 [`diagrams/lab02_detection_methods.svg`](diagrams/lab02_detection_methods.svg)。
+
 Dashboard 只有一張，網址是 <http://localhost:3000/d/aiops-workshop>。三個 lab 寫的是不同檔名的 CSV，彼此不覆蓋，所以執行完 Lab 02 之後 Lab 01 的 panel 還在。
 
 時間範圍要留意。`node_exporter` 的 panel 用相對區間就好，lab CSV 的時間戳落在 2026 年 2 月，要用 Absolute range 才看得到。
@@ -84,8 +88,4 @@ Dashboard 只有一張，網址是 <http://localhost:3000/d/aiops-workshop>。�
 
 每一份 notebook 開頭有 toolkit cell，載入、baseline、偵測器、alert policy、事件評估的函式都寫在那裡，直接讀得到也改得動。這門課不把它們收進要另外理解的函式庫，資料科學的邏輯留在 notebook 裡，不藏在 `import` 後面。
 
-四份 notebook 各自帶自己用得到的那部分，所以有些函式會重複出現。這是刻意的取捨：每一份 notebook 都能單獨打開、單獨讀完，不需要先搞懂一個共用套件。畫圖是 notebook 裡的 matplotlib，送資料是 `to_csv()`；toolkit 不畫圖，也不跟 Grafana 說話。
-
-## Lab 08：排不進下午三節的那一份
-
-`08_agentic_ai_rca_capstone.ipynb` 不屬於下午這三節，時間也排不進去。它接在 Lab 02 的 alert 之後，處理的是「告警發出來以後怎麼查」：把偵測結果整理成 incident context，交給 agent 做 root cause analysis，課堂版的 agent 以 deterministic mock 執行，不需要任何 API token。它跟前三節共用同一份 telemetry，寫出去的是自己的檔名，不會蓋掉前面的畫面。
+三份 notebook 各自帶自己用得到的那部分，所以有些函式會重複出現。這是刻意的取捨：每一份 notebook 都能單獨打開、單獨讀完，不需要先搞懂一個共用套件。畫圖是 notebook 裡的 matplotlib，送資料是 `to_csv()`；toolkit 不畫圖，也不跟 Grafana 說話。
