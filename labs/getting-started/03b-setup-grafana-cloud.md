@@ -2,7 +2,7 @@
 
 官方文件：[Prometheus metrics on Grafana Cloud](https://grafana.com/docs/grafana-cloud/send-data/metrics/metrics-prometheus/)
 
-選用延伸。設定完成後，指標會同時出現在本機 Grafana Local 與 Grafana Cloud 的網頁 UI。做法是本機 Prometheus 透過 `remote_write` 把指標推送到 Grafana Cloud 免費方案，雲端那一側不需要再安裝任何東西。
+選用延伸。設定完成後，指標會同時出現在本機 Grafana Local 與 Grafana Cloud 的網頁 UI。做法是本機 Prometheus 透過 `remote_write` 把指標推送到 Grafana Cloud 免費方案，雲端那一側不需要再安裝任何元件。
 
 **前置條件：** Grafana Local 已設定完成（[03a-install-grafana-local.md](03a-install-grafana-local.md)），Prometheus 正在運作（[02-install-prometheus.md](02-install-prometheus.md)）。
 

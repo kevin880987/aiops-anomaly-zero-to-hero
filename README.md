@@ -81,7 +81,7 @@ notebook 裡的每個參數，都可以回到這張表找它在真實系統中�
 | 階段 | 檢核問題 |
 | --- | --- |
 | 環境設定 | `00-check-your-setup.ipynb` 四格是否全部通過 |
-| Observability | Prometheus 的 `up` 是否看得到 node_exporter |
+| Observability | Prometheus 的 `up` 是否查詢得到 node_exporter |
 | Feature engineering | `features.csv` 是否產生，欄位是否能追溯到 raw counters |
 | Detection | 每種 anomaly flag 是否有明確 threshold 或 score 解釋 |
 | Alerting | alert 是否被合理聚合，是否犧牲了需要立即處理的訊號 |

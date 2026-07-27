@@ -54,7 +54,7 @@ conda activate aiops-anomaly-zero-to-hero
 
 ## IDE 與 notebook 工具
 
-工具只要連得上上一步啟用的 conda 環境就可以用。三者的官方安裝說明：
+工具只要能連上一步啟用的 conda 環境就可以用。三者的官方安裝說明：
 
 | 工具 | 安裝指南 | 開啟 notebook 的方式 |
 | --- | --- | --- |
@@ -89,7 +89,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 **指令顯示找不到環境檔？**
 請確認你目前在專案根目錄，也就是可以看到 `environments/` 與 `labs/` 的那一層。
 
-**notebook 的 kernel 選單裡看不到課程環境？**
+**notebook 的 kernel 選單列不出課程環境？**
 編輯器通常會自己列出 conda environment。找不到時先啟用環境，把它註冊成一個具名 kernel：
 
 ```bash

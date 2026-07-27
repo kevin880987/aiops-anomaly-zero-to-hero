@@ -33,7 +33,7 @@ sudo mv "node_exporter-${VERSION}.${PLATFORM}/node_exporter" /usr/local/bin/
 node_exporter
 ```
 
-看到 `Listening on` 之後保持這個終端機開著，另外開啟一個做驗證：
+看到 `Listening on` 之後保持這個終端機執行，另外開啟一個做驗證：
 
 ```bash
 curl -s http://localhost:9100/metrics | grep node_network_receive_bytes_total | head -5

@@ -43,7 +43,7 @@ Windows 是 `.\prometheus.exe --config.file="C:\path\to\aiops-anomaly-zero-to-he
 
 查詢結果裡完全沒有 `node-exporter` 這一筆，就是設定檔載錯了，往下看〈用 service 啟動〉。
 
-<http://localhost:9090/targets> 是同一件事的圖形版，卡住的時候看那一頁最快。
+<http://localhost:9090/targets> 是同一件事的圖形介面，排查時從那一頁看最快。
 
 ## 用 service 啟動
 
@@ -51,7 +51,7 @@ Windows 是 `.\prometheus.exe --config.file="C:\path\to\aiops-anomaly-zero-to-he
 
 這個錯誤難自己發現，因為它不會出錯。Prometheus 是活的，node_exporter 是活的，Grafana 是活的，查詢 `up{job="prometheus"}` 回傳 `1`，每一項單獨看都正常，但沒有任何人去抓 `localhost:9100`，dashboard 第一列於是永遠空白。要看的是 job 存不存在，不是 job 的值是不是 `1`。
 
-要用 service 方式（服務起來以後整個下午不用管），先把檔案複製到套件的預設位置：
+要用 service 方式（啟動之後無須介入），先把檔案複製到套件的預設位置：
 
 ```bash
 cp infra/prometheus/prometheus.macos.yml /opt/homebrew/etc/prometheus.yml
@@ -76,7 +76,7 @@ Intel Mac 的前綴是 `/usr/local`，用 `brew --prefix` 確認。Linux 的 sys
 
 Notebook 算出來的結果不經過 Prometheus，而是用 `to_csv()` 與 `savefig()` 寫進 `outputs/workshop/`，由 Grafana 的 Infinity datasource 讀檔案。
 
-灌得進去，只是課堂上划不來。`promtool tsdb create-blocks-from openmetrics` 可以把帶時間戳的歷史樣本壓成 TSDB block，時間戳完整保留；代價是一整個月的分數會產生數百個 block，而且要把 block 搬進 Prometheus 的 data 目錄再重啟，每調一次參數重新執行 notebook 就得再走一次。
+技術上灌得進去，只是課堂上的成本不划算。`promtool tsdb create-blocks-from openmetrics` 可以把帶時間戳的歷史樣本壓成 TSDB block，時間戳完整保留；代價是一整個月的分數會產生數百個 block，而且要把 block 搬進 Prometheus 的 data 目錄再重啟，每調一次參數重新執行 notebook 就得再走一次。
 
 真實部署走的是上面那條路：分數由服務算完曝露在 `/metrics`，Prometheus scrape，Grafana 查詢。所以課程的 dashboard 把 Infinity 面板的欄位命名成 `aiops_*` 的 metric 名，port 用 dashboard 變數篩選，對應的就是 PromQL 的 label selector。上線時把 datasource 換成 Prometheus，面板不用重做。
 
@@ -94,7 +94,7 @@ promtool check config infra/prometheus/prometheus.macos.yml
 查詢 `up`，看有沒有 `job="node-exporter"` 這一筆。找不到就是載入了套件預設設定檔，見〈用 service 啟動〉。有這一筆但值是 `0`，代表設定對了、exporter 還沒啟動，去做 [04-install-node-exporter.md](04-install-node-exporter.md)。
 
 **Grafana dashboard 第二列與第三列一直是空的？**
-那兩列讀的是 `outputs/workshop/` 裡的檔案，跟 Prometheus 無關。確認 `python -m http.server 8080 --directory outputs/workshop` 這個終端機還開著，並且對應的 lab 已經執行完寫出 CSV。
+那兩列讀的是 `outputs/workshop/` 裡的檔案，跟 Prometheus 無關。確認 `python -m http.server 8080 --directory outputs/workshop` 這個終端機仍在執行，並且對應的 lab 已經執行完並寫出 CSV。
 
 **`curl -X POST http://localhost:9090/-/reload` 回 405？**
 啟動時沒有帶 `--web.enable-lifecycle`。前景啟動就直接加這個參數，service 啟動就把它加進 `prometheus.args` 再重啟。

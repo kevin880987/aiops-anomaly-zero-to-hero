@@ -76,15 +76,15 @@ Linux 的目標路徑是 `/etc/grafana/provisioning/datasources/aiops.yaml`，�
 
 ## 5. 驗收
 
-<http://localhost:3000/d/aiops-workshop> 打得開，第一列有即時曲線。左上角的 **Interface** 下拉要選一張真的有流量的網卡。
+<http://localhost:3000/d/aiops-workshop> 能開啟，第一列有即時曲線。左上角的 **Interface** 下拉要選一張真的有流量的網卡。
 
-第二列與第三列需要這個終端機開著，才讀得到 lab 結果：
+第二列與第三列需要這個終端機維持執行，才讀取得到 lab 結果：
 
 ```bash
 python -m http.server 8080 --directory outputs/workshop
 ```
 
-時間範圍要留意。第一列用相對區間就好，第二列與第三列的資料時間戳落在 2026 年 2 月，要切成 Absolute range 才看得到。
+時間範圍要留意。第一列用相對區間就好，第二列與第三列的資料時間戳落在 2026 年 2 月，要切成 Absolute range 才顯示得出來。
 
 ## Dashboard 的兩種資料來源
 
@@ -109,4 +109,4 @@ provisioning 檔裡 Prometheus 的 uid 是 `prometheus`，Infinity 的 uid 是 `
 這一列走 Prometheus。查詢 `up{job="node-exporter"}`，值是 `0` 就去啟動 exporter，整筆 job 不存在就是 Prometheus 載錯設定檔，見 [02-install-prometheus.md](02-install-prometheus.md)〈用 service 啟動〉。
 
 **Dashboard 第二列或第三列空白？**
-這兩列跟 Prometheus 無關。先在瀏覽器開啟 <http://localhost:8080/>，看得到檔案清單才表示檔案伺服器活著。看得到清單但 panel 還是空的，就是那個 lab 還沒執行完，或是時間範圍沒切到 2026 年 2 月。
+這兩列跟 Prometheus 無關。先在瀏覽器開啟 <http://localhost:8080/>，列得出檔案清單才表示檔案伺服器仍在執行。清單正常但 panel 仍是空的，就是那個 lab 還沒執行完，或是時間範圍沒切到 2026 年 2 月。

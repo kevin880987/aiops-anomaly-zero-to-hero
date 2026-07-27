@@ -1,6 +1,6 @@
 # 工作坊下午場：從 telemetry 到 alert
 
-上午的理論說，anomaly 是在脈絡下相對於一條明確 baseline 的偏離。下午把這句話變成可以執行的東西：你會親手選 baseline、算 score、把 score 收成 label、讓 label 通過 policy 變成 alert，最後用 event-level recall 與 alerts per day 去評這套設定值不值得帶進值班室。
+上午的理論說，anomaly 是在脈絡下相對於一條明確 baseline 的偏離。下午把這句話變成可以執行的步驟：你會親手選 baseline、算 score、把 score 收成 label、讓 label 通過 policy 變成 alert，最後用 event-level recall 與 alerts per day 去評這套設定值不值得帶進值班室。
 
 ## 兩條資料路徑
 
@@ -14,13 +14,13 @@
 
 一整個月的歷史分數不容易進 Prometheus，因為它是 pull 模型，時間戳來自 scrape 的當下。`promtool tsdb create-blocks-from openmetrics` 做得到，時間戳也保得住，但一整個月會產生數百個 block，還要搬進 data 目錄重啟，每次重新執行 notebook 都得再來一次。所以課堂上歷史結果走檔案，即時指標走 Prometheus。
 
-Infinity 在這裡是課堂用的替身。真實系統裡這些分數由服務算完曝露在 `/metrics`，跟其他指標一樣被 scrape。所以 dashboard 刻意讓 Grafana 這一側長得一樣：欄位名是 `aiops_*` 的 metric 名，port 用 dashboard 變數篩選，對應 PromQL 的 label selector。上線時換掉 datasource，面板不動。
+Infinity 在這裡是課堂用的替身。真實系統裡這些分數由服務算完曝露在 `/metrics`，跟其他指標一樣被 scrape。所以 dashboard 刻意讓 Grafana 這一側維持相同形態：欄位名是 `aiops_*` 的 metric 名，port 用 dashboard 變數篩選，對應 PromQL 的 label selector。上線時換掉 datasource，面板不動。
 
-Notebook 這一端也看得到圖，用的是 matplotlib，離開這個 repo 也還用得上。兩邊分工：notebook 的圖定住不動，適合逐條比較；dashboard 的 panel 可以互動，適合換條件驗證。兩邊沒有共用的繪圖程式碼，只共用同一批數字，所以兩張圖對不起來就是中間那條路徑斷了。
+Notebook 這一端也繪製同一批數字，用的是 matplotlib，離開這個 repo 也還用得上。兩邊分工：notebook 的圖定住不動，適合逐條比較；dashboard 的 panel 可以互動，適合換條件驗證。兩邊沒有共用的繪圖程式碼，只共用同一批數字，所以兩張圖對不起來就是中間那條路徑斷了。
 
-## 開課前的四個終端機
+## 開課前要維持執行的四個終端機
 
-前三個是安裝好就一直在的服務，第四個要自己開，而且整個下午都不能關。
+前三個是安裝完成後常駐的服務，第四個要自己啟動並維持執行。
 
 ```bash
 brew services start prometheus     # http://localhost:9090
@@ -66,7 +66,7 @@ brew services restart grafana
 
 ## 從 Lab 00 開始
 
-Lab 00 要先執行完，它唯一要證明的事是兩條路徑都通。這兩條不通，Lab 01 與 Lab 02 只會得到空的 dashboard。四個服務怎麼起、怎麼在四種壞法之間分辨，都寫在 `00_observability_stack_and_promql.ipynb` 裡。卡住的時候回那份 notebook，不要回這一頁。
+Lab 00 要先執行完，它唯一要證明的事是兩條路徑都通。這兩條不通，Lab 01 與 Lab 02 只會得到空的 dashboard。四個服務怎麼起、怎麼在四種壞法之間分辨，都寫在 `00_observability_stack_and_promql.ipynb` 裡。排查時回那份 notebook，不要回這一頁。
 
 ## 下午三節
 
@@ -80,12 +80,12 @@ Lab 00 要先執行完，它唯一要證明的事是兩條路徑都通。這兩�
 
 Dashboard 只有一張，網址是 <http://localhost:3000/d/aiops-workshop>。三個 lab 寫的是不同檔名的 CSV，彼此不覆蓋，所以執行完 Lab 02 之後 Lab 01 的 panel 還在。
 
-時間範圍要留意。`node_exporter` 的 panel 用相對區間就好，lab CSV 的時間戳落在 2026 年 2 月，要用 Absolute range 才看得到。
+時間範圍要留意。`node_exporter` 的 panel 用相對區間就好，lab CSV 的時間戳落在 2026 年 2 月，要用 Absolute range 才顯示得出來。
 
 順序不能跳。Lab 02 的 evidence panel 畫的是 Lab 01 算出來的 baseline 欄位。
 
 ## notebook 裡的 toolkit
 
-每一份 notebook 開頭有 toolkit cell，載入、baseline、偵測器、alert policy、事件評估的函式都寫在那裡，直接讀得到也改得動。這門課不把它們收進要另外理解的函式庫，資料科學的邏輯留在 notebook 裡，不藏在 `import` 後面。
+每一份 notebook 開頭有 toolkit cell，載入、baseline、偵測器、alert policy、事件評估的函式都寫在那裡，可以直接閱讀與修改。這門課不把它們收進要另外理解的函式庫，資料科學的邏輯留在 notebook 裡，不藏在 `import` 後面。
 
-三份 notebook 各自帶自己用得到的那部分，所以有些函式會重複出現。這是刻意的取捨：每一份 notebook 都能單獨打開、單獨讀完，不需要先搞懂一個共用套件。畫圖是 notebook 裡的 matplotlib，送資料是 `to_csv()`；toolkit 不畫圖，也不跟 Grafana 說話。
+三份 notebook 各自帶自己需要的函式，所以有些函式會重複出現。這是刻意的取捨：每一份 notebook 都能單獨開啟、單獨讀完，不需要先理解一個共用套件。畫圖是 notebook 裡的 matplotlib，送資料是 `to_csv()`；toolkit 不畫圖，也不跟 Grafana 說話。

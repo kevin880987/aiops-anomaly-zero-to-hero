@@ -6,9 +6,9 @@
 
 已經有 conda 環境的話，可以直接開 `00-check-your-setup.ipynb`，它會告訴你缺哪一項，再回到對應步驟補。
 
-## 課堂上要準備的東西
+## 課堂上要維持執行的四個服務
 
-課堂用的是 `labs/workshop/`。它需要四個東西同時活著，最後一個要自己在終端機開，而且整個下午都不能關。
+課堂用的是 `labs/workshop/`。這四個服務要同時執行，最後一個要自己在終端機啟動並維持執行。
 
 | 元件 | 位址 | 步驟 |
 | --- | --- | --- |
@@ -35,13 +35,13 @@ Windows PowerShell 用 `cd C:\path\to\aiops-anomaly-zero-to-hero`。
 
 照 [01-setup-python-environment.md](01-setup-python-environment.md) 做，三個平台共用那一頁。
 
-驗收：`conda activate aiops-anomaly-zero-to-hero` 能啟用環境，而且你慣用的 notebook 工具在 kernel 選單裡看得到它。
+驗收：`conda activate aiops-anomaly-zero-to-hero` 能啟用環境，且你慣用的 notebook 工具在 kernel 選單中列得出它。
 
 ## Step 3. 安裝並啟動 Prometheus
 
-照 [02-install-prometheus.md](02-install-prometheus.md) 做。那份文件用一整節寫這一步唯一的坑：Prometheus 必須載到本 repository 的設定檔，否則它照樣活著、照樣回答查詢，只是永遠抓不到 node_exporter。
+照 [02-install-prometheus.md](02-install-prometheus.md) 做。那份文件用一整節寫這一步唯一的坑：Prometheus 必須載到本 repository 的設定檔，否則它照常執行、照常回答查詢，只是永遠 scrape 不到 node_exporter。
 
-驗收：<http://localhost:9090> 打得開，`up{job="prometheus"}` 查詢得到值。
+驗收：<http://localhost:9090> 能開啟，`up{job="prometheus"}` 查詢得到值。
 
 ## Step 4. 安裝並啟動 node_exporter
 
@@ -55,7 +55,7 @@ Windows PowerShell 用 `cd C:\path\to\aiops-anomaly-zero-to-hero`。
 
 照 [03a-install-grafana-local.md](03a-install-grafana-local.md) 做。Infinity 是外掛，要另外安裝。
 
-驗收：<http://localhost:3000/d/aiops-workshop> 打得開，Prometheus data source 指向 `http://localhost:9090`。填成 `3000` 是最常見的失敗，`3000` 是 Grafana 自己。
+驗收：<http://localhost:3000/d/aiops-workshop> 能開啟，Prometheus data source 指向 `http://localhost:9090`。填成 `3000` 是最常見的失敗，`3000` 是 Grafana 自己。
 
 ## Step 6. 開一個檔案伺服器
 
@@ -67,9 +67,9 @@ python -m http.server 8080 --directory outputs/workshop
 
 Windows PowerShell 的路徑是 `outputs\workshop`。
 
-這個視窗整個下午都要開著，關掉就等於 dashboard 第二列與第三列斷線。
+這個視窗要維持開啟，關閉之後 dashboard 第二列與第三列即中斷。
 
-驗收：<http://localhost:8080/> 看得到檔案清單。剛開始資料夾是空的，那是正常的。
+驗收：<http://localhost:8080/> 列得出檔案清單。初始狀態資料夾是空的，屬於正常。
 
 ## Step 7. 執行 setup check notebook
 
