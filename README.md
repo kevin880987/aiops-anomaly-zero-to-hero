@@ -49,8 +49,6 @@ Grafana 端全部走官方功能。Datasource 用內建的檔案 provisioning（
 | `02_anomaly_detection_and_alerting.ipynb` | score 收成 label、label 通過 policy 成為 alert，以 event recall、detection delay 與 alerts per day 評估 | 60–75 分鐘 |
 | `08_agentic_ai_rca_capstone.ipynb` | RCA context、agentic loop、human approval gate | 45–60 分鐘 |
 
-另有 `toy_health_indicators_and_phm.ipynb`，二十分鐘的獨立走查，把多變量偏離收成有界的健康指標再談外推。
-
 ## 資料流
 
 ```text
