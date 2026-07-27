@@ -18,7 +18,7 @@
 brew install rrdtool
 ```
 
-**已驗證：** 以 `rrdtool 1.9.0` 確認 5 個檔案（port-id7427–7431.rrd）皆可讀，300 秒解析度，各含 15 個 data sources：
+**已驗證：** 以 `rrdtool 1.9.0` 確認 5 個檔案（port-id7427 到 7431.rrd）皆可讀，300 秒解析度，各含 15 個 data sources：
 
 ```text
 INOCTETS, OUTOCTETS, INERRORS, OUTERRORS,
