@@ -66,7 +66,7 @@ organized network telemetry CSV
   -> Grafana reads the files with the Infinity datasource
 ```
 
-本課程的 synthetic CSV 對應的是「organized network telemetry CSV」這一層，模擬真實營運資料整理過後的樣子：欄位清楚、時間戳一致、可供 Python 分析。每份 notebook 讀取前一步的輸出，並把新的中間結果寫回 `outputs/workshop/`（gitignored）。中途失敗時，從失敗 notebook 的前一個 lab 重新執行，不要直接跳到後面的 lab。
+本課程的 synthetic CSV 對應的是「organized network telemetry CSV」這一層，模擬真實營運資料整理過後的樣子：欄位清楚、時間戳一致，可以直接餵給 Python。每份 notebook 讀取前一步的輸出，並把新的中間結果寫回 `outputs/workshop/`（gitignored）。中途失敗時，從失敗 notebook 的前一個 lab 重新執行，不要直接跳到後面的 lab。
 
 ## 設計地圖
 

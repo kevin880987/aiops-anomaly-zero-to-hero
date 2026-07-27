@@ -10,7 +10,7 @@
 
 **分析路徑。** Notebook 算完之後用 `to_csv()` 寫檔案、用 `savefig()` 寫圖，兩個都落在 `outputs/workshop/`。一行 `python -m http.server` 把那個資料夾開出來，Grafana 用 Infinity datasource 讀 CSV，用內建的 Text panel 讀 PNG。一樣沒有 exporter，沒有中介服務。
 
-一個月的歷史分數推不進 Prometheus，因為它是 pull 模型，時間戳來自 scrape 的當下。硬要推就得寫重播器，而重播器會讓時間軸變成假的，在上面做的每一個視窗計算都要先換算一次才能讀。所以歷史結果走檔案，即時指標走 Prometheus。
+一整個月的歷史分數推不進 Prometheus，因為它是 pull 模型，時間戳來自 scrape 的當下。硬要推就得寫重播器，而重播器會讓時間軸變成假的，在上面做的每一個視窗計算都要先換算一次才能讀。所以歷史結果走檔案，即時指標走 Prometheus。
 
 Notebook 這一端也看得到圖，用的是 matplotlib，離開這個 repo 也還用得上。兩邊分工：notebook 的圖定住不動，適合逐條比較；dashboard 的 panel 可以互動，適合換條件驗證。兩邊沒有共用的繪圖程式碼，只共用同一批數字，所以兩張圖對不起來就是中間那條路徑斷了。
 
@@ -80,7 +80,7 @@ Dashboard 只有一張，網址是 <http://localhost:3000/d/aiops-workshop>。�
 
 ## notebook 裡的 toolkit
 
-每一份 notebook 開頭有 toolkit cell，載入、baseline、偵測器、alert policy、事件評估的函式都寫在那裡，直接讀得到也改得動。這門課不把它們收進另一個要先理解的函式庫，`toy_health_indicators_and_phm.ipynb` 就是這個做法的範本：資料科學的邏輯留在 notebook 裡，不藏在 `import` 後面。
+每一份 notebook 開頭有 toolkit cell，載入、baseline、偵測器、alert policy、事件評估的函式都寫在那裡，直接讀得到也改得動。這門課不把它們收進要另外理解的函式庫，`toy_health_indicators_and_phm.ipynb` 就是這個做法的範本：資料科學的邏輯留在 notebook 裡，不藏在 `import` 後面。
 
 四份 notebook 各自帶自己用得到的那部分，所以有些函式會重複出現。這是刻意的取捨：每一份 notebook 都能單獨打開、單獨讀完，不需要先搞懂一個共用套件。畫圖是 notebook 裡的 matplotlib，送資料是 `to_csv()`；toolkit 不畫圖，也不跟 Grafana 說話。
 

@@ -14,7 +14,7 @@ Prometheus 是系統級監控服務，安裝方式依作業系統與權限設定
 | `localhost:9100` | `node-exporter` | 這台機器的真實網路指標（macOS / Linux） |
 | `localhost:9182` | `windows-exporter` | 這台機器的真實網路指標（Windows） |
 
-Notebook 算出來的結果不經過 Prometheus。它用 `to_csv()` 與 `savefig()` 寫進 `outputs/workshop/`，一行 `python -m http.server` 把資料夾開啟給外部讀取，Grafana 端用 Infinity datasource 讀檔案。分開的理由是儲存模型：Prometheus 是 pull 模型，時間戳來自 scrape 的當下，一個月的歷史分數推不進去，硬要推就得寫重播器，而重播器會讓時間軸變成假的。
+Notebook 算出來的結果不經過 Prometheus。它用 `to_csv()` 與 `savefig()` 寫進 `outputs/workshop/`，一行 `python -m http.server` 把資料夾開啟給外部讀取，Grafana 端用 Infinity datasource 讀檔案。分開的理由是儲存模型：Prometheus 是 pull 模型，時間戳來自 scrape 的當下，一整個月的歷史分數推不進去，硬要推就得寫重播器，而重播器會讓時間軸變成假的。
 
 設定檔按平台分成三份，`infra/prometheus/prometheus.{macos,linux,windows}.yml`，target 三份都一樣。Prometheus 對 DOWN 的 target 顯示 `0`，不會影響其他 target 收集。
 
