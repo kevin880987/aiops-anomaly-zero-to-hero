@@ -41,7 +41,7 @@ Python 主要讀取整理好的 CSV，不直接以 PromQL 作為演算法輸入�
 
 這條路線是 GUI-first 的，換 port、拖時間軸、改 alert rule 都在 Grafana 上做。Notebook 這一端用 matplotlib 把每一段的結果畫出來。兩邊各自獨立，讀的是同一批數字，所以兩張圖對不起來就代表中間那條資料路徑斷了。
 
-Grafana 端全部走官方功能。Datasource 用內建的檔案 provisioning（`infra/grafana/provisioning/datasources.yaml`），dashboard 用 UI 的 Import 匯入 `infra/grafana/dashboards/aiops-workshop.json`，告警規則寫在 `infra/prometheus/alerts.yml`，打在 `node_exporter` 的即時指標上，隨時可以用一次下載讓它響。
+Grafana 端全部走官方功能。Datasource 用內建的檔案 provisioning（`infra/grafana/provisioning/datasources.yaml`），dashboard 是每個 lab 自己一格一格建的，`infra/grafana/dashboards/aiops-workshop.json` 是建完之後核對用的答案卷。告警規則寫在 `infra/prometheus/alerts.yml`，打在 `node_exporter` 的即時指標上，隨時可以用一次下載讓它響。
 
 | Lab | 主題 | 建議時間 |
 | --- | --- | --- |

@@ -62,7 +62,10 @@ cp infra/grafana/provisioning/datasources.yaml \
 brew services restart grafana
 ```
 
-**Dashboard。** Dashboards > New > Import，貼上 `infra/grafana/dashboards/aiops-workshop.json` 的內容。三列：第一列是 node_exporter 的即時指標，第二列讀 lab CSV，第三列讀 lab PNG。
+**Dashboard。** 這門課的 dashboard 不匯入，一格一格自己建：第一列在 Lab 00 建，讀
+node_exporter 的即時指標；第二列從 Lab 01 開始建，讀各 lab 寫出的 CSV；第三列讀 lab 的 PNG。
+每個 lab 的 notebook 裡有那一段的完整建法。`infra/grafana/dashboards/aiops-workshop.json`
+是建完之後的答案卷，卡住時核對某張 panel 的設定用，不要在這裡整份匯入。
 
 ## 從 Lab 00 開始
 
@@ -78,7 +81,7 @@ Lab 00 要先執行完，它要確認的是兩條路徑都通。這兩條不通�
 
 四種偵測方法的取捨見 [`diagrams/lab02_detection_methods.svg`](diagrams/lab02_detection_methods.svg)。
 
-Dashboard 只有一張，網址是 <http://localhost:3000/d/aiops-workshop>。三個 lab 寫的是不同檔名的 CSV，彼此不覆蓋，所以執行完 Lab 02 之後 Lab 01 的 panel 還在。
+Dashboard 只有一張，是自己建的那份。三個 lab 寫的是不同檔名的 CSV，彼此不覆蓋，所以執行完 Lab 02 之後 Lab 01 的 panel 還在。
 
 時間範圍要留意。`node_exporter` 的 panel 用相對區間就好，lab CSV 的時間戳落在 2026 年 2 月，要用 Absolute range 才顯示得出來。
 

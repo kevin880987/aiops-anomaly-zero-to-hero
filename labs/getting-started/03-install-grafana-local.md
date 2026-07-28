@@ -4,7 +4,7 @@
 
 **前置條件：** Prometheus 已安裝並正在運作（[02-install-prometheus.md](02-install-prometheus.md)）。
 
-這一步要安裝 Grafana 與 Infinity 外掛，接上兩個 datasource，匯入一份 dashboard。
+這一步要安裝 Grafana 與 Infinity 外掛，接上兩個 datasource。
 
 ## 1. 安裝 Grafana
 
@@ -30,9 +30,10 @@ sudo systemctl enable --now grafana-server
 
 **Windows：** 從[下載頁](https://grafana.com/grafana/download/)選 Windows 下載 `.msi` 安裝。服務會自動啟動，沒有的話在系統管理員權限的 PowerShell 執行 `Start-Service Grafana`。
 
-## 3. 啟動
+## 2. 啟動
+
 開啟 <http://localhost:3000>，帳號密碼都是 `admin`，系統會要求改密碼。
-![alt text](03a-grafana-1.png)
+![alt text](03-grafana-1.png)
 
 ## 3. 安裝 Infinity 外掛
 
@@ -99,21 +100,17 @@ Restart-Service Grafana
 
 手動加也可以，在 **Connections → Data sources → Add data source**：Prometheus 的 server URL 填 `http://localhost:9090`，按 **Save & test** 應出現 "Successfully queried the Prometheus API"；Infinity 的名稱取為 `Lab outputs`，其餘留預設。
 
-## 5. 匯入 dashboard
+## 5. 驗收
 
-在 **Dashboards → New → Import** 貼上 `infra/grafana/dashboards/aiops-workshop.json` 的內容或上傳檔案，按 **Load**，選好 data source 之後 **Import**。
+這一步只確認兩個 datasource 能用，dashboard 是 workshop 裡自己建的，這裡不匯入整份。
 
-## 6. 驗收
+**Prometheus。** 開 <http://localhost:3000/explore>，datasource 選 `Prometheus`，查詢 `up`，應該回
+`job="prometheus"` 值是 `1`。`job="node-exporter"` 這一筆在你完成
+[04-install-node-exporter.md](04-install-node-exporter.md) 之前會是 `0` 或不存在，那是正常的。
 
-<http://localhost:3000/d/aiops-workshop> 能開啟，第一列有即時曲線。左上角的 **Interface** 下拉要選一張真的有流量的網卡。
+**Infinity。** `Connections → Data sources → Lab outputs`，頁面能開啟、沒有紅字錯誤即可。這個
+這個 datasource 現在還沒有真的資料可以讀，第一次真的查詢要等 Lab 00 建立 dashboard 之後。
 
-第二列與第三列需要這個終端機維持執行，才讀取得到 lab 結果：
-
-```bash
-python -m http.server 8080 --directory outputs/workshop
-```
-
-時間範圍要留意。第一列用相對區間就好，第二列與第三列的資料時間戳落在 2026 年 2 月，要切成 Absolute range 才顯示得出來。
 
 ## Dashboard 的兩種資料來源
 
@@ -121,7 +118,8 @@ Grafana 負責查詢與畫圖，不自己去抓 exporter。第一列的即時指
 
 第二列與第三列走檔案。Notebook 寫出來的 CSV 與 PNG 放在 `outputs/workshop/`，用一行 `python -m http.server` 開啟成 HTTP 服務，Infinity datasource 直接讀那些檔案。Grafana 是在自己的伺服器端去抓 `http://localhost:8080`，所以不需要設定 CORS。
 
-provisioning 檔裡 Prometheus 的 uid 是 `prometheus`，Infinity 的 uid 是 `lab-outputs`，dashboard JSON 就是照這兩個 uid 連過去的。手動建立時名稱可以自己取，匯入時 Grafana 會問你要對應到哪一個。
+provisioning 檔裡 Prometheus 的 uid 是 `prometheus`，Infinity 的 uid 是 `lab-outputs`，workshop
+那份 dashboard 的每一張 panel 就是照這兩個 uid 連過去的。手動建立時名稱可以自己取。
 
 ## 常見問題
 
@@ -134,8 +132,6 @@ provisioning 檔裡 Prometheus 的 uid 是 `prometheus`，Infinity 的 uid 是 `
 **Add data source 裡找不到 Infinity？**
 外掛沒有安裝成功，或安裝完沒重啟 Grafana。重新執行一次 `grafana cli plugins install`，macOS 要帶 `--homepath` 與 `--pluginsDir`，否則它會安裝到 Grafana 實際上不會去讀的目錄。
 
-**Dashboard 第一列空白？**
-這一列走 Prometheus。查詢 `up{job="node-exporter"}`，值是 `0` 就去啟動 exporter，整筆 job 不存在就是 Prometheus 載錯設定檔，見 [02-install-prometheus.md](02-install-prometheus.md)〈用 service 啟動〉。
-
-**Dashboard 第二列或第三列空白？**
-這兩列跟 Prometheus 無關。先在瀏覽器開啟 <http://localhost:8080/>，列得出檔案清單才表示檔案伺服器仍在執行。清單正常但 panel 仍是空的，就是那個 lab 還沒執行完，或是時間範圍沒切到 2026 年 2 月。
+**`up` 這個 query 在 Explore 裡查不到 `node-exporter`？**
+整筆 job 不存在就是 Prometheus 載錯設定檔，見 [02-install-prometheus.md](02-install-prometheus.md)〈用 service 啟動〉。dashboard 相關的排查（哪一列空白、CSV 讀取失敗）在
+workshop 那份 notebook 自己的〈排查〉一節，這裡還沒有 dashboard 可以排查。

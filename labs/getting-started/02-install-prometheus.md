@@ -65,4 +65,4 @@ prometheus --config.file=infra/prometheus/prometheus.<你的 OS {macos, linux, w
 
 ## 下一步
 
-[04-install-node-exporter.md](04-install-node-exporter.md) 與 [03a-install-grafana-local.md](03a-install-grafana-local.md)。`alerts.yml` 的規則全部打在 node_exporter 指標上，沒有它，recording rule 與 alert rule 都不會有值。
+[04-install-node-exporter.md](04-install-node-exporter.md) 與 [03-install-grafana-local.md](03-install-grafana-local.md)。`alerts.yml` 的規則全部打在 node_exporter 指標上，沒有它，recording rule 與 alert rule 都不會有值。

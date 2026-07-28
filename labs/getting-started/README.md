@@ -55,9 +55,10 @@ Windows PowerShell 是 `cd C:\Users\<你的帳號>\aiops-anomaly-zero-to-hero`�
 
 ## Step 5. 安裝 Grafana Local，接上兩個資料來源
 
-照 [03a-install-grafana-local.md](03a-install-grafana-local.md) 做。Infinity 是外掛，要另外安裝。
+照 [03-install-grafana-local.md](03-install-grafana-local.md) 做。Infinity 是外掛，要另外安裝。
 
-驗收：<http://localhost:3000/d/aiops-workshop> 能開啟，Prometheus data source 指向 `http://localhost:9090`。填成 `3000` 是最常見的失敗，`3000` 是 Grafana 自己。
+驗收：`Connections → Data sources` 列得出 `Prometheus` 與 `Lab outputs` 兩筆，Prometheus 的 Save & test
+應顯示成功。填成 `3000` 是最常見的失敗，`3000` 是 Grafana 自己。dashboard 在 workshop 裡自己建，這裡不驗收。
 
 ## Step 6. 開一個檔案伺服器
 
@@ -91,4 +92,5 @@ Lab 00 要確認的是即時指標與分析結果這兩條路徑都通。順序�
 
 ## 選用：Grafana Cloud
 
-課程主線只需要 Grafana Local。想把指標推上雲端再看 [03b-setup-grafana-cloud.md](03b-setup-grafana-cloud.md)。
+課程主線只需要 Grafana Local。把指標推上雲端的做法在
+`03b-setup-grafana-cloud.md`，這份文件在 workspace 根目錄，不在這個 repo 裡。
