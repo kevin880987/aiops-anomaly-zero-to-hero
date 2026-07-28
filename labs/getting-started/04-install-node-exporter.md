@@ -95,10 +95,12 @@ macOS 通常看到 `en0`，Linux 通常是 `eth0` 或 `ens3`。Windows 改為查
 
 ## 規則檔看的是哪一張網卡
 
-`alerts.yml` 的 recording rules 比對的是 `device=~"en0|eth0"`。macOS 的無線網卡通常就是 `en0`，Linux 則可能是 `enp3s0`、`ens33` 之類的名字。查詢一次就知道自己這台是哪一張：
+`up{job="node-exporter"}` 是 `1`，但 `net:traffic_bps` 查詢不到值，通常是這裡的問題：`alerts.yml` 的 recording rules 只認 `device=~"en0|eth0"` 這兩個名字。
 
-```promql
-topk(3, rate(node_network_receive_bytes_total[5m]))
-```
+1. 查自己這台實際在傳資料的網卡：
 
-前三名裡沒有 `en0` 或 `eth0` 的話，把 `alerts.yml` 裡的 device 比對式改成你那張網卡的名字，再重新載入 Prometheus。`up{job="node-exporter"}` 是 `1` 但 `net:traffic_bps` 查詢不到值，多半就是這個原因。
+   ```promql
+   topk(3, rate(node_network_receive_bytes_total[5m]))
+   ```
+
+2. 前三名裡有 `en0` 或 `eth0` 就不用改，這一節結束。沒有的話（Linux 常見 `enp3s0`、`ens33` 這類名字），把 `alerts.yml` 裡的 `device=~"en0|eth0"` 換成查到的那個名字，存檔後重新載入 Prometheus（見上面〈讓 Prometheus 抓到它〉）。
