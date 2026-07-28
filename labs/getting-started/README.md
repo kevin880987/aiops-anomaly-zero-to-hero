@@ -26,10 +26,10 @@
 所有指令都從 repository 根目錄執行。
 
 ```bash
-cd /path/to/aiops-anomaly-zero-to-hero
+cd <你 clone 的位置>/aiops-anomaly-zero-to-hero
 ```
 
-Windows PowerShell 用 `cd C:\path\to\aiops-anomaly-zero-to-hero`。
+Windows PowerShell 是 `cd C:\Users\<你的帳號>\aiops-anomaly-zero-to-hero`。
 
 ## Step 2. 建立 Python / conda 環境
 

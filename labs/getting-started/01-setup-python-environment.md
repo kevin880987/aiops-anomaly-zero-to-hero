@@ -24,22 +24,18 @@ cd aiops-anomaly-zero-to-hero
 
 ### 2. 建立 conda 環境
 
-環境檔按平台分成三份，建立出來的是同一個 conda environment：`aiops-anomaly-zero-to-hero`。執行你這個作業系統對應的那一份：
-
-| 作業系統 | 環境檔 |
-| --- | --- |
-| macOS | `environments/environment.macos.yml` |
-| Linux | `environments/environment.linux.yml` |
-| Windows | `environments\environment.windows.yml` |
+環境檔按平台分成三份，建立出來的是同一個 conda environment：`aiops-anomaly-zero-to-hero`。
+在終端機執行，Windows 用 PowerShell，路徑分隔改成反斜線。
 
 ```bash
-conda env create -f environments/environment.macos.yml
+cd <你 clone 的位置>/aiops-anomaly-zero-to-hero
+conda env create -f environments/environment.<你的 OS {macos, linux, windows}>.yml
 ```
 
-環境已存在時改用更新指令，`create` 換成 `update -n aiops-anomaly-zero-to-hero`，結尾加 `--prune`：
+環境已存在時改用更新指令：
 
 ```bash
-conda env update -n aiops-anomaly-zero-to-hero -f environments/environment.macos.yml --prune
+conda env update -n aiops-anomaly-zero-to-hero -f environments/environment.<你的 OS {macos, linux, windows}>.yml --prune
 ```
 
 啟用環境：

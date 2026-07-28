@@ -28,11 +28,15 @@ sudo systemctl enable --now grafana-server
 
 其他發行版見[官方安裝文件](https://grafana.com/docs/grafana/latest/setup-grafana/installation/)。
 
-**Windows：** 從[下載頁](https://grafana.com/grafana/download/)選 Windows 下載 `.msi` 安裝。服務會自動啟動，沒有的話到「服務」管理員手動啟動 `Grafana`。
+**Windows：** 從[下載頁](https://grafana.com/grafana/download/)選 Windows 下載 `.msi` 安裝。服務會自動啟動，沒有的話在系統管理員權限的 PowerShell 執行 `Start-Service Grafana`。
 
+## 3. 啟動
 開啟 <http://localhost:3000>，帳號密碼都是 `admin`，系統會要求改密碼。
+![alt text](03a-grafana-1.png)
 
-## 2. 安裝 Infinity 外掛
+## 3. 安裝 Infinity 外掛
+
+在終端機執行，Windows 用 PowerShell。
 
 **macOS：**
 
@@ -52,13 +56,23 @@ sudo grafana cli plugins install yesoreyeram-infinity-datasource
 sudo systemctl restart grafana-server
 ```
 
-**Windows：** 在 Grafana 安裝目錄的 `bin` 資料夾執行 `.\grafana.exe cli plugins install yesoreyeram-infinity-datasource`，之後到「服務」管理員重新啟動 `Grafana`。
+**Windows：** 在 PowerShell 執行，路徑換成自己的 Grafana 安裝目錄：
+
+```powershell
+cd "C:\Program Files\GrafanaLabs\grafana\bin"
+.\grafana.exe cli plugins install yesoreyeram-infinity-datasource
+Restart-Service Grafana
+```
+
+`Restart-Service` 要用系統管理員權限開啟的 PowerShell，一般權限開的視窗會回權限錯誤。
 
 舊版 Grafana 的指令名稱是 `grafana-cli`，參數相同。
 
-## 3. 建立兩個資料來源
+## 4. 建立兩個資料來源
 
-複製 provisioning 檔再重啟，兩個 datasource 會一起建立：
+複製 provisioning 檔再重新啟動，兩個 datasource 會一起建立。
+
+**macOS：**
 
 ```bash
 cp infra/grafana/provisioning/datasources.yaml \
@@ -66,15 +80,30 @@ cp infra/grafana/provisioning/datasources.yaml \
 brew services restart grafana
 ```
 
-Linux 的目標路徑是 `/etc/grafana/provisioning/datasources/aiops.yaml`，改完 `sudo systemctl restart grafana-server`。
+**Linux：**
+
+```bash
+sudo cp infra/grafana/provisioning/datasources.yaml \
+   /etc/grafana/provisioning/datasources/aiops.yaml
+sudo systemctl restart grafana-server
+```
+
+**Windows：** 在 PowerShell 執行，`$repo` 換成自己 clone 的位置：
+
+```powershell
+$repo = "C:\Users\<你的帳號>\aiops-anomaly-zero-to-hero"
+Copy-Item "$repo\infra\grafana\provisioning\datasources.yaml" `
+  "C:\Program Files\GrafanaLabs\grafana\conf\provisioning\datasources\aiops.yaml"
+Restart-Service Grafana
+```
 
 手動加也可以，在 **Connections → Data sources → Add data source**：Prometheus 的 server URL 填 `http://localhost:9090`，按 **Save & test** 應出現 "Successfully queried the Prometheus API"；Infinity 的名稱取為 `Lab outputs`，其餘留預設。
 
-## 4. 匯入 dashboard
+## 5. 匯入 dashboard
 
 在 **Dashboards → New → Import** 貼上 `infra/grafana/dashboards/aiops-workshop.json` 的內容或上傳檔案，按 **Load**，選好 data source 之後 **Import**。
 
-## 5. 驗收
+## 6. 驗收
 
 <http://localhost:3000/d/aiops-workshop> 能開啟，第一列有即時曲線。左上角的 **Interface** 下拉要選一張真的有流量的網卡。
 
@@ -97,7 +126,7 @@ provisioning 檔裡 Prometheus 的 uid 是 `prometheus`，Infinity 的 uid 是 `
 ## 常見問題
 
 **瀏覽器無法開啟 `localhost:3000`？**
-確認服務已啟動。macOS 執行 `brew services list`，Linux 執行 `systemctl status grafana-server`，Windows 開啟「服務」管理員查看 `Grafana`。
+確認服務已啟動。macOS 執行 `brew services list`，Linux 執行 `systemctl status grafana-server`，Windows 在 PowerShell 執行 `Get-Service Grafana`。
 
 **Save & test 失敗？**
 先確認 Prometheus 能在 <http://localhost:9090> 開啟。資料來源 URL 應填 `http://localhost:9090`，`3000` 是 Grafana 自己。
