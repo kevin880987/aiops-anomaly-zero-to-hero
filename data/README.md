@@ -1,4 +1,4 @@
-# Data Directory
+# data/
 
 此資料夾依來源與生命週期分開保存課程資料。
 

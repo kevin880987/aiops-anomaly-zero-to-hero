@@ -1,4 +1,4 @@
-# Error Log Sample（選讀）
+# RRD 網路計數器範例（選讀）
 
 選讀資料，不是 labs 的必要輸入。Labs 使用 `data/synthetic/synthetic_rrd_metrics.csv`。
 

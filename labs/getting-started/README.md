@@ -73,7 +73,7 @@ Prometheus 一個。
 labs/workshop/00_end_to_end_pipeline.ipynb
 ```
 
-Lab 00 把整條線接起來，從網卡的 counter 一路到會響的告警，中間那一段偵測是自己寫的 Python 服務。
+Lab 00 把整條管線接起來，從網卡的 counter 到會響的告警，中間那一段偵測是自己寫的 Python 服務。
 接完之後 Lab 01 與 Lab 02 只處理演算法。順序不能跳，Lab 02 的分數建立在 Lab 01 的 baseline 上。
 三份 notebook 的分工見 [`labs/workshop/README.md`](../workshop/README.md)。
 

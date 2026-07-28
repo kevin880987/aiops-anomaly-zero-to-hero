@@ -1,4 +1,4 @@
-# Sample Data（選讀）
+# data/sample/（選讀）
 
 選讀資料，不是 labs 的必要輸入。Labs 使用 `data/synthetic/` 即可完成。只有在想理解 LibreNMS / RRDTool 原始 `.rrd` 檔格式時，才進入本目錄。
 

@@ -1,4 +1,4 @@
-# Synthetic Data
+# data/synthetic/
 
 此資料夾放模擬資料與資料模擬 notebook。
 
