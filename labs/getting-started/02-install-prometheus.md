@@ -2,7 +2,7 @@
 
 官方文件：[安裝說明](https://prometheus.io/docs/prometheus/latest/installation/)、[下載頁](https://prometheus.io/download/)
 
-Prometheus 每五秒去抓一次 exporter 的 `/metrics`，把時間序列存起來給 Grafana 查詢。開始之前先完成 [01-setup-python-environment.md](01-setup-python-environment.md)。
+Prometheus 每 5 秒去抓一次 exporter 的 `/metrics`，把時間序列存起來給 Grafana 查詢。開始之前先完成 [01-setup-python-environment.md](01-setup-python-environment.md)。
 
 ## 1. 安裝
 
@@ -49,7 +49,7 @@ Windows 是 `.\prometheus.exe --config.file="C:\path\to\aiops-anomaly-zero-to-he
 
 `brew services start prometheus` 與 `systemctl start prometheus` 載入的是套件自己的預設設定檔（macOS 上是 `/opt/homebrew/etc/prometheus.yml`）。那份檔案只有 Prometheus 自己一個 target，沒有 `node-exporter`，也沒有 `alerts.yml` 的規則。
 
-這個錯誤難自己發現，因為它不會出錯。Prometheus 是活的，node_exporter 是活的，Grafana 是活的，查詢 `up{job="prometheus"}` 回傳 `1`，每一項單獨看都正常，但沒有任何人去抓 `localhost:9100`，dashboard 第一列於是永遠空白。要看的是 job 存不存在，不是 job 的值是不是 `1`。
+這個錯誤難自己發現，因為它不會出錯。三個程序都在執行，查詢 `up{job="prometheus"}` 回傳 `1`，每一項單獨看都正常，但沒有任何人去抓 `localhost:9100`，dashboard 第一列於是永遠空白。要看的是 job 清單裡有沒有這一筆，值是不是 `1` 是下一步的事。
 
 要用 service 方式（啟動之後無須介入），先把檔案複製到套件的預設位置：
 

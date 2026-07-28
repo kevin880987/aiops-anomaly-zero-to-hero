@@ -19,7 +19,7 @@
 
 前三個是官方 binary。第四個是 Python 標準函式庫的 `http.server`，把 notebook 寫出來的 CSV 與 PNG 開給 Grafana 讀。
 
-上面四個服務是為了讓結果上得了 dashboard，不是 notebook 執行起來的前提。
+上面四個服務只影響結果能不能上 dashboard。Notebook 少了它們照樣執行得完。
 
 ## Step 1. 進入 course repo
 
@@ -85,7 +85,7 @@ Windows PowerShell 的路徑是 `outputs\workshop`。
 labs/workshop/00_observability_stack_and_promql.ipynb
 ```
 
-Lab 00 唯一要證明的事，就是即時指標與分析結果這兩條路徑都通。順序不能跳，Lab 02 的 panel 畫的是 Lab 01 算出來的欄位。四份 notebook 的分工見 [`labs/workshop/README.md`](../workshop/README.md)。
+Lab 00 要確認的是即時指標與分析結果這兩條路徑都通。順序不能跳，Lab 02 的 panel 畫的是 Lab 01 算出來的欄位。三份 notebook 的分工見 [`labs/workshop/README.md`](../workshop/README.md)。
 
 ## 選用：Grafana Cloud
 
