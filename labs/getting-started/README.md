@@ -1,10 +1,12 @@
 # Getting started
 
-課程 setup 的主入口，照順序做。安裝細節在各步驟連到的文件裡，這一頁只給順序與每一步的驗收條件。
+這門課的重點是異常偵測的演算法設計。Grafana 與 dashboard 是拿來看資料與驗證結果的工具。
 
-本課程支援 macOS、Linux、Windows。只執行自己作業系統的指令。
+課程 setup 的主入口，照順序做。安裝細節在各步驟連到的文件裡。
 
-已經有 conda 環境的話，可以直接開 `00-check-your-setup.ipynb`，它會告訴你缺哪一項，再回到對應步驟補。
+本課程支援 macOS、Linux、Windows。
+
+最後我們會執行 `00-check-your-setup.ipynb` 確認所有需要的安裝。
 
 ## 課堂上要維持執行的四個服務
 
@@ -19,7 +21,7 @@
 
 前三個是官方 binary。第四個是 Python 標準函式庫的 `http.server`，把 notebook 寫出來的 CSV 與 PNG 開給 Grafana 讀。
 
-上面四個服務只影響結果能不能上 dashboard。Notebook 少了它們照樣執行得完。
+上面四個服務確保資料能拋上 Grafana dashboard。
 
 ## Step 1. 進入 course repo
 

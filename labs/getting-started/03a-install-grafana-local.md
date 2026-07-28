@@ -91,7 +91,7 @@ sudo systemctl restart grafana-server
 **Windows：** 在 PowerShell 執行，`$repo` 換成自己 clone 的位置：
 
 ```powershell
-$repo = "C:\Users\<你的帳號>\aiops-anomaly-zero-to-hero"
+$repo = "<你的路徑>\aiops-anomaly-zero-to-hero"
 Copy-Item "$repo\infra\grafana\provisioning\datasources.yaml" `
   "C:\Program Files\GrafanaLabs\grafana\conf\provisioning\datasources\aiops.yaml"
 Restart-Service Grafana

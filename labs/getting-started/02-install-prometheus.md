@@ -32,7 +32,7 @@ cd <你 clone 的位置>/aiops-anomaly-zero-to-hero
 prometheus --config.file=infra/prometheus/prometheus.<你的 OS {macos, linux, windows}>.yml --web.enable-lifecycle
 ```
 
-這個視窗留著**維持執行**。**不要用 `brew services start prometheus` 或 `systemctl start prometheus` 直接啟動**，那會載入套件自己的預設設定檔。
+這個視窗請保持開啟**維持執行，並開新的終端機執行之後的指令**。**不要用 `brew services start prometheus` 或 `systemctl start prometheus` 直接啟動**，那會載入套件自己的預設設定檔。
 
 ## 3. 驗收
 
