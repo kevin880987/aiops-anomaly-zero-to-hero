@@ -64,8 +64,9 @@ brew services restart grafana
 
 **Dashboard。** 這門課的 dashboard 不匯入，一格一格自己建：第一列在 Lab 00 建，讀
 node_exporter 的即時指標；第二列從 Lab 01 開始建，讀各 lab 寫出的 CSV；第三列讀 lab 的 PNG。
-每個 lab 的 notebook 裡有那一段的完整建法。`infra/grafana/dashboards/aiops-workshop.json`
-是建完之後的答案卷，卡住時核對某張 panel 的設定用，不要在這裡整份匯入。
+完整建法在 [`dashboard.md`](dashboard.md)，各 lab 的 notebook 裡在對應段落有連結過去。
+`infra/grafana/dashboards/aiops-workshop.json` 是建完之後的答案卷，卡住時核對某張 panel 的
+設定用，不要在這裡整份匯入。
 
 ## 從 Lab 00 開始
 
