@@ -41,13 +41,13 @@ sudo systemctl enable --now grafana-server
 **macOS：**
 
 ```bash
-grafana cli --homepath /opt/homebrew/share/grafana \
-  --pluginsDir /opt/homebrew/var/lib/grafana/plugins \
+grafana cli --homepath "$(brew --prefix)/share/grafana" \
+  --pluginsDir "$(brew --prefix)/var/lib/grafana/plugins" \
   plugins install yesoreyeram-infinity-datasource
 brew services restart grafana
 ```
 
-Intel Mac 的前綴是 `/usr/local`，用 `brew --prefix` 確認。
+`$(brew --prefix)` 在 Apple Silicon 是 `/opt/homebrew`，在 Intel Mac 是 `/usr/local`，這行指令兩種都適用。
 
 **Linux：**
 
@@ -76,7 +76,7 @@ Restart-Service Grafana
 
 ```bash
 cp infra/grafana/provisioning/datasources.yaml \
-   /opt/homebrew/share/grafana/conf/provisioning/datasources/aiops.yaml
+   "$(brew --prefix)/share/grafana/conf/provisioning/datasources/aiops.yaml"
 brew services restart grafana
 ```
 
