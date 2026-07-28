@@ -2,7 +2,7 @@
 
 官方來源：[Prometheus 官方 guide](https://prometheus.io/docs/guides/node-exporter/)、[node_exporter](https://github.com/prometheus/node_exporter/releases)、[windows_exporter](https://github.com/prometheus-community/windows_exporter)
 
-node_exporter 把這台機器的 CPU、記憶體、網路指標曝露成 Prometheus 格式，讓你的 PC 成為被監控目標。三份 Prometheus 設定檔預設就帶它的 job，`infra/prometheus/alerts.yml` 的 recording rules 打在 `node_network_*` 上，Lab 00 那支 `detector.py` 也是讀這一組指標算分數，所以沒有它，後面整條管線都不會有值。
+node_exporter 把這台機器的 CPU、記憶體、網路指標曝露成 Prometheus 格式，讓你的 PC 成為被監控目標。三份 Prometheus 設定檔預設就帶它的 job，`infra/prometheus/alerts.yml` 的 recording rules 打在 `node_network_*` 上，Lab 00 那支 `detector.py` 也是讀這一組指標算分數，所以沒有它，後面整條 pipeline 都不會有值。
 
 它讀的是真實作業系統指標，跟 notebook 讀的 `data/synthetic/synthetic_rrd_metrics.csv` 是兩回事。後者是 synthetic data，模擬的是整理後的真實網路訊號。
 

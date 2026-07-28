@@ -2,7 +2,7 @@
 
 這門課走一遍營運監控的完整資料流，而且是接得起來、跑得下去的那一種。OS 產生 telemetry，exporter 曝露 `/metrics`，Prometheus scrape 並儲存時間序列。接著課程自己寫的一支偵測服務回頭查 Prometheus、算出偏離分數、把分數曝露成 `/metrics`，於是 Prometheus 把它當成一般指標抓回去，Grafana 與告警規則查詢的就是那個分數。
 
-重點在演算法，不在畫面。Lab 00 一次把整條管線接完，之後兩節處理的是那個分數該怎麼算。
+重點在演算法，不在畫面。Lab 00 一次把整條 pipeline 接完，之後兩節處理的是那個分數該怎麼算。
 
 每個方法都要能解釋它為什麼被選、用什麼數字驗證，以及在真實系統裡該放在哪一層。不需要雲端帳號，Grafana Cloud 是選用延伸。
 
@@ -31,7 +31,7 @@
 ## 教材路線
 
 ```text
-getting-started -> 把整條管線接起來 -> feature engineering -> anomaly detection 與 alerting
+getting-started -> 把整條 pipeline 接起來 -> feature engineering -> anomaly detection 與 alerting
 ```
 
 Lab 00 讀的是這台機器此刻的流量，走 Prometheus。Lab 01 與 Lab 02 讀 `data/synthetic/` 底下標好真值的歷史 CSV，因為演算法要拿有答案的資料才評得出好壞，那兩節全程用 matplotlib 畫圖。兩者的關係很直接：在歷史資料上挑出來的 baseline 與政策，就是要放進 Lab 00 那支服務裡的演算法。
@@ -46,7 +46,7 @@ Grafana 端全部走官方功能，datasource 用內建的檔案 provisioning（
 
 | Lab | 主題 | 建議時間 |
 | --- | --- | --- |
-| `00_end_to_end_pipeline.ipynb` | 把整條管線接起來。counter 與 rate、Python 服務怎麼進到 Prometheus、`for:` 怎麼擋掉雜訊，再故意弄壞四次讀出斷在哪一段 | 45 到 60 分鐘 |
+| `00_end_to_end_pipeline.ipynb` | 把整條 pipeline 接起來。counter 與 rate、Python 服務怎麼進到 Prometheus、`for:` 怎麼擋掉雜訊，再故意弄壞四次讀出斷在哪一段 | 45 到 60 分鐘 |
 | `01_network_traffic_feature_engineering.ipynb` | 單位契約、資料剖面、四種 baseline（rolling mean、median 與 MAD、seasonal、peer group）與 shape features | 60 到 75 分鐘 |
 | `02_anomaly_detection_and_alerting.ipynb` | score 收成 label、label 通過 policy 成為 alert，以 event recall、detection delay 與 alerts per day 評估 | 60 到 75 分鐘 |
 
@@ -61,7 +61,7 @@ actual OS / network telemetry
   -> Grafana panels and alert rules read that score with PromQL
 ```
 
-分數繞回 Prometheus 這一步是整個設計的關鍵。繞回去之後下游沒有一格知道它是 Python 算的，所以上線的時候換掉的是演算法，管線原封不動。
+分數繞回 Prometheus 這一步是整個設計的關鍵。繞回去之後下游沒有一格知道它是 Python 算的，所以上線的時候換掉的是演算法，pipeline 原封不動。
 
 Lab 01 與 Lab 02 另外讀 `data/synthetic/` 底下的 synthetic CSV，那是真實營運資料整理過後的樣子：五個 port、一整個月、十八個標好的事件。有真值才量得出一個 baseline 好不好，這台機器此刻的流量沒有真值可比。
 
