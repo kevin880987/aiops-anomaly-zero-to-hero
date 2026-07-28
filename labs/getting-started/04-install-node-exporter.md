@@ -1,31 +1,18 @@
 # 安裝 node_exporter
 
-官方來源：[node_exporter](https://github.com/prometheus/node_exporter)、[releases](https://github.com/prometheus/node_exporter/releases)、[Prometheus 官方 guide](https://prometheus.io/docs/guides/node-exporter/)、[windows_exporter](https://github.com/prometheus-community/windows_exporter)
+官方來源：[Prometheus 官方 guide](https://prometheus.io/docs/guides/node-exporter/)、[node_exporter](https://github.com/prometheus/node_exporter/releases)、[windows_exporter](https://github.com/prometheus-community/windows_exporter)
 
 node_exporter 把這台機器的 CPU、記憶體、網路指標曝露成 Prometheus 格式，讓你的 PC 成為被監控目標。三份 Prometheus 設定檔預設就帶它的 job，`infra/prometheus/alerts.yml` 的 recording rules 與 alert rules 也全部打在 `node_network_*` 上，所以沒有它，工作坊 dashboard 第一列與所有規則都不會有值。
 
 它讀的是真實作業系統指標，跟 notebook 讀的 `data/synthetic/synthetic_rrd_metrics.csv` 是兩回事。後者是 synthetic data，模擬的是整理後的真實網路訊號。
 
-## macOS / Linux
+## macOS
 
-到 [releases](https://github.com/prometheus/node_exporter/releases) 確認最新版本。先看自己的 CPU 架構：
-
-```bash
-uname -m
-```
-
-`arm64` 是 Apple Silicon Mac，`x86_64` 是 Intel Mac 或多數 Linux PC。對照下表填入 `PLATFORM`：
-
-| 機器 | `PLATFORM` |
-| --- | --- |
-| Apple Silicon Mac | `darwin-arm64` |
-| Intel Mac | `darwin-amd64` |
-| x86_64 Linux | `linux-amd64` |
-| ARM64 Linux | `linux-arm64` |
+在終端機執行，架構（Apple Silicon 或 Intel）由指令自己判斷：
 
 ```bash
 VERSION="1.11.1"
-PLATFORM="darwin-arm64"
+PLATFORM="darwin-arm64"; [ "$(uname -m)" = "x86_64" ] && PLATFORM="darwin-amd64"
 curl -LO "https://github.com/prometheus/node_exporter/releases/download/v${VERSION}/node_exporter-${VERSION}.${PLATFORM}.tar.gz"
 tar xvf "node_exporter-${VERSION}.${PLATFORM}.tar.gz"
 sudo mkdir -p /usr/local/bin
@@ -41,9 +28,31 @@ curl -s http://localhost:9100/metrics | grep node_network_receive_bytes_total | 
 
 有輸出就表示它正常運作。要停止前景執行的 node_exporter，回到該終端機按 `Ctrl+C`。
 
-啟動時顯示 `command not found` 就改用完整路徑 `/usr/local/bin/node_exporter`。macOS 出現安全性阻擋時，到 **System Settings → Privacy & Security** 允許執行，再重新啟動。
+啟動時顯示 `command not found` 就改用完整路徑 `/usr/local/bin/node_exporter`。出現安全性阻擋時，到 **System Settings → Privacy & Security** 允許執行，再重新啟動。
 
-其他發行版的服務化方式見[官方 guide](https://prometheus.io/docs/guides/node-exporter/)。
+## Linux
+
+在終端機執行，架構由指令自己判斷：
+
+```bash
+VERSION="1.11.1"
+PLATFORM="linux-amd64"; [ "$(uname -m)" = "aarch64" ] && PLATFORM="linux-arm64"
+curl -LO "https://github.com/prometheus/node_exporter/releases/download/v${VERSION}/node_exporter-${VERSION}.${PLATFORM}.tar.gz"
+tar xvf "node_exporter-${VERSION}.${PLATFORM}.tar.gz"
+sudo mkdir -p /usr/local/bin
+sudo mv "node_exporter-${VERSION}.${PLATFORM}/node_exporter" /usr/local/bin/
+node_exporter
+```
+
+看到 `Listening on` 之後保持這個終端機執行，另外開啟一個做驗證：
+
+```bash
+curl -s http://localhost:9100/metrics | grep node_network_receive_bytes_total | head -5
+```
+
+有輸出就表示它正常運作。要停止前景執行的 node_exporter，回到該終端機按 `Ctrl+C`。
+
+啟動時顯示 `command not found` 就改用完整路徑 `/usr/local/bin/node_exporter`。要當成服務常駐執行，見[官方 guide](https://prometheus.io/docs/guides/node-exporter/)。
 
 ## Windows
 

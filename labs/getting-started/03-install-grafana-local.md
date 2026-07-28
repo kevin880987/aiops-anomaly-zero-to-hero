@@ -32,7 +32,7 @@ sudo systemctl enable --now grafana-server
 
 ## 2. 啟動
 
-開啟 <http://localhost:3000>，帳號密碼都是 `admin`，系統會要求改密碼。
+在瀏覽器開啟 <http://localhost:3000>，帳號密碼都是 `admin`，系統會要求改密碼。
 ![alt text](03-grafana-1.png)
 
 ## 3. 安裝 Infinity 外掛
@@ -98,11 +98,13 @@ Copy-Item "$repo\infra\grafana\provisioning\datasources.yaml" `
 Restart-Service Grafana
 ```
 
-手動加也可以，在 **Connections → Data sources → Add data source**：Prometheus 的 server URL 填 `http://localhost:9090`，按 **Save & test** 應出現 "Successfully queried the Prometheus API"；Infinity 的名稱取為 `Lab outputs`，其餘留預設。
+也可以手動新增以下兩個資料源 Prometheus 與 Infinity，在 **Connections → Data sources → Add data source**：Prometheus 的 server URL 填 `http://localhost:9090`，按 **Save & test** 應出現 "Successfully queried the Prometheus API"；Infinity 的名稱取為 `Lab outputs`，其餘留預設。
+
+![alt text](03-grafana-2.png)
 
 ## 5. 驗收
 
-這一步只確認兩個 datasource 能用，dashboard 是 workshop 裡自己建的，這裡不匯入整份。
+確認兩個 datasource。
 
 **Prometheus。** 開 <http://localhost:3000/explore>，datasource 選 `Prometheus`，查詢 `up`，應該回
 `job="prometheus"` 值是 `1`。`job="node-exporter"` 這一筆在你完成
@@ -110,16 +112,6 @@ Restart-Service Grafana
 
 **Infinity。** `Connections → Data sources → Lab outputs`，頁面能開啟、沒有紅字錯誤即可。這個
 這個 datasource 現在還沒有真的資料可以讀，第一次真的查詢要等 Lab 00 建立 dashboard 之後。
-
-
-## Dashboard 的兩種資料來源
-
-Grafana 負責查詢與畫圖，不自己去抓 exporter。第一列的即時指標走 Prometheus：exporter 曝露 `/metrics`，Prometheus scrape 並儲存時間序列，Grafana 連過去查詢。
-
-第二列與第三列走檔案。Notebook 寫出來的 CSV 與 PNG 放在 `outputs/workshop/`，用一行 `python -m http.server` 開啟成 HTTP 服務，Infinity datasource 直接讀那些檔案。Grafana 是在自己的伺服器端去抓 `http://localhost:8080`，所以不需要設定 CORS。
-
-provisioning 檔裡 Prometheus 的 uid 是 `prometheus`，Infinity 的 uid 是 `lab-outputs`，workshop
-那份 dashboard 的每一張 panel 就是照這兩個 uid 連過去的。手動建立時名稱可以自己取。
 
 ## 常見問題
 
