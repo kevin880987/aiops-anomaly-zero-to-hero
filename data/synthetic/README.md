@@ -8,4 +8,4 @@
 - `synthetic_rrd_metrics.csv`：模擬後的主要時間序列資料。
 - `synthetic_event_catalog.csv`：模擬事件 A-J 的事件表。
 
-`labs/workshop/00_observability_stack_and_promql.ipynb` 會讀取 `synthetic_rrd_metrics.csv`，分析結果輸出到 `outputs/workshop/`。
+`labs/workshop/01_network_traffic_feature_engineering.ipynb` 與 `02_anomaly_detection_and_alerting.ipynb` 讀取 `synthetic_rrd_metrics.csv`。

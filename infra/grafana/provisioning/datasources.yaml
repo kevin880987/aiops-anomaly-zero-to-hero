@@ -1,38 +1,16 @@
-# Grafana's built-in file provisioning. Copy this into Grafana's provisioning
-# directory and restart; nothing here needs an API call or a script.
+# Grafana 內建的檔案 provisioning。複製到 Grafana 的 provisioning 目錄再重新啟動即可，
+# 不需要 API 呼叫，也不需要腳本。指令見 labs/getting-started/03-install-grafana-local.md。
 #
-#   macOS (homebrew)
-#     cp infra/grafana/provisioning/datasources.yaml \
-#        /opt/homebrew/share/grafana/conf/provisioning/datasources/aiops.yaml
-#     brew services restart grafana
-#
-#   Linux
-#     sudo cp ... /etc/grafana/provisioning/datasources/aiops.yaml
-#     sudo systemctl restart grafana-server
-#
-# Adding both datasources by hand in Connections > Data sources works too and
-# takes about a minute. This file only saves the clicking.
+# 只有一個 datasource，因為這門課只有一個資料來源。原始指標、Python 算出來的分數、
+# 告警狀態，三樣東西都存在 Prometheus 裡，Grafana 一律用 PromQL 查。
 
 apiVersion: 1
 
 datasources:
 
-  # Live metrics from node_exporter, scraped by Prometheus. This is what the
-  # PromQL exercises query.
   - name: Prometheus
     uid: prometheus
     type: prometheus
     access: proxy
     url: http://localhost:9090
     isDefault: true
-
-  # Lab results. The notebooks write CSV into outputs/workshop/ and a plain
-  # `python -m http.server` serves that folder; Infinity reads the files over
-  # HTTP. Grafana proxies the request server-side, so there is no CORS setup.
-  - name: Lab outputs
-    uid: lab-outputs
-    type: yesoreyeram-infinity-datasource
-    access: proxy
-    jsonData:
-      auth_method: none
-      global_queries: []

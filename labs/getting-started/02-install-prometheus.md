@@ -48,11 +48,11 @@ prometheus --config.file=infra/prometheus/prometheus.<你的 OS {macos, linux, w
 
 ## 常見問題
 
-**Grafana dashboard 第一列一直是空的？**
+**Grafana 上的流量 panel 一直是空的？**
 查詢 `up`，看有沒有 `job="node-exporter"` 這一筆。找不到就是載入了套件預設設定檔，見〈用 service 啟動〉。有這一筆但值是 `0`，代表設定對了、exporter 還沒啟動，去做 [04-install-node-exporter.md](04-install-node-exporter.md)。
 
-**Grafana dashboard 第二列與第三列一直是空的？**
-那兩列讀的是 `outputs/workshop/` 裡的檔案，跟 Prometheus 無關。確認 `python -m http.server 8080 --directory outputs/workshop` 這個終端機仍在執行，並且對應的 lab 已經執行完並寫出 CSV。
+**分數 panel 一直是空的？**
+查詢 `up{job="aiops-detector"}`。那個 job 抓的是 Lab 00 才會啟動的 `detector.py`，setup 階段是 `0`，屬於正常。
 
 **`curl -X POST http://localhost:9090/-/reload` 回 405？**
 啟動時沒有帶 `--web.enable-lifecycle`。前景啟動就直接加這個參數，service 啟動就把它加進 `prometheus.args` 再重啟。

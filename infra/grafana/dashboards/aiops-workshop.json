@@ -1,857 +1,277 @@
 {
-  "uid": "aiops-workshop",
-  "title": "AIOps workshop",
-  "tags": [
-    "aiops",
-    "workshop"
-  ],
-  "timezone": "browser",
+  "annotations": {
+    "list": []
+  },
   "editable": true,
-  "schemaVersion": 39,
-  "refresh": "",
-  "time": {
-    "from": "now-30m",
-    "to": "now"
-  },
-  "templating": {
-    "list": [
-      {
-        "name": "iface",
-        "label": "Interface",
-        "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "query": "label_values(node_network_receive_bytes_total, device)",
-        "refresh": 1,
-        "includeAll": false,
-        "current": {
-          "text": "en0",
-          "value": "en0"
-        }
-      },
-      {
-        "name": "port",
-        "label": "Port",
-        "type": "custom",
-        "query": "port-id7427,port-id7428,port-id7429,port-id7430,port-id7431",
-        "includeAll": false,
-        "options": [
-          {
-            "text": "port-id7427",
-            "value": "port-id7427",
-            "selected": true
-          },
-          {
-            "text": "port-id7428",
-            "value": "port-id7428",
-            "selected": false
-          },
-          {
-            "text": "port-id7429",
-            "value": "port-id7429",
-            "selected": false
-          },
-          {
-            "text": "port-id7430",
-            "value": "port-id7430",
-            "selected": false
-          },
-          {
-            "text": "port-id7431",
-            "value": "port-id7431",
-            "selected": false
-          }
-        ],
-        "current": {
-          "text": "port-id7427",
-          "value": "port-id7427"
-        }
-      }
-    ]
-  },
+  "description": "Lab 00 的答案卷。三張 panel 全部讀 Prometheus：原始速率來自 node_exporter，分數來自 labs/workshop/detector.py，告警狀態來自 infra/prometheus/alerts.yml。建議一格一格自己建，卡住的時候再打開這一份對照。",
+  "graphTooltip": 1,
   "panels": [
     {
       "id": 1,
-      "type": "row",
-      "title": "Lab 00  live metrics through Prometheus, the deployment path",
+      "type": "timeseries",
+      "title": "Throughput, receive and transmit",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "gridPos": {
-        "h": 1,
+        "h": 9,
         "w": 24,
         "x": 0,
         "y": 0
       },
-      "collapsed": false,
-      "panels": []
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "rate(node_network_receive_bytes_total{device=\"$iface\"}[1m])",
+          "legendFormat": "receive",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "rate(node_network_transmit_bytes_total{device=\"$iface\"}[1m])",
+          "legendFormat": "transmit",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "mappings": [],
+          "unit": "Bps",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
     },
     {
       "id": 2,
-      "type": "text",
-      "title": "What this row is for",
+      "type": "timeseries",
+      "title": "Anomaly score",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "gridPos": {
-        "h": 5,
-        "w": 6,
+        "h": 9,
+        "w": 14,
         "x": 0,
-        "y": 1
+        "y": 9
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "aiops_traffic_score",
+          "legendFormat": "{{device}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false,
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "min": -6,
+          "max": 6
+        },
+        "overrides": []
       },
       "options": {
-        "mode": "markdown",
-        "content": "These panels query **Prometheus**, which scrapes `node_exporter` on your own machine: exporter exposes `/metrics`, Prometheus scrapes and stores, Grafana queries. That is the shape a real deployment has, and Lab 00 is where the course exercises it end to end.\n\nLabs 01, 02 and 08 never query Prometheus. They read CSV, and the row below stands in.\n\nPick an interface with real traffic in the **Interface** dropdown, then download something large and watch it move."
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
       }
     },
     {
       "id": 3,
-      "type": "timeseries",
-      "title": "Throughput, receive and transmit",
-      "description": "rate() over the counters node_exporter exposes for the selected interface.",
+      "type": "state-timeline",
+      "title": "Alert state",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
-        "h": 5,
-        "w": 9,
-        "x": 6,
-        "y": 1
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "Bps",
-          "custom": {
-            "fillOpacity": 0,
-            "lineWidth": 1
-          }
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "editorMode": "code",
-          "range": true,
-          "expr": "rate(node_network_receive_bytes_total{device=\"$iface\"}[1m])",
-          "legendFormat": "receive"
-        },
-        {
-          "refId": "B",
-          "editorMode": "code",
-          "range": true,
-          "expr": "rate(node_network_transmit_bytes_total{device=\"$iface\"}[1m])",
-          "legendFormat": "transmit"
-        }
-      ],
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
-    },
-    {
-      "id": 4,
-      "type": "timeseries",
-      "title": "Mean packet size",
-      "description": "Bytes divided by packets. A shift here separates a throughput change from a change in traffic shape.",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 9,
-        "x": 15,
-        "y": 1
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes",
-          "custom": {
-            "fillOpacity": 0,
-            "lineWidth": 1
-          }
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "editorMode": "code",
-          "range": true,
-          "expr": "(rate(node_network_receive_bytes_total{device=\"$iface\"}[1m]) + rate(node_network_transmit_bytes_total{device=\"$iface\"}[1m])) / clamp_min(rate(node_network_receive_packets_total{device=\"$iface\"}[1m]) + rate(node_network_transmit_packets_total{device=\"$iface\"}[1m]), 1)",
-          "legendFormat": "mean packet size"
-        }
-      ],
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
-    },
-    {
-      "id": 10,
-      "type": "row",
-      "title": "Lab 01 and 02  results read from CSV",
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 6
-      },
-      "collapsed": false,
-      "panels": []
-    },
-    {
-      "id": 11,
-      "type": "text",
-      "title": "Where this data comes from",
-      "gridPos": {
-        "h": 14,
-        "w": 6,
-        "x": 0,
-        "y": 7
-      },
-      "options": {
-        "mode": "markdown",
-        "content": "Lab 00 proved the path above works. From Lab 01 onward the numbers come\nfrom CSV instead, and this row stands in for Prometheus. Each piece has a\ncounterpart up there:\n\n| here | in production |\n| --- | --- |\n| `outputs/workshop/*.csv` | a service exposing `/metrics` |\n| `python -m http.server` | the exporter endpoint |\n| Infinity plugin | Prometheus |\n| **Port** dropdown filtering `port_id` | a PromQL label selector |\n| a CSV column | a metric name |\n\nThe stand-in exists because a scrape timestamps a sample at the moment it happens,\nso a month of history has nowhere to go. In production these numbers are computed\nby a service, exposed on `/metrics`, scraped, and this row queries Prometheus like\nthe one above it.\n\nStart the file server from the repository root:\n\n```\npython -m http.server 8080 \\\n  --directory outputs/workshop\n```\n\nLab timestamps are February 2026, so set an Absolute range."
-      }
-    },
-    {
-      "id": 12,
-      "type": "timeseries",
-      "title": "Lab 01  traffic against four baselines",
-      "description": "outputs/workshop/lab01_baselines.csv. Same traffic, four ways of saying what normal is. Where they disagree is where the choice of baseline decides the alert.",
-      "datasource": {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "lab-outputs"
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 9,
-        "x": 6,
-        "y": 7
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "fillOpacity": 0,
-            "lineWidth": 1
-          },
-          "unit": "Bps"
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "type": "csv",
-          "source": "url",
-          "format": "table",
-          "parser": "backend",
-          "url": "http://localhost:8080/lab01_baselines.csv",
-          "url_options": {
-            "method": "GET"
-          },
-          "columns": [
-            {
-              "selector": "timestamp",
-              "text": "time",
-              "type": "timestamp"
-            },
-            {
-              "selector": "traffic_bps",
-              "text": "aiops_traffic_bps",
-              "type": "number"
-            },
-            {
-              "selector": "roll_center",
-              "text": "aiops_baseline_rolling_bps",
-              "type": "number"
-            },
-            {
-              "selector": "robust_center",
-              "text": "aiops_baseline_robust_bps",
-              "type": "number"
-            },
-            {
-              "selector": "seasonal_center",
-              "text": "aiops_baseline_seasonal_bps",
-              "type": "number"
-            },
-            {
-              "selector": "peer_center",
-              "text": "aiops_baseline_peer_bps",
-              "type": "number"
-            }
-          ],
-          "filters": [],
-          "filterExpression": "port_id == \"$port\""
-        }
-      ],
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
-    },
-    {
-      "id": 13,
-      "type": "timeseries",
-      "title": "Lab 01  the robust band, and what it swallows",
-      "description": "Median plus and minus three MAD. The band widens around the event it failed to flag, which is the point.",
-      "datasource": {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "lab-outputs"
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 9,
-        "x": 15,
-        "y": 7
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "fillOpacity": 0,
-            "lineWidth": 1
-          },
-          "unit": "Bps"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "aiops_baseline_robust_hi_bps"
-            },
-            "properties": [
-              {
-                "id": "custom.fillBelowTo",
-                "value": "aiops_baseline_robust_lo_bps"
-              },
-              {
-                "id": "custom.fillOpacity",
-                "value": 16
-              },
-              {
-                "id": "custom.lineWidth",
-                "value": 0
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "aiops_baseline_robust_lo_bps"
-            },
-            "properties": [
-              {
-                "id": "custom.lineWidth",
-                "value": 0
-              }
-            ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "type": "csv",
-          "source": "url",
-          "format": "table",
-          "parser": "backend",
-          "url": "http://localhost:8080/lab01_baselines.csv",
-          "url_options": {
-            "method": "GET"
-          },
-          "columns": [
-            {
-              "selector": "timestamp",
-              "text": "time",
-              "type": "timestamp"
-            },
-            {
-              "selector": "traffic_bps",
-              "text": "aiops_traffic_bps",
-              "type": "number"
-            },
-            {
-              "selector": "robust_lo",
-              "text": "aiops_baseline_robust_lo_bps",
-              "type": "number"
-            },
-            {
-              "selector": "robust_hi",
-              "text": "aiops_baseline_robust_hi_bps",
-              "type": "number"
-            }
-          ],
-          "filters": [],
-          "filterExpression": "port_id == \"$port\""
-        }
-      ],
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
-    },
-    {
-      "id": 14,
-      "type": "timeseries",
-      "title": "Lab 02  score layers",
-      "description": "outputs/workshop/lab02_detection.csv. Each baseline produces its own score; score_max is what the policy sees.",
-      "datasource": {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "lab-outputs"
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 9,
-        "x": 6,
-        "y": 14
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "fillOpacity": 0,
-            "lineWidth": 1
-          }
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "type": "csv",
-          "source": "url",
-          "format": "table",
-          "parser": "backend",
-          "url": "http://localhost:8080/lab02_detection.csv",
-          "url_options": {
-            "method": "GET"
-          },
-          "columns": [
-            {
-              "selector": "timestamp",
-              "text": "time",
-              "type": "timestamp"
-            },
-            {
-              "selector": "score_rolling",
-              "text": "aiops_score_rolling",
-              "type": "number"
-            },
-            {
-              "selector": "score_robust",
-              "text": "aiops_score_robust",
-              "type": "number"
-            },
-            {
-              "selector": "score_seasonal",
-              "text": "aiops_score_seasonal",
-              "type": "number"
-            },
-            {
-              "selector": "score_peer",
-              "text": "aiops_score_peer",
-              "type": "number"
-            },
-            {
-              "selector": "score_max",
-              "text": "aiops_score_max",
-              "type": "number"
-            }
-          ],
-          "filters": [],
-          "filterExpression": "port_id == \"$port\""
-        }
-      ],
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
-    },
-    {
-      "id": 15,
-      "type": "timeseries",
-      "title": "Lab 02  breach, label, alert",
-      "description": "Three step functions. The gap between breach and label is the deadband; the gap between label and alert is duration plus the exclusions.",
-      "datasource": {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "lab-outputs"
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 9,
-        "x": 15,
-        "y": 14
-      },
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "fillOpacity": 0,
-            "lineWidth": 2,
-            "lineInterpolation": "stepAfter"
-          }
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "type": "csv",
-          "source": "url",
-          "format": "table",
-          "parser": "backend",
-          "url": "http://localhost:8080/lab02_detection.csv",
-          "url_options": {
-            "method": "GET"
-          },
-          "columns": [
-            {
-              "selector": "timestamp",
-              "text": "time",
-              "type": "timestamp"
-            },
-            {
-              "selector": "breach",
-              "text": "aiops_breach",
-              "type": "number"
-            },
-            {
-              "selector": "label",
-              "text": "aiops_label",
-              "type": "number"
-            },
-            {
-              "selector": "alert",
-              "text": "aiops_alert",
-              "type": "number"
-            },
-            {
-              "selector": "is_incident",
-              "text": "aiops_incident",
-              "type": "number"
-            }
-          ],
-          "filters": [],
-          "filterExpression": "port_id == \"$port\""
-        }
-      ],
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      }
-    },
-    {
-      "id": 20,
-      "type": "stat",
-      "title": "Event recall",
-      "description": "Share of true events the alerts caught. lab02_scorecard.csv.",
-      "datasource": {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "lab-outputs"
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 6,
-        "y": 21
-      },
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "unit": "percentunit",
-          "decimals": 2
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "type": "csv",
-          "source": "url",
-          "format": "table",
-          "parser": "backend",
-          "url": "http://localhost:8080/lab02_scorecard.csv",
-          "url_options": {
-            "method": "GET"
-          },
-          "columns": [
-            {
-              "selector": "event_recall",
-              "text": "aiops_event_recall",
-              "type": "number"
-            }
-          ],
-          "filters": []
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "none",
-        "graphMode": "none",
-        "justifyMode": "auto"
-      }
-    },
-    {
-      "id": 21,
-      "type": "stat",
-      "title": "Alerts per day",
-      "description": "What the on-call rota actually receives.",
-      "datasource": {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "lab-outputs"
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 10,
-        "y": 21
-      },
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "decimals": 1
-        },
-        "overrides": []
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "type": "csv",
-          "source": "url",
-          "format": "table",
-          "parser": "backend",
-          "url": "http://localhost:8080/lab02_scorecard.csv",
-          "url_options": {
-            "method": "GET"
-          },
-          "columns": [
-            {
-              "selector": "alerts_per_day",
-              "text": "aiops_alerts_per_day",
-              "type": "number"
-            }
-          ],
-          "filters": []
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "none",
-        "graphMode": "none",
-        "justifyMode": "auto"
-      }
-    },
-    {
-      "id": 22,
-      "type": "stat",
-      "title": "Detection delay",
-      "description": "Median minutes from event start to alert.",
-      "datasource": {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "lab-outputs"
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
+        "h": 9,
+        "w": 10,
         "x": 14,
-        "y": 21
-      },
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "unit": "m",
-          "decimals": 0
-        },
-        "overrides": []
+        "y": 9
       },
       "targets": [
         {
-          "refId": "A",
-          "type": "csv",
-          "source": "url",
-          "format": "table",
-          "parser": "backend",
-          "url": "http://localhost:8080/lab02_scorecard.csv",
-          "url_options": {
-            "method": "GET"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "columns": [
-            {
-              "selector": "mttd_min",
-              "text": "aiops_detection_delay_minutes",
-              "type": "number"
-            }
-          ],
-          "filters": []
+          "editorMode": "code",
+          "expr": "ALERTS{alertname=\"TrafficAnomaly\"}",
+          "legendFormat": "{{alertstate}}",
+          "range": true,
+          "refId": "A"
         }
       ],
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "colorMode": "none",
-        "graphMode": "none",
-        "justifyMode": "auto"
-      }
-    },
-    {
-      "id": 23,
-      "type": "stat",
-      "title": "Unexplained alerts",
-      "description": "Fired, matched no event and no planned change.",
-      "datasource": {
-        "type": "yesoreyeram-infinity-datasource",
-        "uid": "lab-outputs"
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 18,
-        "y": 21
-      },
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "lineWidth": 0
+          },
           "mappings": [],
-          "decimals": 0
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "orange",
+                "value": null
+              }
+            ]
+          }
         },
         "overrides": []
       },
-      "targets": [
-        {
-          "refId": "A",
-          "type": "csv",
-          "source": "url",
-          "format": "table",
-          "parser": "backend",
-          "url": "http://localhost:8080/lab02_scorecard.csv",
-          "url_options": {
-            "method": "GET"
-          },
-          "columns": [
-            {
-              "selector": "false_unexplained",
-              "text": "aiops_unexplained_alerts",
-              "type": "number"
-            }
-          ],
-          "filters": []
-        }
-      ],
       "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
+        "alignValue": "left",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
         },
-        "textMode": "auto",
-        "colorMode": "none",
-        "graphMode": "none",
-        "justifyMode": "auto"
-      }
-    },
-    {
-      "id": 30,
-      "type": "row",
-      "title": "Lab 01 and 02  notebook charts, served as PNG",
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 25
-      },
-      "collapsed": false,
-      "panels": []
-    },
-    {
-      "id": 31,
-      "type": "text",
-      "title": "Lab 01  four baselines on one traffic series",
-      "gridPos": {
-        "h": 12,
-        "w": 12,
-        "x": 0,
-        "y": 26
-      },
-      "options": {
-        "mode": "markdown",
-        "content": "![four baselines](http://localhost:8080/lab01_baselines.png)\n\nThe rolling band swallows the event it is supposed to flag. The seasonal band does not."
-      }
-    },
-    {
-      "id": 32,
-      "type": "text",
-      "title": "Lab 02  score, label, alert",
-      "gridPos": {
-        "h": 12,
-        "w": 12,
-        "x": 12,
-        "y": 26
-      },
-      "options": {
-        "mode": "markdown",
-        "content": "![three layers](http://localhost:8080/lab02_layers.png)\n\nFind the isolated breach that produced no label and no alert. That gap is the deadband."
+        "mergeValues": true,
+        "rowHeight": 0.9,
+        "showValue": "auto",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
       }
     }
-  ]
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "tags": [
+    "aiops",
+    "workshop"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(node_network_receive_bytes_total, device)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "iface",
+        "multi": false,
+        "name": "iface",
+        "options": [],
+        "query": {
+          "query": "label_values(node_network_receive_bytes_total, device)",
+          "refId": "A"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "AIOps workshop",
+  "uid": "aiops-workshop",
+  "version": 1,
+  "weekStart": ""
 }

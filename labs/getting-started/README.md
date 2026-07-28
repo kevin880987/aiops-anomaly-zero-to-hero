@@ -10,18 +10,17 @@
 
 ## 課堂上要維持執行的四個服務
 
-課堂用的是 `labs/workshop/`。這四個服務要同時執行，最後一個要自己在終端機啟動並維持執行。
+課堂用的是 `labs/workshop/`。這四個服務要同時執行。
 
 | 元件 | 位址 | 步驟 |
 | --- | --- | --- |
 | Prometheus | <http://localhost:9090> | Step 3 |
 | node_exporter（Windows 是 windows_exporter） | <http://localhost:9100/metrics> | Step 4 |
 | Grafana | <http://localhost:3000> | Step 5 |
-| 檔案伺服器 | <http://localhost:8080> | Step 6 |
+| `detector.py` | <http://localhost:9200/metrics> | Lab 00 第 4 節 |
 
-前三個是官方 binary。第四個是 Python 標準函式庫的 `http.server`，把 notebook 寫出來的 CSV 與 PNG 開給 Grafana 讀。
-
-上面四個服務確保資料能拋上 Grafana dashboard。
+前三個是官方 binary，這裡先裝好。第四個是這門課唯一自己寫的服務，在 Lab 00 當場啟動，
+所以 setup 階段還不用管它。
 
 ## Step 1. 進入 course repo
 
@@ -53,28 +52,15 @@ Windows PowerShell 是 `cd C:\Users\<你的帳號>\aiops-anomaly-zero-to-hero`�
 
 驗收：`up{job="node-exporter"}` 是 `1`。查詢結果裡完全沒有這個 job，表示 Step 3 的設定檔沒有載進去。
 
-## Step 5. 安裝 Grafana Local，接上兩個資料來源
+## Step 5. 安裝 Grafana Local，接上資料來源
 
-照 [03-install-grafana-local.md](03-install-grafana-local.md) 做。Infinity 是外掛，要另外安裝。
+照 [03-install-grafana-local.md](03-install-grafana-local.md) 做。這門課只有 Prometheus 一個
+datasource，沒有外掛需要安裝。
 
-驗收：`Connections → Data sources` 列得出 `Prometheus` 與 `Lab outputs` 兩筆，Prometheus 的 Save & test
-應顯示成功。填成 `3000` 是最常見的失敗，`3000` 是 Grafana 自己。dashboard 在 workshop 裡自己建，這裡不驗收。
+驗收：`Connections → Data sources` 列得出 `Prometheus`，Save & test 顯示成功。URL 填成 `3000` 是最
+常見的失敗，`3000` 是 Grafana 自己。dashboard 在 Lab 00 自己建，這裡不驗收。
 
-## Step 6. 開一個檔案伺服器
-
-Notebook 算完之後把 CSV 與 PNG 寫進 `outputs/workshop/`，Grafana 用 Infinity datasource 從 HTTP 讀那個資料夾。在 repository 根目錄另開一個終端機：
-
-```bash
-python -m http.server 8080 --directory outputs/workshop
-```
-
-Windows PowerShell 的路徑是 `outputs\workshop`。
-
-這個視窗要維持開啟，關閉之後 dashboard 第二列與第三列即中斷。
-
-驗收：<http://localhost:8080/> 列得出檔案清單。初始狀態資料夾是空的，屬於正常。
-
-## Step 7. 執行 setup check notebook
+## Step 6. 執行 setup check notebook
 
 逐格執行 `00-check-your-setup.ipynb`，四格都要通過：repo 路徑、Python 環境、Prometheus 與 Grafana 與 node_exporter、準備完成。
 
@@ -82,13 +68,15 @@ Windows PowerShell 的路徑是 `outputs\workshop`。
 
 請以這份 notebook 的結果為準。terminal Python、conda environment 與 notebook kernel 三者不一致時，在終端機另外執行一支檢查腳本會給出誤判。
 
-## Step 8. 開始 labs
+## Step 7. 開始 labs
 
 ```text
-labs/workshop/00_observability_stack_and_promql.ipynb
+labs/workshop/00_end_to_end_pipeline.ipynb
 ```
 
-Lab 00 要確認的是即時指標與分析結果這兩條路徑都通。順序不能跳，Lab 02 的 panel 畫的是 Lab 01 算出來的欄位。三份 notebook 的分工見 [`labs/workshop/README.md`](../workshop/README.md)。
+Lab 00 把整條線接起來，從網卡的 counter 一路到會響的告警，中間那一段偵測是自己寫的 Python 服務。
+接完之後 Lab 01 與 Lab 02 只處理演算法。順序不能跳，Lab 02 的分數建立在 Lab 01 的 baseline 上。
+三份 notebook 的分工見 [`labs/workshop/README.md`](../workshop/README.md)。
 
 ## 選用：Grafana Cloud
 

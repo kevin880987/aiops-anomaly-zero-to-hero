@@ -47,6 +47,15 @@ env/
 *.swp
 *.swo
 
+# Prometheus TSDB. Starting Prometheus from the repo root without --storage.tsdb.path
+# makes it write its blocks, WAL and lock file into ./data next to the course CSV.
+# The datasets below are committed; anything Prometheus writes is not.
+data/wal/
+data/chunks_head/
+data/queries.active
+data/lock
+data/[0-9A-Z][0-9A-Z]*/
+
 # Notebook runtime outputs — written to outputs/ during lab runs, not source data.
 # Source datasets live in data/synthetic/ and data/sample/ (both committed).
 # .gitkeep files anchor the directories in git; all generated content is ignored.

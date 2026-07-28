@@ -1,9 +1,12 @@
-# macOS. Linux uses prometheus.linux.yml, Windows prometheus.windows.yml.
+# macOS。Linux 用 prometheus.linux.yml，Windows 用 prometheus.windows.yml。
 #
-# Two jobs run by default, both official binaries. The workshop track ships no
-# exporter of its own: lab results reach Grafana as CSV read by the Infinity
-# datasource, because a month of history cannot be pushed into a pull-based
-# store without a replay trick that teaches the wrong lesson.
+# 三個 scrape job，一條閉環：exporter 曝露原始 OS 指標，Prometheus 抓進來存著，
+# detector.py 回頭查 Prometheus、算出分數、把分數曝露在 :9200/metrics，Prometheus
+# 再把分數當成一般指標抓回來。分數進了 Prometheus 之後，Grafana 與 alerts.yml
+# 對待它的方式，就跟對待 node_exporter 的指標沒有分別。
+#
+# detector.py 在 labs/workshop/ 底下，Lab 00 會啟動它。沒有啟動的時候這個 job
+# 的 up 是 0，DetectorDown 這條規則會響，其餘兩個 job 不受影響。
 
 global:
   scrape_interval: 5s
@@ -17,6 +20,12 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:9090"]
 
+  # 原始訊號：這台機器的網路與 CPU counter。
   - job_name: "node-exporter"
     static_configs:
       - targets: ["localhost:9100"]
+
+  # 分數：labs/workshop/detector.py 算出來的。
+  - job_name: "aiops-detector"
+    static_configs:
+      - targets: ["localhost:9200"]

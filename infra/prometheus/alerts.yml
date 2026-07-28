@@ -1,14 +1,15 @@
-# Recording and alert rules over node_exporter, the same official exporter the
-# workshop scrapes. Every metric here comes from a real interface on the machine
-# running Prometheus, so a cadet can make these rules fire by downloading a file.
+# 規則檔。兩件事寫在這裡：把 counter 整理成速率，以及決定什麼情況要告警。
 #
-# The features mirror what Lab 01 computes on the telemetry CSV. Reading the two
-# side by side is the point: a rate in PromQL and a per-interval delta in pandas
-# are the same idea expressed against different storage.
+# 分層的界線在這份檔案上看得最清楚。PromQL 擅長的是「一條式子吃一個 selector 就寫得完」
+# 的計算，規則數不隨網卡或設備數量成長，下面 network_features 那一組全部屬於這一類。
+# 需要跨評估保留狀態的計算，PromQL 沒有寫法，那一半在 labs/workshop/detector.py，
+# 算完之後以 aiops_traffic_score 這個名字回到 Prometheus。
 #
-# IFACE is en0 on macOS. Linux is usually eth0 or enp*s*, Windows an adapter
-# description. Change the device matcher below to whichever carries your traffic;
-# `topk(3, rate(node_network_receive_bytes_total[5m]))` in Explore will tell you.
+# 於是告警規則裡兩種來源混在一起，而且看不出差別。TrafficAnomaly 用的是 Python 算的分數，
+# ErrorRateSurge 用的是 PromQL 算的比率，兩條規則的寫法一樣。這就是把分數送回 Prometheus
+# 換來的好處：下游不需要知道上游是誰算的。
+#
+# 網卡只排除 loopback。其餘虛擬介面留著也無妨，它們的速率是 0，觸發不了任何一條規則。
 
 groups:
 
@@ -16,111 +17,79 @@ groups:
     interval: 5s
     rules:
 
-      # Counters must be differenced before they mean anything. rate() over a
-      # 1m window is the PromQL spelling of the per-interval delta in Lab 01.
+      # counter 差分之後才有意義，rate() 是 PromQL 的差分寫法。
       - record: net:rx_bytes:rate1m
-        expr: rate(node_network_receive_bytes_total{device=~"en0|eth0"}[1m])
+        expr: rate(node_network_receive_bytes_total{device!~"lo.*"}[1m])
 
       - record: net:tx_bytes:rate1m
-        expr: rate(node_network_transmit_bytes_total{device=~"en0|eth0"}[1m])
+        expr: rate(node_network_transmit_bytes_total{device!~"lo.*"}[1m])
 
       - record: net:traffic_bps
         expr: net:rx_bytes:rate1m + net:tx_bytes:rate1m
 
       - record: net:packets_pps
         expr: >
-          rate(node_network_receive_packets_total{device=~"en0|eth0"}[1m])
-          + rate(node_network_transmit_packets_total{device=~"en0|eth0"}[1m])
+          rate(node_network_receive_packets_total{device!~"lo.*"}[1m])
+          + rate(node_network_transmit_packets_total{device!~"lo.*"}[1m])
 
-      # Mean packet size. Lab 01 shows this is the feature that sees a scan when
-      # byte volume does not, because packet count and packet size move against
-      # each other and their product barely changes.
+      # 平均封包大小。Lab 01 會說明這一欄為什麼看得到掃描，而位元組流量看不到：
+      # 封包數與封包大小反向移動，兩者的乘積幾乎不變。
       - record: net:avg_pkt_bytes
         expr: net:traffic_bps / clamp_min(net:packets_pps, 1)
 
       - record: net:error_rate
         expr: >
-          (rate(node_network_receive_errs_total{device=~"en0|eth0"}[1m])
-           + rate(node_network_transmit_errs_total{device=~"en0|eth0"}[1m]))
+          (rate(node_network_receive_errs_total{device!~"lo.*"}[1m])
+           + rate(node_network_transmit_errs_total{device!~"lo.*"}[1m]))
           / clamp_min(net:packets_pps, 1)
 
-      - record: net:discard_rate
-        expr: >
-          rate(node_network_receive_drop_total{device=~"en0|eth0"}[1m])
-          / clamp_min(net:packets_pps, 1)
-
-      - record: net:multicast_ratio
-        expr: >
-          rate(node_network_receive_multicast_total{device=~"en0|eth0"}[1m])
-          / clamp_min(net:packets_pps, 1)
-
-      # A rolling baseline and its spread, which is Lab 01's rolling mean written
-      # as a recording rule. stddev_over_time is the fragile half: the very spike
-      # you want to catch inflates the denominator that would have caught it.
-      - record: net:traffic_bps:mean30m
-        expr: avg_over_time(net:traffic_bps[30m])
-
-      - record: net:traffic_bps:stddev30m
-        expr: stddev_over_time(net:traffic_bps[30m])
-
-      - record: net:traffic_bps:zscore
-        expr: >
-          (net:traffic_bps - net:traffic_bps:mean30m)
-          / clamp_min(net:traffic_bps:stddev30m, 1)
-
-  - name: network_anomaly_detection
+  - name: anomaly_alerts
     interval: 5s
     rules:
 
-      # `for:` is the duration gate. It is the same deadband Lab 02 applies as
-      # "n consecutive samples", and it is why a single scrape over the line does
-      # not page anyone.
-      - alert: TrafficSurge
-        expr: net:traffic_bps:zscore > 3
+      # detector.py 算的分數。`for:` 是時間閘，同一件事 Lab 02 在 Python 那一側寫成
+      # 「連續 n 個樣本才算數」。單一個越線的取樣叫不醒任何人。
+      - alert: TrafficAnomaly
+        expr: abs(aiops_traffic_score) > 3
         for: 1m
         labels:
           severity: warning
-          anomaly_type: traffic_surge
+          source: detector
         annotations:
-          summary: "Traffic surge on {{ $labels.device }}"
+          summary: "{{ $labels.device }} 的流量偏離滾動基線 {{ $value | printf \"%.1f\" }} 個標準差"
           description: >
-            {{ $labels.device }} is {{ $value | printf "%.1f" }} standard
-            deviations above its 30 minute mean. Lab 02 threshold: z > 3.
+            分數由 labs/workshop/detector.py 算出，門檻 3。這條規則不知道分數是誰算的，
+            也不需要知道。
 
-      - alert: TrafficDrop
-        expr: net:traffic_bps:zscore < -3
-        for: 2m
+      # 固定門檻在這裡是對的：錯誤率絕大多數時間是 0，沒有離散度可以讓 z-score 去除。
+      - alert: ErrorRateSurge
+        expr: net:error_rate > 0.01
+        for: 1m
         labels:
-          severity: warning
-          anomaly_type: traffic_drop
+          severity: critical
+          source: promql
         annotations:
-          summary: "Traffic drop on {{ $labels.device }}"
-          description: >
-            {{ $labels.device }} fell to {{ $value | printf "%.1f" }} standard
-            deviations below its 30 minute mean. Check link state and routing.
+          summary: "{{ $labels.device }} 的錯誤率超過 1%"
+          description: "每個封包 {{ $value | printf \"%.3f\" }} 個錯誤。"
 
       - alert: PacketSizeCollapse
         expr: net:avg_pkt_bytes < 200 and net:packets_pps > 100
         for: 2m
         labels:
           severity: warning
-          anomaly_type: small_packet_flood
+          source: promql
         annotations:
-          summary: "Mean packet size collapsed on {{ $labels.device }}"
-          description: >
-            {{ $value | printf "%.0f" }} bytes per packet while packet rate is
-            high. This is the shape Lab 01 event B has, and byte volume alone
-            does not show it.
+          summary: "{{ $labels.device }} 的平均封包大小塌到 {{ $value | printf \"%.0f\" }} bytes"
+          description: "封包數高而封包小。位元組流量單獨看不出這個形狀。"
 
-      - alert: ErrorRateSurge
-        expr: net:error_rate > 0.01
+      # 偵測器自己也要被監看。它掛掉的時候分數停在最後一個值，上面那條 TrafficAnomaly
+      # 因此再也不會響，而畫面上看起來一切正常。
+      - alert: DetectorDown
+        expr: up{job="aiops-detector"} == 0
         for: 1m
         labels:
           severity: critical
-          anomaly_type: error_burst
+          source: prometheus
         annotations:
-          summary: "Error rate above 1% on {{ $labels.device }}"
-          description: >
-            {{ $value | printf "%.3f" }} errors per packet. A fixed threshold is
-            correct here: Lab 01 shows error rate is zero almost always, so it
-            has no spread for a z-score to divide by.
+          summary: "detector.py 沒有在跑"
+          description: "aiops_* 的分數不再更新，以它為條件的告警不會再觸發。"
