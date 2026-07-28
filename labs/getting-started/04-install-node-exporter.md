@@ -64,43 +64,27 @@ Windows 用的是 [windows_exporter](https://github.com/prometheus-community/win
 
 Windows 的指標名稱前綴是 `windows_net_*` 而不是 `node_network_*`，Prometheus 請直接使用 `infra/prometheus/prometheus.windows.yml`（在 repository 根目錄執行），不要修改 macOS / Linux 設定檔。`alerts.yml` 的規則寫的是 node_exporter 的指標名稱，在 Windows 上不會有值；工作坊 dashboard 第一列的兩張 panel 與 Lab 00 的 PromQL 同理，要自己換成 `windows_net_bytes_received_total` 這一組。
 
-## 讓 Prometheus 抓到它
+## 驗收
 
-設定檔裡本來就有這個 job：
+在 <http://localhost:9090> 查詢 `up{job="node-exporter"}`，值是 `1` 就完成。這個 job 在
+[02-install-prometheus.md](02-install-prometheus.md) 那三份設定檔裡已經寫好了，不用自己新增。
 
-```yaml
-scrape_configs:
-  - job_name: "node-exporter"
-    static_configs:
-      - targets: ["localhost:9100"]
-```
-
-Prometheus 已經依 [02-install-prometheus.md](02-install-prometheus.md) 啟動的話，安裝完等幾秒 target 就會變成 `up`。要立刻生效就重新載入：
+查詢不到這個 job，等幾秒再查詢一次；剛安裝好想立刻生效就重新載入：
 
 ```bash
 curl -X POST http://localhost:9090/-/reload
 ```
 
-Windows PowerShell 是 `Invoke-WebRequest -Method Post http://localhost:9090/-/reload`。回 `405` 表示啟動時沒有帶 `--web.enable-lifecycle`，處理方式見 [02-install-prometheus.md](02-install-prometheus.md)，直接重啟 Prometheus 也有同樣效果。
+Windows PowerShell 是 `Invoke-WebRequest -Method Post http://localhost:9090/-/reload`。回 `405`
+表示啟動時沒有帶 `--web.enable-lifecycle`，處理方式見 [02-install-prometheus.md](02-install-prometheus.md)，
+或直接重啟 Prometheus。
 
-## 確認網路指標可用
-
-在 <http://localhost:9090> 查詢：
+`up` 是 `1` 之後，再查詢一次真的有指標值：
 
 ```promql
 node_network_receive_bytes_total{device!~"lo|docker.*|veth.*"}
 ```
 
-macOS 通常看到 `en0`，Linux 通常是 `eth0` 或 `ens3`。Windows 改為查詢 `windows_net_bytes_received_total`。有結果就可以進入 `labs/workshop/00_observability_stack_and_promql.ipynb`。
-
-## 規則檔看的是哪一張網卡
-
-`up{job="node-exporter"}` 是 `1`，但 `net:traffic_bps` 查詢不到值，通常是這裡的問題：`alerts.yml` 的 recording rules 只認 `device=~"en0|eth0"` 這兩個名字。
-
-1. 查自己這台實際在傳資料的網卡：
-
-   ```promql
-   topk(3, rate(node_network_receive_bytes_total[5m]))
-   ```
-
-2. 前三名裡有 `en0` 或 `eth0` 就不用改，這一節結束。沒有的話（Linux 常見 `enp3s0`、`ens33` 這類名字），把 `alerts.yml` 裡的 `device=~"en0|eth0"` 換成查到的那個名字，存檔後重新載入 Prometheus（見上面〈讓 Prometheus 抓到它〉）。
+macOS 通常看到 `en0`，Linux 通常是 `eth0` 或 `ens3`，Windows 改查詢
+`windows_net_bytes_received_total`。有結果就可以進入
+`labs/workshop/00_observability_stack_and_promql.ipynb`。
