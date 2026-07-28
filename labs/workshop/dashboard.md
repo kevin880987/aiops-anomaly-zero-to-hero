@@ -1,6 +1,6 @@
 # 建這門課的 dashboard
 
-這門課的 dashboard 一格一格自己建。理由是三個 lab 讀的檔案不是同時存在：
+這門課的 dashboard 一格一格自己建立。理由是三個 lab 讀的檔案不是同時存在：
 Lab 01 與 Lab 02 的 CSV 要執行過那份 notebook 才會出現，匯入整份只會看到一堆空 panel。
 `infra/grafana/dashboards/aiops-workshop.json` 留著，是建完之後核對用的答案卷，卡在某張 panel
 的設定上可以打開來看對應 id，不要在任何一個 lab 裡把它整份匯入。
