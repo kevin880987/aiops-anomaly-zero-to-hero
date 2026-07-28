@@ -6,9 +6,9 @@ node_exporter 把這台機器的 CPU、記憶體、網路指標曝露成 Prometh
 
 它讀的是真實作業系統指標，跟 notebook 讀的 `data/synthetic/synthetic_rrd_metrics.csv` 是兩回事。後者是 synthetic data，模擬的是整理後的真實網路訊號。
 
-## macOS
+## 1. 安裝
 
-在終端機執行，架構（Apple Silicon 或 Intel）由指令自己判斷：
+**macOS：** 在終端機執行，架構（Apple Silicon 或 Intel）由指令自己判斷：
 
 ```bash
 VERSION="1.11.1"
@@ -30,9 +30,7 @@ curl -s http://localhost:9100/metrics | grep node_network_receive_bytes_total | 
 
 啟動時顯示 `command not found` 就改用完整路徑 `/usr/local/bin/node_exporter`。出現安全性阻擋時，到 **System Settings → Privacy & Security** 允許執行，再重新啟動。
 
-## Linux
-
-在終端機執行，架構由指令自己判斷：
+**Linux：** 在終端機執行，架構由指令自己判斷：
 
 ```bash
 VERSION="1.11.1"
@@ -54,9 +52,7 @@ curl -s http://localhost:9100/metrics | grep node_network_receive_bytes_total | 
 
 啟動時顯示 `command not found` 就改用完整路徑 `/usr/local/bin/node_exporter`。要當成服務常駐執行，見[官方 guide](https://prometheus.io/docs/guides/node-exporter/)。
 
-## Windows
-
-Windows 用的是 [windows_exporter](https://github.com/prometheus-community/windows_exporter/releases)，在 Windows 上負責同一件事。
+**Windows：** 用的是 [windows_exporter](https://github.com/prometheus-community/windows_exporter/releases)，在 Windows 上負責同一件事。
 
 1. 從 Releases 頁面下載最新的 `.msi`（例如 `windows_exporter-0.x.x-amd64.msi`）。
 2. 雙擊安裝。預設 port 是 **9182**，不是 9100。
@@ -64,7 +60,7 @@ Windows 用的是 [windows_exporter](https://github.com/prometheus-community/win
 
 Windows 的指標名稱前綴是 `windows_net_*` 而不是 `node_network_*`，Prometheus 請直接使用 `infra/prometheus/prometheus.windows.yml`（在 repository 根目錄執行），不要修改 macOS / Linux 設定檔。`alerts.yml` 的規則寫的是 node_exporter 的指標名稱，在 Windows 上不會有值；工作坊 dashboard 第一列的兩張 panel 與 Lab 00 的 PromQL 同理，要自己換成 `windows_net_bytes_received_total` 這一組。
 
-## 驗收
+## 2. 驗收
 
 在 <http://localhost:9090> 查詢 `up{job="node-exporter"}`，值是 `1` 就完成。這個 job 在
 [02-install-prometheus.md](02-install-prometheus.md) 那三份設定檔裡已經寫好了，不用自己新增。
