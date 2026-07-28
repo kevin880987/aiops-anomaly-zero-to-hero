@@ -19,8 +19,7 @@
 | Grafana | <http://localhost:3000> | Step 5 |
 | `detector.py` | <http://localhost:9200/metrics> | Lab 00 第 4 節 |
 
-前三個是官方 binary，這裡先裝好。第四個是這門課唯一自己寫的服務，在 Lab 00 當場啟動，
-所以 setup 階段還不用管它。
+前三個是官方 binary，這裡先裝好。第四個是這門課唯一自己寫的服務，Lab 00 會帶你當場啟動它。
 
 ## Step 1. 進入 course repo
 
@@ -54,8 +53,8 @@ Windows PowerShell 是 `cd C:\Users\<你的帳號>\aiops-anomaly-zero-to-hero`�
 
 ## Step 5. 安裝 Grafana Local，接上資料來源
 
-照 [03-install-grafana-local.md](03-install-grafana-local.md) 做。這門課只有 Prometheus 一個
-datasource，沒有外掛需要安裝。
+照 [03-install-grafana-local.md](03-install-grafana-local.md) 做。這門課的 datasource 只有
+Prometheus 一個。
 
 驗收：`Connections → Data sources` 列得出 `Prometheus`，Save & test 顯示成功。URL 填成 `3000` 是最
 常見的失敗，`3000` 是 Grafana 自己。dashboard 在 Lab 00 自己建，這裡不驗收。

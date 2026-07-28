@@ -63,6 +63,11 @@ outputs/workshop/*
 !outputs/workshop/.gitkeep
 outputs/setup/*
 
+# Diagram sources. The .drawio files live in materials/diagrams/ one level up, and
+# materials/tools/build_diagrams.py exports the .svg into labs/*/diagrams/. Only the
+# generated .svg belongs in this repo; editing it by hand is lost on the next build.
+*.drawio
+
 # Slide decks. The deck lives outside this repo in ../slide/ and is rebuilt from
 # slide/build_deck.py; binary Office files do not belong in the course history.
 *.pptx

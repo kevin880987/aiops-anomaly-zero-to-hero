@@ -4,8 +4,8 @@
 
 **前置條件：** Prometheus 已安裝並正在運作（[02-install-prometheus.md](02-install-prometheus.md)）。
 
-這一步要安裝 Grafana，並且接上 Prometheus 這一個 datasource。這門課只有這一個資料來源：原始
-指標、Python 算出來的分數、告警狀態，全部存在 Prometheus 裡。
+這一步要安裝 Grafana，並且接上 Prometheus。原始指標存在 Prometheus 裡，Python 算出來的分數與
+告警狀態也一樣，所以 Grafana 這一端只需要這一個 datasource。
 
 ## 1. 安裝 Grafana
 

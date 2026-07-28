@@ -1,15 +1,15 @@
-# 規則檔。兩件事寫在這裡：把 counter 整理成速率，以及決定什麼情況要告警。
+# 規則檔。這裡寫兩件事，把 counter 整理成速率，以及決定什麼情況要告警。
 #
-# 分層的界線在這份檔案上看得最清楚。PromQL 擅長的是「一條式子吃一個 selector 就寫得完」
-# 的計算，規則數不隨網卡或設備數量成長，下面 network_features 那一組全部屬於這一類。
-# 需要跨評估保留狀態的計算，PromQL 沒有寫法，那一半在 labs/workshop/detector.py，
-# 算完之後以 aiops_traffic_score 這個名字回到 Prometheus。
+# 分層的界線在這份檔案上看得最清楚。PromQL 擅長「一條式子吃一個 selector 就寫得完」的
+# 計算，規則數不隨網卡或設備數量成長，下面 network_features 那一組全部屬於這一類。
+# 需要跨評估保留狀態的計算，PromQL 沒有寫法。那一半在 labs/workshop/detector.py，算完
+# 之後以 aiops_traffic_score 這個名字回到 Prometheus。
 #
 # 於是告警規則裡兩種來源混在一起，而且看不出差別。TrafficAnomaly 用的是 Python 算的分數，
-# ErrorRateSurge 用的是 PromQL 算的比率，兩條規則的寫法一樣。這就是把分數送回 Prometheus
-# 換來的好處：下游不需要知道上游是誰算的。
+# ErrorRateSurge 用的是 PromQL 算的比率，兩條規則的寫法一樣。把分數送回 Prometheus 換來的
+# 就是這一點，下游不需要知道上游是誰算的。
 #
-# 網卡只排除 loopback。其餘虛擬介面留著也無妨，它們的速率是 0，觸發不了任何一條規則。
+# 網卡只排除 loopback。其餘虛擬介面留著也無妨，它們的速率是 0，任何一條規則都不會成立。
 
 groups:
 
@@ -32,7 +32,7 @@ groups:
           rate(node_network_receive_packets_total{device!~"lo.*"}[1m])
           + rate(node_network_transmit_packets_total{device!~"lo.*"}[1m])
 
-      # 平均封包大小。Lab 01 會說明這一欄為什麼看得到掃描，而位元組流量看不到：
+      # 平均封包大小。Lab 01 會說明掃描為什麼在這一欄現形，而位元組流量測不到它。
       # 封包數與封包大小反向移動，兩者的乘積幾乎不變。
       - record: net:avg_pkt_bytes
         expr: net:traffic_bps / clamp_min(net:packets_pps, 1)
@@ -47,8 +47,8 @@ groups:
     interval: 5s
     rules:
 
-      # detector.py 算的分數。`for:` 是時間閘，同一件事 Lab 02 在 Python 那一側寫成
-      # 「連續 n 個樣本才算數」。單一個越線的取樣叫不醒任何人。
+      # detector.py 算的分數。`for:` 是時間閘，Lab 02 在 Python 那一側把同一件事寫成
+      # 「連續 n 個樣本才算數」。越線的單一取樣叫不醒任何人。
       - alert: TrafficAnomaly
         expr: abs(aiops_traffic_score) > 3
         for: 1m
@@ -56,12 +56,12 @@ groups:
           severity: warning
           source: detector
         annotations:
-          summary: "{{ $labels.device }} 的流量偏離滾動基線 {{ $value | printf \"%.1f\" }} 個標準差"
+          summary: '{{ $labels.device }} 的流量偏離滾動基線 {{ $value | printf "%.1f" }} 個標準差'
           description: >
             分數由 labs/workshop/detector.py 算出，門檻 3。這條規則不知道分數是誰算的，
             也不需要知道。
 
-      # 固定門檻在這裡是對的：錯誤率絕大多數時間是 0，沒有離散度可以讓 z-score 去除。
+      # 固定門檻在這裡是對的，因為錯誤率絕大多數時間是 0，沒有離散度可以讓 z-score 去除。
       - alert: ErrorRateSurge
         expr: net:error_rate > 0.01
         for: 1m
@@ -69,8 +69,8 @@ groups:
           severity: critical
           source: promql
         annotations:
-          summary: "{{ $labels.device }} 的錯誤率超過 1%"
-          description: "每個封包 {{ $value | printf \"%.3f\" }} 個錯誤。"
+          summary: '{{ $labels.device }} 的錯誤率超過 1%'
+          description: '每個封包 {{ $value | printf "%.3f" }} 個錯誤。'
 
       - alert: PacketSizeCollapse
         expr: net:avg_pkt_bytes < 200 and net:packets_pps > 100
@@ -79,11 +79,11 @@ groups:
           severity: warning
           source: promql
         annotations:
-          summary: "{{ $labels.device }} 的平均封包大小塌到 {{ $value | printf \"%.0f\" }} bytes"
-          description: "封包數高而封包小。位元組流量單獨看不出這個形狀。"
+          summary: '{{ $labels.device }} 的平均封包大小塌到 {{ $value | printf "%.0f" }} bytes'
+          description: '封包數高而封包小。位元組流量單獨測不出這個形狀。'
 
-      # 偵測器自己也要被監看。它掛掉的時候分數停在最後一個值，上面那條 TrafficAnomaly
-      # 因此再也不會響，而畫面上看起來一切正常。
+      # 偵測器自己也要被監看。它停掉的時候分數停在最後一次寫入的值，上面那條
+      # TrafficAnomaly 的條件再也不會成立，而畫面上看起來一切正常。
       - alert: DetectorDown
         expr: up{job="aiops-detector"} == 0
         for: 1m
@@ -91,5 +91,5 @@ groups:
           severity: critical
           source: prometheus
         annotations:
-          summary: "detector.py 沒有在跑"
-          description: "aiops_* 的分數不再更新，以它為條件的告警不會再觸發。"
+          summary: 'detector.py 沒有在執行'
+          description: 'aiops_* 的分數不再更新，以這個分數為條件的告警不會再觸發。'

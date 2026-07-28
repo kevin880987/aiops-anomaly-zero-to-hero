@@ -1,20 +1,18 @@
-"""偵測服務：讀 Prometheus、算分數、把分數曝露成 /metrics 讓 Prometheus 抓回去。
+"""偵測服務。讀 Prometheus、算分數、把分數曝露成 /metrics 讓 Prometheus 抓回去。
 
-這支程式是整條線的第三個環節，也是這門課唯一自己寫的服務。它做的事只有三件：
+這支程式是整條線的第三個環節，也是這門課唯一自己寫的服務。每一輪只做三件事，
+向 Prometheus 查一次網卡的接收速率，拿最近一段視窗算出偏離分數，再把速率與分數
+寫進 Gauge，曝露的工作由 `start_http_server` 負責。
 
-    1. 對 Prometheus 查一次網卡的接收速率
-    2. 拿最近一段視窗算一個偏離分數
-    3. 把速率與分數寫進 Gauge，`start_http_server` 負責曝露在 /metrics
-
-Prometheus 抓它的方式跟抓 node_exporter 完全一樣，所以 `aiops_traffic_score` 在
-Grafana 與告警規則裡的用法，跟 `node_network_receive_bytes_total` 沒有分別。
+Prometheus 抓它的方式跟抓 node_exporter 一樣，所以 `aiops_traffic_score` 在 Grafana
+與告警規則裡的用法，跟 `node_network_receive_bytes_total` 沒有分別。
 
     python detector.py
 
-跑起來之後 <http://localhost:9200/metrics> 看得到 aiops_traffic_score。
+啟動之後，<http://localhost:9200/metrics> 會列出 aiops_traffic_score。
 
-`rolling_zscore()` 是這門課接下來要動的那一個函式。Lab 01 換掉它的 baseline，
-Lab 02 在它外面包門檻與政策。其餘的程式碼在後面兩節都不會再改。
+Lab 01 與 Lab 02 動的是 `rolling_zscore()` 這一個函式。Lab 01 換掉它的基線，Lab 02
+在它外面包門檻與政策。其餘的程式碼在後面兩節都不會再改。
 """
 import os
 import time

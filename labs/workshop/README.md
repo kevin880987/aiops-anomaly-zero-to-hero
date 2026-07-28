@@ -4,9 +4,9 @@
 步驟：親手選 baseline、算 score、把 score 收成 label、讓 label 經過 policy 篩選才成為 alert，最後用
 event recall 與 alerts per day 去評這套設定值不值得帶進值班室。
 
-## 整條線只有一條路徑
+## 管線的五個環節
 
-Lab 00 把整條線接起來，之後不再動它。
+Lab 00 把這條管線接起來，之後不再動它。
 
 ![Lab 00 的資料流](diagrams/lab00_pipeline.svg)
 
@@ -15,22 +15,22 @@ Lab 00 把整條線接起來，之後不再動它。
 `/metrics`，於是 Prometheus 把它當成一般指標抓回去。Grafana 用 PromQL 查詢分數，
 `infra/prometheus/alerts.yml` 的規則也直接打在分數上。
 
-除了 `detector.py`，這條線上每一個元件都是官方軟體。分數送回 Prometheus 之後，下游沒有任何
+除了 `detector.py`，管線上每一個元件都是官方軟體。分數送回 Prometheus 之後，下游沒有任何
 一格知道它是 Python 算的，這一點是刻意設計的，因為上線要換的只有演算法，管線可以原封不動。
 
 所以 Lab 01 與 Lab 02 都只做一件事，把 `detector.py` 裡 `rolling_zscore()` 那個函式換成撐得住
 真實流量的版本。Lab 01 決定基線該怎麼算，Lab 02 決定分數之外還要包什麼政策才配送出去。
 
-## 兩份 notebook，兩種角色
+## Lab 01 與 Lab 02 的資料來源
 
 Lab 01 與 Lab 02 讀的是 `data/synthetic/synthetic_rrd_metrics.csv`，五個 port、一整個月、
-十八個標好的事件。用歷史資料是因為演算法要拿有真值的資料去量，而 Lab 00 那條線上跑的是這台
+十八個標好的事件。用歷史資料是因為演算法要拿有真值的資料去量，而 Lab 00 的管線上跑的是這台
 機器此刻的流量，沒有真值可比。
 
-這兩份 notebook 全程用 matplotlib 畫圖，不寫檔案給 Grafana，也不需要開檔案伺服器。notebook
-裡的圖是定住的，適合逐條比較；Grafana 上那三張 panel 畫的是即時的線，適合換條件驗證。
+這兩份 notebook 全程用 matplotlib 畫圖，產出留在 notebook 裡。定住的圖適合逐條比較，Grafana
+上那三張 panel 畫的是即時的線，適合換條件驗證。
 
-三種偵測判準的取捨見 [`diagrams/lab02_detection_methods.svg`](diagrams/lab02_detection_methods.svg)。
+三種偵測方法的取捨見 [`diagrams/lab02_detection_methods.svg`](diagrams/lab02_detection_methods.svg)。
 
 ## 開課前要維持執行的四個服務
 
@@ -58,10 +58,10 @@ Windows 的 exporter 是 `windows_exporter`，聽在 9182，設定檔用 `promet
 
 ## Grafana 這一端
 
-只有 Prometheus 一個 datasource，在 setup 那一步就設定完成。原始速率、偏離分數、告警狀態
-都存在 Prometheus 裡，所以沒有第二個資料來源，也沒有外掛需要安裝。
+只有 Prometheus 一個 datasource，在 setup 那一步就設定完成。原始速率存在裡面，偏離分數與
+告警狀態也一樣，所以 Grafana 這一端一律用 PromQL 查詢。
 
-Dashboard 不匯入，三張 panel 在 Lab 00 一格一格自己建，建法在 [`dashboard.md`](dashboard.md)。
+三張 panel 在 Lab 00 逐格建立，做法寫在 [`dashboard.md`](dashboard.md)。
 `infra/grafana/dashboards/aiops-workshop.json` 是建完之後核對用的答案卷。
 
 ## 下午三節

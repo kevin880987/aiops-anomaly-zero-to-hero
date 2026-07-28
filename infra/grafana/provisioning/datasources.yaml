@@ -1,8 +1,8 @@
-# Grafana 內建的檔案 provisioning。複製到 Grafana 的 provisioning 目錄再重新啟動即可，
-# 不需要 API 呼叫，也不需要腳本。指令見 labs/getting-started/03-install-grafana-local.md。
+# Grafana 內建的檔案 provisioning。複製到 Grafana 的 provisioning 目錄再重新啟動，
+# 不必呼叫 API，也不必寫腳本。指令見 labs/getting-started/03-install-grafana-local.md。
 #
-# 只有一個 datasource，因為這門課只有一個資料來源。原始指標、Python 算出來的分數、
-# 告警狀態，三樣東西都存在 Prometheus 裡，Grafana 一律用 PromQL 查。
+# 只有一個 datasource。原始指標存在 Prometheus 裡，detector.py 算出來的分數與告警狀態
+# 也一樣，所以 Grafana 這一端一律用 PromQL 查詢。
 
 apiVersion: 1
 
