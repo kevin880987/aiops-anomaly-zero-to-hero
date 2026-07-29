@@ -39,10 +39,10 @@ prometheus --config.file=infra/prometheus/prometheus.<你的 OS {macos, linux, w
 在瀏覽器開啟 <http://localhost:9090>，在 Expression 欄位查詢 `up`。
 
 `job="prometheus"` 應該是 `1`；`job="node-exporter"`（Windows 是 `windows-exporter`）在你完成 [04-install-node-exporter.md](04-install-node-exporter.md) 之前會是 `0`，那是正常的。
-![alt text](02-prometheus-1.png)
+![Prometheus 的 Expression 欄位查詢 up，兩個 job 各自的值](screenshots/02-prometheus-1.png)
 <http://localhost:9090/targets> 是對應的圖形介面。
-![alt text](02-prometheus-2.png)
-確認完即完成本章節 Prometheus 安裝．
+![Prometheus 的 Targets 頁面，逐一列出每個 job 的狀態](screenshots/02-prometheus-2.png)
+確認完即完成本章節 Prometheus 安裝。
 
 若查詢結果裡完全沒有 `node-exporter`，就是設定檔載錯了，請再次確認`aiops-anomaly-zero-to-hero/infra/prometheus` 中的 .yaml。
 

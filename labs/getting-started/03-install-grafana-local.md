@@ -34,7 +34,7 @@ sudo systemctl enable --now grafana-server
 ## 2. 啟動
 
 在瀏覽器開啟 <http://localhost:3000>，帳號密碼都是 `admin`，系統會要求改密碼。
-![alt text](03-grafana-1.png)
+![Grafana 首次登入後要求改密碼的畫面](screenshots/03-grafana-1.png)
 
 ## 3. 建立資料來源
 
@@ -67,7 +67,7 @@ Restart-Service Grafana
 
 也可以手動新增，在 **Connections → Data sources → Add data source** 選 Prometheus，server URL 填 `http://localhost:9090`，按 **Save & test** 應出現 "Successfully queried the Prometheus API"。
 
-![alt text](03-grafana-2.png)
+![Grafana 新增 Prometheus 資料來源，Save & test 回報成功](screenshots/03-grafana-2.png)
 
 ## 4. 驗收
 

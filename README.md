@@ -104,9 +104,10 @@ promtool check config infra/prometheus/prometheus.macos.yml
 .
 ├── README.md                  # 本文件
 ├── environments/              # conda 課程環境，三個平台各一份
+├── diagrams/                  # 課程圖表，各章共用同一份，來源在 materials/diagrams/
 ├── labs/
-│   ├── getting-started/       # setup 主入口、互動式檢查 notebook、安裝指南
-│   └── workshop/              # 工作坊 notebooks、detector.py、diagrams/
+│   ├── getting-started/       # setup 主入口、互動式檢查 notebook、安裝指南、screenshots/
+│   └── workshop/              # 工作坊 notebooks、detector.py
 ├── data/
 │   ├── synthetic/             # 可重建的 organized network telemetry CSV
 │   └── sample/                # 原始 LibreNMS/RRDTool sample data（選讀）

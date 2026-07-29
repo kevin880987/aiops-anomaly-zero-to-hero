@@ -8,7 +8,7 @@ event recall 與 alerts per day 去評這套設定值不值得帶進值班室。
 
 Lab 00 把這條 pipeline 接起來，之後不再動它。
 
-![Lab 00 的資料流](diagrams/lab00_pipeline.svg)
+![Lab 00 的資料流](../../diagrams/lab00_pipeline.svg)
 
 `node_exporter` 曝露這台機器的網路 counter，Prometheus 每 5 秒抓一次。
 [`detector.py`](detector.py) 反過來向 Prometheus 查詢這段流量，算出偏離分數，再把分數曝露成
@@ -30,7 +30,7 @@ Lab 01 與 Lab 02 讀的是 `data/synthetic/synthetic_rrd_metrics.csv`，五個 
 這兩份 notebook 全程用 matplotlib 畫圖，產出留在 notebook 裡。定住的圖適合逐條比較，Grafana
 上那三張 panel 畫的是即時的線，適合換條件驗證。
 
-三種偵測方法的取捨見 [`diagrams/lab02_detection_methods.svg`](diagrams/lab02_detection_methods.svg)。
+三種偵測方法的取捨見 [`../../diagrams/lab02_detection_methods.svg`](../../diagrams/lab02_detection_methods.svg)。
 
 ## 開課前要維持執行的四個服務
 
