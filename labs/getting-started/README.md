@@ -69,10 +69,5 @@ Prometheus 一個。
 
 ## Step 7. 開始 labs
 
-課程教材放在 `labs/workshop/`，依課程進度分批發布。上到那幾節才會發到你手上，發下來之後從編號最小的
-那一份開始，編號就是順序。
+課程教材放在 `labs/workshop/`，從編號最小的那一份開始，編號就是順序。
 
-## 選用：Grafana Cloud
-
-課程主線只需要 Grafana Local。把指標推上雲端的做法在
-`03b-setup-grafana-cloud.md`，這份文件放在教材外層的工作目錄，不隨教材一起發布。

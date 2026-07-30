@@ -70,9 +70,8 @@ Windows 的 exporter 是 `windows_exporter`，聽在 9182，設定檔用 `promet
 
 ## 這一批的單元
 
-教材按課程進度分批發布，`labs/workshop/` 底下實際有幾份 notebook 以你收到的教材為準，之後排到的
-單元會補進同一個資料夾。檔名前面的編號就是順序，不能跳，後一節的分數建立在前一節算出來的
-baseline 欄位上。
+`labs/workshop/` 底下實際有幾份 notebook，以你收到的教材為準。檔名前面的編號就是順序，不能跳，
+後一節的偏離分數建立在前一節算出來的 baseline 欄位上。
 
 Lab 00 把 node_exporter、Prometheus、`detector.py` 與 Grafana 串成一條可運作的 pipeline。內容包括
 counter 與 rate 的換算、`up` 怎麼判讀、Python 服務怎麼註冊成 Prometheus 的 scrape target、`for:`

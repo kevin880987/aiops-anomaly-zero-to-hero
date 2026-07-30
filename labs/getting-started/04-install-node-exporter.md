@@ -82,4 +82,4 @@ node_network_receive_bytes_total{device!~"lo|docker.*|veth.*"}
 ```
 
 macOS 通常看到 `en0`，Linux 通常是 `eth0` 或 `ens3`，Windows 改查詢
-`windows_net_bytes_received_total`。有結果就完成環境設定。課程教材放在 `labs/workshop/`，依課程進度分批發布。
+`windows_net_bytes_received_total`。有結果就完成環境設定。課程教材放在 `labs/workshop/`。
