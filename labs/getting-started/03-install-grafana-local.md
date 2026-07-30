@@ -76,7 +76,7 @@ Restart-Service Grafana
 
 另外兩個 job 現在還不會有值，那是正常的。`job="node-exporter"` 要等你完成
 [04-install-node-exporter.md](04-install-node-exporter.md)，`job="aiops-detector"` 要等
-Lab 00 啟動那支偵測服務。
+課堂上啟動那支偵測服務。
 
 ## 常見問題
 
@@ -87,4 +87,4 @@ Lab 00 啟動那支偵測服務。
 先確認 Prometheus 能在 <http://localhost:9090> 開啟。資料來源 URL 應填 `http://localhost:9090`，`3000` 是 Grafana 自己。
 
 **`up` 這個 query 在 Explore 裡查詢不到 `node-exporter`？**
-整筆 job 不存在就是 Prometheus 載錯設定檔，見 [02-install-prometheus.md](02-install-prometheus.md)〈用 service 啟動〉。Dashboard 的排查寫在工作坊那一批的教材裡，這裡還沒有 dashboard 可以排查。
+整筆 job 不存在就是 Prometheus 載錯設定檔，見 [02-install-prometheus.md](02-install-prometheus.md)〈用 service 啟動〉。Dashboard 的排查寫在 `labs/workshop/` 的教材裡，這裡還沒有 dashboard 可以排查。

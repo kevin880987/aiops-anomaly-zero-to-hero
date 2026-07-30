@@ -52,7 +52,7 @@ prometheus --config.file=infra/prometheus/prometheus.<你的 OS {macos, linux, w
 查詢 `up`，看有沒有 `job="node-exporter"` 這一筆。找不到就是載入了套件預設設定檔，見〈用 service 啟動〉。有這一筆但值是 `0`，代表設定對了、exporter 還沒啟動，去做 [04-install-node-exporter.md](04-install-node-exporter.md)。
 
 **偏離分數 panel 一直是空的？**
-查詢 `up{job="aiops-detector"}`。那個 job 抓的是 Lab 00 才會啟動的 `detector.py`，setup 階段是 `0`，屬於正常。
+查詢 `up{job="aiops-detector"}`。那個 job 抓的是課堂上才會啟動的偵測服務，setup 階段是 `0`，屬於正常。
 
 **`curl -X POST http://localhost:9090/-/reload` 回 405？**
 啟動時沒有帶 `--web.enable-lifecycle`。前景啟動就直接加這個參數，service 啟動就把它加進 `prometheus.args` 再重啟。

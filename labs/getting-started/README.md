@@ -17,9 +17,9 @@
 | Prometheus | <http://localhost:9090> | Step 3 |
 | node_exporter（Windows 是 windows_exporter） | <http://localhost:9100/metrics> | Step 4 |
 | Grafana | <http://localhost:3000> | Step 5 |
-| `detector.py` | <http://localhost:9200/metrics> | Lab 00 第 4 節 |
+| 偵測服務 | <http://localhost:9200/metrics> | 課堂上啟動 |
 
-前三個是官方 binary，在這一章先完成安裝。第四個是這門課唯一自己寫的服務，Lab 00 會在課堂上啟動它。
+前三個是官方 binary，在這一章先完成安裝。第四個是這門課唯一自己寫的服務，課堂上會帶你啟動。
 
 ## Step 1. 進入教材根目錄
 
@@ -57,7 +57,7 @@ Windows PowerShell 是 `cd C:\Users\<你的帳號>\aiops-anomaly-zero-to-hero`�
 Prometheus 一個。
 
 驗收：`Connections → Data sources` 列得出 `Prometheus`，Save & test 顯示成功。URL 填成 `3000` 是最
-常見的失敗，`3000` 是 Grafana 自己。dashboard 在 Lab 00 逐格建立，這裡不驗收。
+常見的失敗，`3000` 是 Grafana 自己。dashboard 在課堂上建立，這裡不驗收。
 
 ## Step 6. 執行 setup check notebook
 
@@ -69,13 +69,8 @@ Prometheus 一個。
 
 ## Step 7. 開始 labs
 
-```text
-labs/workshop/
-```
-
-從這個資料夾裡編號最小的那一份 notebook 開始。Lab 00 建立完整的 pipeline，從網卡的 counter 一路到
-觸發的告警，中間的偵測環節是自己寫的 Python 服務。建立完成之後的每一節都只處理演算法。編號就是順序，不能
-跳，後一節的偏離分數建立在前一節的 baseline 上。各單元的分工寫在那個資料夾自己的說明裡。
+課程教材放在 `labs/workshop/`，依課程進度分批發布。上到那幾節才會發到你手上，發下來之後從編號最小的
+那一份開始，編號就是順序。
 
 ## 選用：Grafana Cloud
 
