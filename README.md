@@ -36,7 +36,7 @@ Lab 00 讀的是這台機器此刻的流量，走 Prometheus。凡是要評演�
 
 工作坊的 notebook 都在 `labs/workshop/`，同一個資料夾裡還有 `detector.py`，那是這門課唯一自己寫的服務，六十行上下，可以完整閱讀，也可以直接修改。它算分數的那個函式正是每一節要換掉的部分，其餘的程式碼從頭到尾都不會再動。各節分別處理哪一段、要花多久，寫在那個資料夾自己的說明裡。
 
-Grafana 端全部走官方功能，datasource 用內建的檔案 provisioning（`infra/grafana/provisioning/datasources.yaml`）接上 Prometheus。Dashboard 在 Lab 00 逐格建立，一張 panel 畫原始速率，一張畫算出來的分數，第三張畫告警現在的狀態，`infra/grafana/dashboards/aiops-workshop.json` 是建完之後核對用的答案卷。告警規則寫在 `infra/prometheus/alerts.yml`，隨時可以用一次下載讓它響。
+Grafana 端全部走官方功能，datasource 用內建的檔案 provisioning（`infra/grafana/provisioning/datasources.yaml`）接上 Prometheus，這一步在環境設定就做完。Dashboard 不匯入現成的，到工作坊那一批才逐格建立，一張 panel 畫原始速率，一張畫算出來的分數，第三張畫告警現在的狀態，建完之後核對用的答案卷跟著那一批一起發。告警規則寫在 `infra/prometheus/alerts.yml`，隨時可以用一次下載讓它響。
 
 
 ## 資料流
