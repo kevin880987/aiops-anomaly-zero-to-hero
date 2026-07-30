@@ -31,7 +31,9 @@ Lab 00 之後的每一節讀的都是 `data/synthetic/synthetic_rrd_metrics.csv`
 這些 notebook 全程用 matplotlib 畫圖，產出留在 notebook 裡。定住的圖適合逐條比較，Grafana
 上那三張 panel 畫的是即時的線，適合換條件驗證。
 
-三種偵測方法的取捨見 [`../../diagrams/lab02_detection_methods.svg`](../../diagrams/lab02_detection_methods.svg)。
+三種偵測方法的取捨見下圖。
+
+![三種偵測方法的取捨](../../diagrams/lab02_detection_methods.svg)
 
 ## 開課前要維持執行的四個服務
 
