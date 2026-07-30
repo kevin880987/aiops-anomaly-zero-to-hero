@@ -1,8 +1,8 @@
 # AIOps Anomaly Detection: Zero to Hero
 
-這門課從網卡的 counter 開始，一路接到會響的告警，中間每一段都在你自己的機器上執行。node_exporter 把作業系統的 telemetry 曝露成 `/metrics`，Prometheus 每 5 秒抓一次，存成時間序列。接著課程自己寫的一支偵測服務回頭查 Prometheus、算出偏離分數，再把分數曝露成 `/metrics`，於是 Prometheus 把它當成一般指標抓回去。Grafana 的 panel 與告警規則查詢的都是那個分數。
+這門課從網卡的 counter 開始，一路接到告警，中間每一段都在你自己的機器上執行。node_exporter 把作業系統的 telemetry 曝露成 `/metrics`，Prometheus 每 5 秒抓一次，存成時間序列。接著課程自己寫的一支偵測服務回頭查 Prometheus，算出偏離分數並取名 `aiops_traffic_score`，再把它曝露成 `/metrics`，於是 Prometheus 把它當成一般指標抓回去。Grafana 的 panel 與告警規則查詢的都是這個偏離分數。
 
-分數繞回 Prometheus 之後，下游沒有任何一段知道它是 Python 算的。這個做法決定了後面每一節的形狀：改良演算法不必動 pipeline，所以課程的時間花在演算法上，畫面只用來確認演算法的輸出。
+偏離分數繞回 Prometheus 之後，下游沒有任何一段知道它是 Python 算的。這個做法決定了後面每一節的形狀：改良演算法不必動 pipeline，所以課程的時間花在演算法上，畫面只用來確認演算法的輸出。
 
 ## 開始使用
 
@@ -31,11 +31,11 @@ actual OS / network telemetry
   -> Grafana panels and alert rules read that score with PromQL
 ```
 
-上面只有 `labs/workshop/detector.py` 是課程自己寫的，一百行上下，可以完整閱讀，也可以直接修改。其餘每個元件都是官方軟體。Lab 00 一次建立完整的 pipeline，之後每一節換掉的都是 `detector.py` 裡算分數的那個函式，其他程式碼不會再改動。
+上面只有 `labs/workshop/detector.py` 是課程自己寫的，一百行上下，可以完整閱讀，也可以直接修改。其餘每個元件都是官方軟體。Lab 00 一次建立完整的 pipeline，之後每一節換掉的都是 `detector.py` 裡算偏離分數的那個函式，其他程式碼不會再改動。
 
-告警規則寫在 `infra/prometheus/alerts.yml`。規則的條件來自哪裡，從寫法上看不出來。`ErrorRateSurge` 的條件由 PromQL 算，`TrafficAnomaly` 的條件用 Python 算出來的分數，兩條的寫法完全一樣。把分數送回 Prometheus，換到的就是這種一致性。
+告警規則寫在 `infra/prometheus/alerts.yml`。規則的條件來自哪裡，從寫法上看不出來。`ErrorRateSurge` 的條件由 PromQL 算，`TrafficAnomaly` 的條件用 Python 算出來的偏離分數，兩條的寫法完全一樣。把偏離分數送回 Prometheus，換到的就是這種一致性。
 
-Grafana 端全部走官方功能。datasource 用內建的檔案 provisioning（`infra/grafana/provisioning/datasources.yaml`）接上 Prometheus，這一步在環境設定就做完。三張 panel 在工作坊那一批逐格建立，一張畫原始速率，一張畫算出來的分數，第三張畫告警現在的狀態。`infra/grafana/dashboards/aiops-workshop.json` 是另外一份示範用的 dashboard，panel 不同，匯入之後就能看到這台機器此刻的資料。
+Grafana 端全部走官方功能。datasource 用內建的檔案 provisioning（`infra/grafana/provisioning/datasources.yaml`）接上 Prometheus，這一步在環境設定就做完。三張 panel 在工作坊那一批逐格建立，一張畫原始速率，一張畫偏離分數，第三張畫告警現在的狀態。`infra/grafana/dashboards/aiops-workshop.json` 是另外一份示範用的 dashboard，panel 不同，匯入之後就能看到這台機器此刻的資料。
 
 ## 兩種資料
 
@@ -45,9 +45,9 @@ Lab 00 讀的是這台機器此刻的流量，走 Prometheus。這份資料真�
 
 ## 學習成果
 
-先把 telemetry 到 alert 的 pipeline 接通，確認每一段真的有資料流過，再回頭反覆改良算分數的那一段。每次改良都要拿得出數字來支持。
+先把 telemetry 到 alert 的 pipeline 接通，確認每一段真的有資料流過，再回頭反覆改良算偏離分數的那一段。每次改良都要拿得出數字來支持。
 
-你會啟動本機的 Prometheus、Grafana Local 與 node_exporter，並確認資料真的被抓取。你會用 PromQL 查詢 counter、rate、label filtering 與 aggregation，從 raw network counters 建立可解釋的 time-series features，再比較不同的 baseline。偏離量彙整成分數之後，以門檻判定成 label，套上 policy 才送得出 alert。這組設定值不值得上線，由 event recall、detection delay 與 alerts per day 決定。
+你會啟動本機的 Prometheus、Grafana Local 與 node_exporter，並確認資料真的被抓取。你會用 PromQL 查詢 counter、rate、label filtering 與 aggregation，從 raw network counters 建立可解釋的 time-series features，再比較不同的 baseline。偏離量先彙整成偏離分數，再以門檻判定成 label，套上 policy 才送得出 alert。這組設定值不值得上線，由 event recall、detection delay 與 alerts per day 決定。
 
 每個方法都要說得出它為什麼被選、用什麼數字驗證，以及在真實系統裡該放在哪一層。
 
