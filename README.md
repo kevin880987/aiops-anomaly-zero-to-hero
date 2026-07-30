@@ -22,29 +22,22 @@
 
 ## 學習成果
 
-1. 啟動本機 Prometheus、Grafana Local 與 node_exporter，並確認資料真的被抓取。
-2. 用 PromQL 查詢 counter、rate、label filtering 與 aggregation。
-3. 從 raw network counters 建立可解釋的 time-series features，並比較四種 baseline。
-4. 把偏離量彙整成單一分數、以門檻把分數判定成 label、套上 policy 之後送出 alert，並用 event recall、detection delay 與 alerts per day 評估這組設定。
-5. 把 Python 算出來的分數送回 Prometheus，讓 Grafana 與 alert rules 以查詢一般指標的方式取用。
+主線只有一條。先把 telemetry 到 alert 的 pipeline 接通，確認每一段真的有資料流過，再回頭反覆改良算分數的那一段，而且每次改良都要拿得出數字來支持。
+
+落到能力上，你會啟動本機的 Prometheus、Grafana Local 與 node_exporter 並確認資料真的被抓取；用 PromQL 查詢 counter、rate、label filtering 與 aggregation；從 raw network counters 建立可解釋的 time-series features 並比較不同的 baseline；把偏離量彙整成分數、以門檻判定成 label、套上 policy 之後送出 alert，再用 event recall、detection delay 與 alerts per day 判斷這組設定值不值得上線；最後把 Python 算出來的分數送回 Prometheus，讓 Grafana 與 alert rules 以查詢一般指標的方式取用。每一份 notebook 開頭都寫了自己那一節要達成的目標。
 
 ## 教材路線
 
-```text
-getting-started -> 建立完整 pipeline -> feature engineering -> anomaly detection 與 alerting
-```
+環境設定完成之後，第一節把整條 pipeline 接通，之後的每一節都在同一條線上改良算分數的那一段。
 
 Lab 00 讀的是這台機器此刻的流量，走 Prometheus。凡是要評演算法好壞的單元，讀的都是 `data/synthetic/` 底下標好真值的歷史 CSV，因為沒有答案就量不出好壞，那些單元全程用 matplotlib 畫圖。在歷史資料上挑出來的 baseline 與政策，就是要放進 Lab 00 那支服務裡的演算法。
 
 ## Labs
 
-位置：`labs/workshop/`，入口是 [`labs/workshop/README.md`](labs/workshop/README.md)。
-
-`labs/workshop/detector.py` 是這門課唯一自己寫的服務，六十行上下，可以完整閱讀，也可以直接修改。它算分數的那個函式正是後面每一節要換掉的部分，其餘的程式碼從頭到尾都不會再動。
+工作坊的 notebook 都在 `labs/workshop/`，同一個資料夾裡還有 `detector.py`，那是這門課唯一自己寫的服務，六十行上下，可以完整閱讀，也可以直接修改。它算分數的那個函式正是每一節要換掉的部分，其餘的程式碼從頭到尾都不會再動。各節分別處理哪一段、要花多久，寫在那個資料夾自己的說明裡。
 
 Grafana 端全部走官方功能，datasource 用內建的檔案 provisioning（`infra/grafana/provisioning/datasources.yaml`）接上 Prometheus。Dashboard 在 Lab 00 逐格建立，一張 panel 畫原始速率，一張畫算出來的分數，第三張畫告警現在的狀態，`infra/grafana/dashboards/aiops-workshop.json` 是建完之後核對用的答案卷。告警規則寫在 `infra/prometheus/alerts.yml`，隨時可以用一次下載讓它響。
 
-每一節換掉的都是 `detector.py` 裡算分數的那個函式。`labs/workshop/` 這一批各自處理哪一段、要花多久，寫在 [`labs/workshop/README.md`](labs/workshop/README.md)，那份以你收到的教材為準。
 
 ## 資料流
 
@@ -63,15 +56,13 @@ actual OS / network telemetry
 
 ## 設計地圖
 
-notebook 裡的每個參數，都可以回到這張表找它在真實系統中的位置。
+notebook 裡調的每個參數在真實系統裡都有對應的位置，而那個位置決定了上線之後由誰維護它。
 
-| Lab | 實務問題 | 主要設計決策 | 生產環境位置 |
-| --- | --- | --- | --- |
-| 00 Pipeline | 指標是否真的被收集、算完的分數是否回得去 | scrape interval、label 設計、counter 與 rate、哪一段計算該放在 PromQL 哪一段放在服務裡 | Prometheus scrape config、偵測服務、Grafana dashboard |
-| 01 Feature engineering | raw counters 如何變成可比較的訊號 | rate、ratio、rolling window、lag、多解析度 | Prometheus recording rules 或 feature service |
-| 02 Detection 與 alerting | 哪些偏離值得告警，代價是多少 | 閾值、baseline 視窗、deadband、duration、誤報預算 | Prometheus alert rules、Alertmanager |
+scrape interval 與 label 設計落在 Prometheus 的 scrape config。rate、ratio、rolling window、lag 與多解析度這類特徵落在 recording rules，或是另外一支 feature service。閾值、baseline 視窗、deadband、duration 與誤報預算落在 alert rules 與 Alertmanager。至於哪一段計算該留在 PromQL、哪一段該進到偵測服務裡，那是每一節都會再問一次的問題。
 
-## 每章自我檢核
+每一份 notebook 在動到參數的地方，會指出它在生產環境的對應位置。
+
+## 自我檢核
 
 | 階段 | 檢核問題 |
 | --- | --- |

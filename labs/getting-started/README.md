@@ -75,8 +75,7 @@ labs/workshop/
 
 從這個資料夾裡編號最小的那一份 notebook 開始。Lab 00 建立完整的 pipeline，從網卡的 counter 一路到
 觸發的告警，中間的偵測環節是自己寫的 Python 服務。建立完成之後的每一節都只處理演算法。編號就是順序，不能
-跳，後一節的分數建立在前一節的 baseline 上。各單元的分工見
-[`labs/workshop/README.md`](../workshop/README.md)，那份以你收到的教材為準。
+跳，後一節的分數建立在前一節的 baseline 上。各單元的分工寫在那個資料夾自己的說明裡。
 
 ## 選用：Grafana Cloud
 

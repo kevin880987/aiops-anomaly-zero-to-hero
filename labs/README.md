@@ -5,4 +5,4 @@
 | 目錄 | 用途 |
 | --- | --- |
 | [getting-started/](getting-started/) | setup 主入口、互動式檢查 notebook、各平台安裝指南 — 從這裡開始 |
-| [workshop/](workshop/) | 工作坊 notebooks 與 `detector.py`，依課程進度分批發布 |
+| `workshop/` | 工作坊 notebooks 與 `detector.py`，依課程進度分批發布，上到那幾節才會發 |
