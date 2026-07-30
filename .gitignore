@@ -47,17 +47,29 @@ env/
 *.swp
 *.swo
 
+# Prometheus TSDB. Starting Prometheus from the repo root without --storage.tsdb.path
+# makes it write its blocks, WAL and lock file into ./data next to the course CSV.
+# The datasets below are committed; anything Prometheus writes is not.
+data/wal/
+data/chunks_head/
+data/queries.active
+data/lock
+data/[0-9A-Z][0-9A-Z]*/
+
 # Notebook runtime outputs — written to outputs/ during lab runs, not source data.
 # Source datasets live in data/synthetic/ and data/sample/ (both committed).
 # .gitkeep files anchor the directories in git; all generated content is ignored.
 outputs/workshop/*
 !outputs/workshop/.gitkeep
-outputs/self-study/*
-!outputs/self-study/.gitkeep
-outputs/prometheus-dropzone/*
-!outputs/prometheus-dropzone/.gitkeep
 outputs/setup/*
 
-# Stack runtime state written by labs/workshop/start_week6_stack.sh (pids, logs,
-# the generated additive Prometheus config). Never source.
-outputs/.stack/
+# Diagram sources. The .drawio files live in materials/diagrams/ one level up, and
+# materials/tools/build_diagrams.py exports the .svg into labs/*/diagrams/. Only the
+# generated .svg belongs in this repo; editing it by hand is lost on the next build.
+*.drawio
+
+# Slide decks. The deck lives outside this repo in ../slide/ and is rebuilt from
+# slide/build_deck.py; binary Office files do not belong in the course history.
+*.pptx
+*.pptx#
+~$*.pptx

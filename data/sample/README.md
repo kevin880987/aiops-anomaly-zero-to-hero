@@ -1,4 +1,4 @@
-# Sample Data（選讀）
+# data/sample/（選讀）
 
 選讀資料，不是 labs 的必要輸入。Labs 使用 `data/synthetic/` 即可完成。只有在想理解 LibreNMS / RRDTool 原始 `.rrd` 檔格式時，才進入本目錄。
 
@@ -18,7 +18,7 @@
 brew install rrdtool
 ```
 
-**已驗證：** 以 `rrdtool 1.9.0` 確認 5 個檔案（port-id7427–7431.rrd）皆可讀，300 秒解析度，各含 15 個 data sources：
+**已驗證：** 以 `rrdtool 1.9.0` 確認 5 個檔案（port-id7427 到 7431.rrd）皆可讀，300 秒解析度，各含 15 個 data sources：
 
 ```text
 INOCTETS, OUTOCTETS, INERRORS, OUTERRORS,

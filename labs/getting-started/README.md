@@ -1,268 +1,83 @@
 # Getting started
 
-這一頁是課程 setup 的主入口。學員只需要照順序做；安裝細節已拆到各平台或工具自己的文件。
+這門課的重點是異常偵測的演算法設計。Grafana 與 dashboard 是拿來看資料與驗證結果的工具。
 
-本課程支援 macOS、Linux、Windows。請只執行自己作業系統的指令，不要混用不同 OS 的安裝方式。
+課程 setup 的主入口，照順序做。安裝細節在各步驟連到的文件裡。
 
----
+本課程支援 macOS、Linux、Windows。
 
-## 0. 先選你的起點
+最後我們會執行 `00-check-your-setup.ipynb` 確認所有需要的安裝。
 
-### A. 已經有 Python / conda 環境
+## 課堂上要維持執行的四個服務
 
-直接開啟檢查 notebook：
+課堂用的是 `labs/workshop/`。這四個服務要同時執行。
 
-```text
-labs/getting-started/00-check-your-setup.ipynb
-```
+| 元件 | 位址 | 步驟 |
+| --- | --- | --- |
+| Prometheus | <http://localhost:9090> | Step 3 |
+| node_exporter（Windows 是 windows_exporter） | <http://localhost:9100/metrics> | Step 4 |
+| Grafana | <http://localhost:3000> | Step 5 |
+| `detector.py` | <http://localhost:9200/metrics> | Lab 00 第 4 節 |
 
-它會檢查目前 notebook kernel、Python packages，並可直接啟動 course exporter；也會檢查 Prometheus、Grafana Local，以及 workshop 需要的 `node_exporter` / `windows_exporter`。每個檢查 cell 通過時都會輸出確認訊息。
-
-如果 notebook 顯示缺少任何項目，回到本頁對應步驟補安裝或啟動即可。
-
-### B. 還沒有 Python / conda 環境，或不確定怎麼安裝
-
-從 Step 1 開始做。完成 Step 1 到 Step 4 後，再回來開 `00-check-your-setup.ipynb` 檢查是否全部就緒。
-
----
+前三個是官方 binary，這裡先裝好。第四個是這門課唯一自己寫的服務，Lab 00 會帶你當場啟動它。
 
 ## Step 1. 進入 course repo
 
-所有指令都從 `aiops-anomaly-zero-to-hero` 根目錄執行。
-
-macOS / Linux：
+所有指令都從 repository 根目錄執行。
 
 ```bash
-cd /path/to/aiops-anomaly-zero-to-hero
-pwd
+cd <你 clone 的位置>/aiops-anomaly-zero-to-hero
 ```
 
-Windows PowerShell：
-
-```powershell
-cd C:\path\to\aiops-anomaly-zero-to-hero
-Get-Location
-```
-
----
+Windows PowerShell 是 `cd C:\Users\<你的帳號>\aiops-anomaly-zero-to-hero`。
 
 ## Step 2. 建立 Python / conda 環境
 
-依你的作業系統選一份文件：
+照 [01-setup-python-environment.md](01-setup-python-environment.md) 做，三個平台共用那一頁。
 
-| 作業系統 | 文件 |
-| --- | --- |
-| macOS | [01a-setup-macos-python-environment.md](01a-setup-macos-python-environment.md) |
-| Linux | [01b-setup-linux-python-environment.md](01b-setup-linux-python-environment.md) |
-| Windows | [01c-setup-windows-python-environment.md](01c-setup-windows-python-environment.md) |
-
-完成後，確認你能啟動課程環境：
-
-macOS / Linux：
-
-```bash
-conda activate aiops-anomaly-zero-to-hero
-jupyter lab labs/
-```
-
-Windows PowerShell：
-
-```powershell
-conda activate aiops-anomaly-zero-to-hero
-jupyter lab labs\
-```
-
-你可以使用 JupyterLab、VS Code、PyCharm 或其他支援 Jupyter notebook 的工具。重點是 notebook kernel 要選到 `aiops-anomaly-zero-to-hero`。
-
----
+驗收：`conda activate aiops-anomaly-zero-to-hero` 能啟用環境，且你慣用的 notebook 工具在 kernel 選單中列得出它。
 
 ## Step 3. 安裝並啟動 Prometheus
 
-照這份文件做：
+照 [02-install-prometheus.md](02-install-prometheus.md) 做。那份文件用一整節寫這一步唯一的坑：Prometheus 必須載到本 repository 的設定檔，否則它照常執行、照常回答查詢，只是永遠 scrape 不到 node_exporter。
+
+驗收：<http://localhost:9090> 能開啟，`up{job="prometheus"}` 查詢得到值。
+
+## Step 4. 安裝並啟動 node_exporter
+
+照 [04-install-node-exporter.md](04-install-node-exporter.md) 做。Windows 用的是 windows_exporter，listening port 為 9182。
+
+工作坊的即時指標與 `alerts.yml` 的所有規則都打在這個 exporter 曝露的 `node_network_*` 上。
+
+驗收：`up{job="node-exporter"}` 是 `1`。查詢結果裡完全沒有這個 job，表示 Step 3 的設定檔沒有載進去。
+
+## Step 5. 安裝 Grafana Local，接上資料來源
+
+照 [03-install-grafana-local.md](03-install-grafana-local.md) 做。這門課的 datasource 只有
+Prometheus 一個。
+
+驗收：`Connections → Data sources` 列得出 `Prometheus`，Save & test 顯示成功。URL 填成 `3000` 是最
+常見的失敗，`3000` 是 Grafana 自己。dashboard 在 Lab 00 自己建，這裡不驗收。
+
+## Step 6. 執行 setup check notebook
+
+逐格執行 `00-check-your-setup.ipynb`，四格都要通過：repo 路徑、Python 環境、Prometheus 與 Grafana 與 node_exporter、準備完成。
+
+某一格失敗時，它會列出對應的安裝指南。補齊之後重新執行整份。
+
+請以這份 notebook 的結果為準。terminal Python、conda environment 與 notebook kernel 三者不一致時，在終端機另外執行一支檢查腳本會給出誤判。
+
+## Step 7. 開始 labs
 
 ```text
-02-install-prometheus.md
+labs/workshop/00_end_to_end_pipeline.ipynb
 ```
 
-連結：[02-install-prometheus.md](02-install-prometheus.md)
-
-這一步會讓 Prometheus 抓到兩類資料來源。第一類是真實 OS metrics，由 `node_exporter` 或 `windows_exporter` 提供。第二類是課程準備好的 network telemetry CSV，由 `infra/rrd_exporter.py` 轉成 Prometheus 可以 scrape 的 `/metrics` 端點。這份 CSV 在課堂中是 synthetic data，但它模擬的是真實網路訊號被整理成表格後的形態。`00-check-your-setup.ipynb` 會先啟動並檢查 course exporter；你仍需要依此文件安裝並啟動 Prometheus。完成後應能確認：
-
-```text
-http://localhost:8000/metrics
-http://localhost:9090
-```
-
-在 Prometheus 查詢：
-
-```promql
-up{job="rrd-exporter"}
-```
-
-值應為 `1`。
-
----
-
-## Step 4. 安裝 Grafana Local 並連接 Prometheus
-
-照這份文件做：
-
-```text
-03a-install-grafana-local.md
-```
-
-連結：[03a-install-grafana-local.md](03a-install-grafana-local.md)
-
-完成後應能打開：
-
-```text
-http://localhost:3000
-```
-
-Grafana data source 請連到：
-
-```text
-http://localhost:9090
-```
-
----
-
-## Step 5. 跑 setup check notebook
-
-開啟並逐格執行：
-
-```text
-labs/getting-started/00-check-your-setup.ipynb
-```
-
-你應該看到四個主要檢查通過：
-
-1. Course repo path 通過。
-2. Python kernel / packages 通過。
-3. Course exporter 通過。
-4. Local services 中 `Prometheus`、`Grafana Local` 通過。
-
-如果某一格失敗，notebook 會列出對應安裝指南。先補齊缺項，再重新跑這份 notebook。
-
-請以 notebook 的結果為準。本課程不再提供另一套檢查腳本，避免 terminal Python、conda environment 與 notebook kernel 不一致時產生誤判。
-
----
-
-## Step 6. 開始 labs
-
-Self-study 開始條件：
-
-- `00-check-your-setup.ipynb` 的 Course repo path 通過。
-- Python kernel / packages 通過。
-- Course exporter、`Prometheus`、`Grafana Local` 通過。
-- `node_exporter` / `windows_exporter` 可以是 `SKIP`。
-
-符合以上條件後，從這裡開始：
-
-```text
-labs/self-study/00_observability_stack.ipynb
-```
-
-Workshop 開始條件：
-
-- self-study 條件全部通過。
-- `node_exporter` 或 `windows_exporter` 也已通過。
-
-符合以上條件後，從這裡開始：
-
-```text
-labs/workshop/00_observability_stack_and_promql.ipynb
-```
-
-如果你想把 notebook 產生的數值結果放到 Grafana，請走 Prometheus drop zone：
-
-```text
-labs/getting-started/05-prometheus-dropzone.md
-```
-
-Cadets 只需要把 notebook 產生的結果 CSV 複製到 `outputs/prometheus-dropzone/current_results.csv`。`infra/python_results_exporter.py` 會把檔案轉成 Prometheus metrics，Grafana dashboard 再從 Prometheus 顯示結果。這表示 Python 的主要輸入仍是整理好的 CSV；Prometheus/Grafana 負責展示與營運化，不是 beginner path 的演算法輸入來源。
-
----
-
-## Workshop 延伸：即時 OS metrics
-
-Workshop 若要查自己的電腦網路指標，需要安裝 `node_exporter` 或 `windows_exporter`。
-
-連結：[04-install-node-exporter.md](04-install-node-exporter.md)
-
-macOS / Linux 請使用 Prometheus 官方 GitHub release 的 `node_exporter` binary；Windows 請使用 `windows_exporter`。
-
-Self-study 不需要先做這一步。
-
----
+Lab 00 把整條 pipeline 接起來，從網卡的 counter 到會響的告警，中間那一段偵測是自己寫的 Python 服務。
+接完之後 Lab 01 與 Lab 02 只處理演算法。順序不能跳，Lab 02 的分數建立在 Lab 01 的 baseline 上。
+三份 notebook 的分工見 [`labs/workshop/README.md`](../workshop/README.md)。
 
 ## 選用：Grafana Cloud
 
-Grafana Cloud 是選用延伸。課程主線只需要 Grafana Local。
-
-連結：[03b-setup-grafana-cloud.md](03b-setup-grafana-cloud.md)
-
----
-
-## 常見錯誤定位
-
-### `conda` 找不到
-
-先重新開一個 terminal。若仍失敗，回到你的 OS 專用 Python setup 文件：
-
-- [macOS](01a-setup-macos-python-environment.md)
-- [Linux](01b-setup-linux-python-environment.md)
-- [Windows](01c-setup-windows-python-environment.md)
-
-### notebook 找不到 `aiops-anomaly-zero-to-hero` kernel
-
-安裝流程中的 Step 3 可能被略過。先啟用課程環境，再執行一次 kernel 註冊：
-
-macOS / Linux：
-
-```bash
-conda activate aiops-anomaly-zero-to-hero
-python -m ipykernel install --user --name aiops-anomaly-zero-to-hero --display-name "Python (aiops-anomaly-zero-to-hero)"
-```
-
-Windows PowerShell：
-
-```powershell
-conda activate aiops-anomaly-zero-to-hero
-python -m ipykernel install --user --name aiops-anomaly-zero-to-hero --display-name "Python (aiops-anomaly-zero-to-hero)"
-```
-
-重新整理 JupyterLab 的 kernel 選單，再選 `Python (aiops-anomaly-zero-to-hero)`。
-
-### `localhost:8000` 連不上
-
-course exporter 沒有啟動，或啟動後 terminal 被關掉。回到 [02-install-prometheus.md](02-install-prometheus.md)，確認 `python infra/rrd_exporter.py` 還在執行。
-
-### `localhost:9090` 連不上
-
-Prometheus 沒有啟動，或 9090 port 被其他程序佔用。回到 [02-install-prometheus.md](02-install-prometheus.md) 查看 Prometheus 啟動方式。
-
-### Grafana `Save & test` 失敗
-
-Grafana data source URL 應填：
-
-```text
-http://localhost:9090
-```
-
-不要填 `http://localhost:3000`。`3000` 是 Grafana 自己，`9090` 才是 Prometheus。
-
----
-
-## Conda environment files
-
-大多數學員不需要手動選這些檔案；請依本 README 的安裝指南建立環境，最後用 `00-check-your-setup.ipynb` 檢查。
-
-| 檔案 | 用途 |
-| --- | --- |
-| `environment.yml` | 預設跨平台版本 |
-| `environments/environment.macos.yml` | macOS 版本 |
-| `environments/environment.linux.yml` | Linux 版本 |
-| `environments/environment.windows.yml` | Windows 版本 |
-
-三個平台檔都建立同一個 conda environment：`aiops-anomaly-zero-to-hero`。
+課程主線只需要 Grafana Local。把指標推上雲端的做法在
+`03b-setup-grafana-cloud.md`，這份文件在 workspace 根目錄，不在這個 repo 裡。

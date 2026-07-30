@@ -1,147 +1,95 @@
+# 規則檔。這裡寫兩件事，把 counter 整理成速率，以及決定什麼情況要告警。
+#
+# 分層的界線在這份檔案上看得最清楚。PromQL 擅長「一條式子吃一個 selector 就寫得完」的
+# 計算，規則數不隨網卡或設備數量成長，下面 network_features 那一組全部屬於這一類。
+# 需要跨評估保留狀態的計算，PromQL 沒有寫法。那一半在 labs/workshop/detector.py，算完
+# 之後以 aiops_traffic_score 這個名字回到 Prometheus。
+#
+# 於是告警規則裡兩種來源混在一起，而且看不出差別。TrafficAnomaly 用的是 Python 算的分數，
+# ErrorRateSurge 用的是 PromQL 算的比率，兩條規則的寫法一樣。把分數送回 Prometheus 換來的
+# 就是這一點，下游不需要知道上游是誰算的。
+#
+# 網卡只排除 loopback。其餘虛擬介面留著也無妨，它們的速率是 0，任何一條規則都不會成立。
+
 groups:
 
-  # ── Recording rules: pre-compute features (equivalent to Notebook 01) ────────
   - name: network_features
     interval: 5s
     rules:
 
-      # Total traffic (IN + OUT bytes)
-      - record: network:traffic_total
-        expr: network_rrd_inoctets + network_rrd_outoctets
+      # counter 差分之後才有意義，rate() 是 PromQL 的差分寫法。
+      - record: net:rx_bytes:rate1m
+        expr: rate(node_network_receive_bytes_total{device!~"lo.*"}[1m])
 
-      # Total errors and discards
-      - record: network:errors_total
-        expr: network_rrd_inerrors + network_rrd_outerrors
+      - record: net:tx_bytes:rate1m
+        expr: rate(node_network_transmit_bytes_total{device!~"lo.*"}[1m])
 
-      - record: network:discards_total
-        expr: network_rrd_indiscards + network_rrd_outdiscards
+      - record: net:traffic_bps
+        expr: net:rx_bytes:rate1m + net:tx_bytes:rate1m
 
-      # Total unicast packets (denominator for rates)
-      - record: network:ucast_total
-        expr: network_rrd_inucastpkts + network_rrd_outucastpkts
-
-      # Error rate = errors / unicast packets
-      - record: network:error_rate
-        expr: network:errors_total / clamp_min(network:ucast_total, 1)
-
-      # Discard rate
-      - record: network:discard_rate
-        expr: network:discards_total / clamp_min(network:ucast_total, 1)
-
-      # Broadcast total
-      - record: network:broadcast_total
-        expr: network_rrd_inbroadcastpkts + network_rrd_outbroadcastpkts
-
-      # Rolling 1-hour mean and stddev (12 × 5-min intervals)
-      - record: network:traffic_mean_1h
-        expr: avg_over_time(network:traffic_total[1h])
-
-      - record: network:traffic_stddev_1h
-        expr: stddev_over_time(network:traffic_total[1h])
-
-      - record: network:error_rate_mean_1h
-        expr: avg_over_time(network:error_rate[1h])
-
-      - record: network:error_rate_stddev_1h
-        expr: stddev_over_time(network:error_rate[1h])
-
-      - record: network:discard_rate_mean_1h
-        expr: avg_over_time(network:discard_rate[1h])
-
-      - record: network:discard_rate_stddev_1h
-        expr: stddev_over_time(network:discard_rate[1h])
-
-      - record: network:broadcast_mean_1h
-        expr: avg_over_time(network:broadcast_total[1h])
-
-      - record: network:broadcast_stddev_1h
-        expr: stddev_over_time(network:broadcast_total[1h])
-
-      # Z-scores (equivalent to Notebook 02 z-score calculation)
-      - record: network:traffic_zscore
+      - record: net:packets_pps
         expr: >
-          (network:traffic_total - network:traffic_mean_1h)
-          / clamp_min(network:traffic_stddev_1h, 1)
+          rate(node_network_receive_packets_total{device!~"lo.*"}[1m])
+          + rate(node_network_transmit_packets_total{device!~"lo.*"}[1m])
 
-      - record: network:error_rate_zscore
+      # 平均封包大小。Lab 01 會說明掃描為什麼在這一欄現形，而位元組流量測不到它。
+      # 封包數與封包大小反向移動，兩者的乘積幾乎不變。
+      - record: net:avg_pkt_bytes
+        expr: net:traffic_bps / clamp_min(net:packets_pps, 1)
+
+      - record: net:error_rate
         expr: >
-          (network:error_rate - network:error_rate_mean_1h)
-          / clamp_min(network:error_rate_stddev_1h, 0.0001)
+          (rate(node_network_receive_errs_total{device!~"lo.*"}[1m])
+           + rate(node_network_transmit_errs_total{device!~"lo.*"}[1m]))
+          / clamp_min(net:packets_pps, 1)
 
-      - record: network:discard_rate_zscore
-        expr: >
-          (network:discard_rate - network:discard_rate_mean_1h)
-          / clamp_min(network:discard_rate_stddev_1h, 0.0001)
-
-      - record: network:broadcast_zscore
-        expr: >
-          (network:broadcast_total - network:broadcast_mean_1h)
-          / clamp_min(network:broadcast_stddev_1h, 1)
-
-  # ── Alert rules: anomaly detection (equivalent to Notebook 02 flags) ─────────
-  - name: network_anomaly_detection
+  - name: anomaly_alerts
     interval: 5s
     rules:
 
-      - alert: TrafficSurge
-        expr: network:traffic_zscore > 3
+      # detector.py 算的分數。`for:` 是時間閘，Lab 02 在 Python 那一側把同一件事寫成
+      # 「連續 n 個樣本才算數」。越線的單一取樣叫不醒任何人。
+      - alert: TrafficAnomaly
+        expr: abs(aiops_traffic_score) > 3
         for: 1m
         labels:
           severity: warning
-          anomaly_type: traffic_surge
+          source: detector
         annotations:
-          summary: "Traffic surge on {{ $labels.port_id }}"
+          summary: '{{ $labels.device }} 的流量偏離滾動基線 {{ $value | printf "%.1f" }} 個標準差'
           description: >
-            Port {{ $labels.port_id }} ({{ $labels.device_id }}) traffic z-score
-            = {{ $value | printf "%.1f" }}σ above 1-hour baseline.
-            Notebook 02 threshold: z > 3.0
+            分數由 labs/workshop/detector.py 算出，門檻 3。這條規則不知道分數是誰算的，
+            也不需要知道。
 
-      - alert: TrafficDrop
-        expr: network:traffic_zscore < -3
+      # 固定門檻在這裡是對的，因為錯誤率絕大多數時間是 0，沒有離散度可以讓 z-score 去除。
+      - alert: ErrorRateSurge
+        expr: net:error_rate > 0.01
+        for: 1m
+        labels:
+          severity: critical
+          source: promql
+        annotations:
+          summary: '{{ $labels.device }} 的錯誤率超過 1%'
+          description: '每個封包 {{ $value | printf "%.3f" }} 個錯誤。'
+
+      - alert: PacketSizeCollapse
+        expr: net:avg_pkt_bytes < 200 and net:packets_pps > 100
         for: 2m
         labels:
           severity: warning
-          anomaly_type: traffic_drop
+          source: promql
         annotations:
-          summary: "Traffic drop on {{ $labels.port_id }}"
-          description: >
-            Port {{ $labels.port_id }} traffic dropped to
-            {{ $value | printf "%.1f" }}σ below 1-hour baseline.
-            Possible: link failure, upstream routing change.
+          summary: '{{ $labels.device }} 的平均封包大小塌到 {{ $value | printf "%.0f" }} bytes'
+          description: '封包數高而封包小。位元組流量單獨測不出這個形狀。'
 
-      - alert: ErrorRateSurge
-        expr: network:error_rate_zscore > 3
+      # 偵測器自己也要被監看。它停掉的時候分數停在最後一次寫入的值，上面那條
+      # TrafficAnomaly 的條件再也不會成立，而畫面上看起來一切正常。
+      - alert: DetectorDown
+        expr: up{job="aiops-detector"} == 0
         for: 1m
         labels:
           severity: critical
-          anomaly_type: error_burst
+          source: prometheus
         annotations:
-          summary: "Error rate spike on {{ $labels.port_id }}"
-          description: >
-            Port {{ $labels.port_id }} error rate z-score = {{ $value | printf "%.1f" }}σ.
-            Check: cable, SFP, NIC, duplex/speed mismatch.
-
-      - alert: DiscardRateSurge
-        expr: network:discard_rate_zscore > 3
-        for: 1m
-        labels:
-          severity: warning
-          anomaly_type: discard_spike
-        annotations:
-          summary: "Discard rate spike on {{ $labels.port_id }}"
-          description: >
-            Port {{ $labels.port_id }} discard rate z-score = {{ $value | printf "%.1f" }}σ.
-            Check: queue congestion, QoS policy, buffer exhaustion.
-
-      - alert: BroadcastStorm
-        expr: network:broadcast_zscore > 3
-        for: 30s
-        labels:
-          severity: critical
-          anomaly_type: broadcast_storm
-        annotations:
-          summary: "Broadcast storm suspected on {{ $labels.port_id }}"
-          description: >
-            Port {{ $labels.port_id }} broadcast z-score = {{ $value | printf "%.1f" }}σ.
-            Check: ARP storm, switch loop, DHCP storm.
-            Cross-port: look for simultaneous spikes on multiple ports.
+          summary: 'detector.py 沒有在執行'
+          description: 'aiops_* 的分數不再更新，以這個分數為條件的告警不會再觸發。'

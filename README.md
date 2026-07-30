@@ -1,189 +1,126 @@
 # AIOps Anomaly Detection: Zero to Hero
 
-本課程幫助工程師建立可直接落地的 AIOps 實戰能力。課程從真實營運監控的資料流開始：OS 或網路設備產生 telemetry，exporter 暴露 `/metrics`，Prometheus scrape 並儲存時間序列，Grafana 顯示 operational dashboard。Python notebooks 則讀取整理好的 network telemetry CSV，設計特徵工程、異常偵測、告警降噪、預測與 RCA，再把數值結果輸出回 Prometheus / Grafana workflow。課程著重「可解釋、可驗證、可落地」的方法選擇，幫助工程師完成課程後即能在自己的監控系統中應用所學框架。
+這門課走一遍營運監控的完整資料流，而且是接得起來、跑得下去的那一種。OS 產生 telemetry，exporter 曝露 `/metrics`，Prometheus scrape 並儲存時間序列。接著課程自己寫的一支偵測服務回頭查 Prometheus、算出偏離分數、把分數曝露成 `/metrics`，於是 Prometheus 把它當成一般指標抓回去，Grafana 與告警規則查詢的就是那個分數。
 
-不需要雲端帳號。完成後可選擇延伸至 Grafana Cloud（選用）。
+重點在演算法，不在畫面。Lab 00 一次把整條 pipeline 接完，之後兩節處理的是那個分數該怎麼算。
 
----
+每個方法都要能解釋它為什麼被選、用什麼數字驗證，以及在真實系統裡該放在哪一層。不需要雲端帳號，Grafana Cloud 是選用延伸。
+
+教材按課程進度釋出。這一份涵蓋環境設定與 Lab 00 到 Lab 02，也就是第一天要用到的全部內容；RCA capstone 與自學路線在後續梯次發布。
 
 ## 開始使用
 
-**需要設定環境：** → [`labs/getting-started/`](labs/getting-started/README.md) — 先用 README 判斷起點；已有環境就開 setup check notebook，沒有環境就依 OS 連到對應安裝指南。
+環境還沒設定，從 [`labs/getting-started/README.md`](labs/getting-started/README.md) 開始，它給的是順序與每一步的驗收條件。
 
-**已有自己的環境：** → [`labs/getting-started/00-check-your-setup.ipynb`](labs/getting-started/00-check-your-setup.ipynb) — 直接用 notebook 檢查 kernel、Python packages、course exporter、Prometheus、Grafana Local 與 OS exporter 狀態。
-
----
+已經有自己的環境，直接執行 [`labs/getting-started/00-check-your-setup.ipynb`](labs/getting-started/00-check-your-setup.ipynb)，它會檢查 repo 路徑、Python 環境、Prometheus、Grafana Local 與 node_exporter。
 
 ## 適合對象
 
-- 已能照著指令操作終端機，但第一次接觸 Prometheus 或 Grafana Local 的維運或後端工程師。
-- 想把時間序列資料轉成 AIOps 偵測流程的資料或維運工程師。
-- 需要教學版範例資料，而不是只想看 production deployment template 的讀者。
+已能照著指令操作終端機，但第一次接觸 Prometheus 或 Grafana 的維運或後端工程師；想把時間序列資料轉成偵測流程的資料工程師；需要教學版範例資料而不是 production deployment template 的讀者。
 
 不預設有 Kubernetes、雲端平台、Python package 開發或深度學習經驗。
 
----
-
 ## 學習成果
 
-完成課程後，工程師應該能做到：
-
-1. 啟動本機 Prometheus、Grafana Local 與 exporter，並確認資料真的被抓取。
+1. 啟動本機 Prometheus、Grafana Local 與 node_exporter，並確認資料真的被抓取。
 2. 用 PromQL 查詢 counter、rate、label filtering 與 aggregation。
-3. 從 raw network counters 建立可解釋的 time-series features。
-4. 比較固定閾值、Z-score、SPC、Isolation Forest 與 forecasting 的適用情境。
-5. 把低階 anomaly flags 聚合成較少、較可處理的 alerts。
-6. 為 RCA 建立結構化 context，並區分證據、假說與可執行行動。
-7. 說明 Python 分析結果如何回到 Prometheus / Grafana / alerting workflow。
-
----
+3. 從 raw network counters 建立可解釋的 time-series features，並比較四種 baseline。
+4. 把偏離量收斂成 score、設門檻得到 label、加上 policy 成為 alert，並用 event recall、detection delay 與 alerts per day 評估這組設定。
+5. 把 Python 算出來的分數送回 Prometheus，讓 Grafana 與 alert rules 以查詢一般指標的方式取用。
 
 ## 教材路線
 
 ```text
-getting-started
-  -> observability stack
-  -> PromQL
-  -> feature engineering
-  -> anomaly detection
-  -> alert reduction
-  -> forecasting
-  -> RCA
-  -> deployment checks
+getting-started -> 把整條 pipeline 接起來 -> feature engineering -> anomaly detection 與 alerting
 ```
 
-Notebook 仍是主要學習介面，因為它能展示資料處理、feature engineering 與演算法判斷。在 beginner path 中，Python 主要讀取整理好的 CSV，不直接以 PromQL 作為演算法輸入。每個結果產生後，cadets 可以選擇直接在 notebook 看圖，或把結果 CSV 複製到 `outputs/prometheus-dropzone/current_results.csv`，讓 Prometheus scrape 後在 Grafana dashboard 顯示。完整流程見 [`labs/getting-started/05-prometheus-dropzone.md`](labs/getting-started/05-prometheus-dropzone.md)。
+Lab 00 讀的是這台機器此刻的流量，走 Prometheus。Lab 01 與 Lab 02 讀 `data/synthetic/` 底下標好真值的歷史 CSV，因為演算法要拿有答案的資料才評得出好壞，那兩節全程用 matplotlib 畫圖。在歷史資料上挑出來的 baseline 與政策，就是要放進 Lab 00 那支服務裡的演算法。
 
-### 路線 A：工作坊短版
+## Labs
 
-位置：`labs/workshop/`
+位置：`labs/workshop/`，入口是 [`labs/workshop/README.md`](labs/workshop/README.md)。
 
-使用 Prometheus 查詢即時本機指標，讓工程師先看到自己的機器產生 metrics，再進入特徵工程、異常偵測與 RCA capstone。
+`labs/workshop/detector.py` 是這門課唯一自己寫的服務，六十行上下，讀得懂也改得動。它算分數的那個函式正是 Lab 01 與 Lab 02 要換掉的部分，其餘的程式碼在後面兩節都不會再動。
+
+Grafana 端全部走官方功能，datasource 用內建的檔案 provisioning（`infra/grafana/provisioning/datasources.yaml`）接上 Prometheus。Dashboard 在 Lab 00 逐格建立，一張 panel 畫原始速率，一張畫算出來的分數，第三張畫告警現在的狀態，`infra/grafana/dashboards/aiops-workshop.json` 是建完之後核對用的答案卷。告警規則寫在 `infra/prometheus/alerts.yml`，隨時可以用一次下載讓它響。
 
 | Lab | 主題 | 建議時間 |
 | --- | --- | --- |
-| `00_observability_stack_and_promql.ipynb` | Prometheus、node_exporter、PromQL | 45–60 分鐘 |
-| `01_network_traffic_feature_engineering.ipynb` | EDA、rate、rolling、lag、多解析度 features | 60–75 分鐘 |
-| `02_anomaly_detection_and_alerting.ipynb` | 固定閾值、Z-score、deadband、change point | 60–75 分鐘 |
-| `08_agentic_ai_rca_capstone.ipynb` | RCA context、agentic loop、human approval gate | 45–60 分鐘 |
-
-### 路線 B：完整自學版
-
-位置：`labs/self-study/`
-
-主要使用 repository 內建 synthetic data。它不是另一條 production 架構，而是用可重建 CSV 模擬真實網路 telemetry 已被整理後的形態，讓 Python 演算法練習可以穩定重跑、容易定位錯誤。
-
-1. `data/synthetic/simulator_rrd_metrics.ipynb`
-2. `labs/self-study/00_observability_stack.ipynb`
-3. `labs/self-study/01_time_series_features.ipynb`
-4. `labs/self-study/02_baseline_anomaly_detection.ipynb`
-5. `labs/self-study/03_spc_anomaly_detection.ipynb`
-6. `labs/self-study/04_ml_anomaly_detection.ipynb`
-7. `labs/self-study/05_alert_reduction.ipynb`
-8. `labs/self-study/06_forecasting.ipynb`
-9. `labs/self-study/07_root_cause_analysis.ipynb`
-10. `labs/self-study/08_deploy_to_production.ipynb`
-
----
+| `00_end_to_end_pipeline.ipynb` | 把整條 pipeline 接起來。counter 與 rate、Python 服務怎麼進到 Prometheus、`for:` 怎麼擋掉雜訊，再故意弄壞四次讀出斷在哪一段 | 45 到 60 分鐘 |
+| `01_network_traffic_feature_engineering.ipynb` | 單位契約、資料剖面、四種 baseline（rolling mean、median 與 MAD、seasonal、peer group）與 shape features | 60 到 75 分鐘 |
+| `02_anomaly_detection_and_alerting.ipynb` | score 收成 label、label 通過 policy 成為 alert，以 event recall、detection delay 與 alerts per day 評估 | 60 到 75 分鐘 |
 
 ## 資料流
 
 ```text
 actual OS / network telemetry
-  -> exporter exposes /metrics
+  -> node_exporter exposes /metrics
   -> Prometheus stores time-series metrics
-  -> Grafana shows the operational dashboard
-
-organized network telemetry CSV
-  -> Python notebooks consume CSV
-  -> outputs/self-study/*.csv or outputs/workshop/*.csv
-  -> optional copy to outputs/prometheus-dropzone/current_results.csv
-  -> python_results_exporter exposes Python results as /metrics
-  -> Prometheus scrapes aiops_python_result
-  -> Grafana shows Python anomaly / forecast / RCA signals
+  -> detector.py queries Prometheus, scores, exposes /metrics
+  -> Prometheus scrapes the score like any other metric
+  -> Grafana panels and alert rules read that score with PromQL
 ```
 
-本課程的 synthetic CSV 對應的是「organized network telemetry CSV」這一層。它模擬真實營運資料被整理成欄位清楚、時間戳一致、可供 Python 分析的格式。每個 self-study notebook 會讀取前一步輸出，並把新的中間結果寫回 `outputs/self-study/`（gitignored）。中途失敗時，從失敗 notebook 的前一個 lab 重跑，不要直接跳到後面的 lab。
+分數繞回 Prometheus 這一步是整個設計的關鍵。繞回去之後下游沒有一格知道它是 Python 算的，所以上線的時候換掉的是演算法，pipeline 原封不動。
 
----
+Lab 01 與 Lab 02 另外讀 `data/synthetic/` 底下的 synthetic CSV，那是真實營運資料整理過後的樣子：五個 port、一整個月、十八個標好的事件。有真值才量得出一個 baseline 好不好，這台機器此刻的流量沒有真值可比。
 
-## 演算法與架構設計地圖
+## 設計地圖
 
-| 階段 | 實務問題 | 主要設計決策 | 生產環境位置 |
+notebook 裡的每個參數，都可以回到這張表找它在真實系統中的位置。
+
+| Lab | 實務問題 | 主要設計決策 | 生產環境位置 |
 | --- | --- | --- | --- |
-| Lab 00 Observability | 指標是否真的被收集，且可查詢？ | scrape interval、label 設計、資料來源健康檢查 | Prometheus scrape config、Grafana Local / Grafana Cloud dashboard |
-| Lab 01 Feature engineering | raw counters 如何變成可比較的訊號？ | rate、ratio、rolling window、lag、多解析度 | Prometheus recording rules 或 feature service |
-| Lab 02 Baseline detection | 哪些偏離值得告警？ | 閾值、baseline 視窗、deadband、誤報預算 | Prometheus alert rules、Grafana Cloud annotations |
-| Lab 03 SPC | 如何區分隨機波動與製程偏移？ | control limits、EWMA 記憶長度、CUSUM 靈敏度 | rule service 或 batch validation |
-| Lab 04 ML anomaly detection | 單一指標看不出來的組合異常如何處理？ | feature set、contamination、解釋方式、重訓頻率 | scoring service，必要時回寫 Prometheus |
-| Lab 05 Alert reduction | 如何把大量 flags 變成可處理事件？ | grouping window、problem taxonomy、suppression rule | Alertmanager、event correlation service |
-| Lab 06 Forecasting | 能否在 SLA 受影響前提早預警？ | horizon、prediction interval、季節性假設 | forecasting service、capacity planning dashboard |
-| Lab 07 RCA | 如何把事件轉成可驗證的根因假說？ | context window、evidence schema、LLM output contract | RCA webhook、ticket enrichment |
-| Lab 08 Deployment | 探索邏輯如何進入 24/7 監控？ | 哪些放在 Prometheus rules，哪些放在 Python service，哪些先用 CSV 驗證，哪裡保留 human gate | production monitoring pipeline |
-
-這張表是全課的設計骨架。notebook 中的每個參數，都可以回到這張表找它在系統中的位置。
-
----
+| 00 Pipeline | 指標是否真的被收集、算完的分數是否回得去 | scrape interval、label 設計、counter 與 rate、哪一段計算該放在 PromQL 哪一段放在服務裡 | Prometheus scrape config、偵測服務、Grafana dashboard |
+| 01 Feature engineering | raw counters 如何變成可比較的訊號 | rate、ratio、rolling window、lag、多解析度 | Prometheus recording rules 或 feature service |
+| 02 Detection 與 alerting | 哪些偏離值得告警，代價是多少 | 閾值、baseline 視窗、deadband、duration、誤報預算 | Prometheus alert rules、Alertmanager |
 
 ## 每章自我檢核
 
 | 階段 | 檢核問題 |
 | --- | --- |
-| 環境設定 | `00-check-your-setup.ipynb` 是否通過 Python kernel / packages、course exporter、Prometheus 與 Grafana Local 檢查？ |
-| Observability | Prometheus 的 `up` 是否能看到 exporter 與 OS exporter？ |
-| Feature engineering | `features.csv` 是否產生？欄位是否能追溯到 raw counters？ |
-| Detection | 每種 anomaly flag 是否有明確 threshold 或 score 解釋？ |
-| Alert reduction | raw alerts 是否被合理聚合？是否犧牲了需要立即處理的訊號？ |
-| Forecasting | prediction interval 是否太窄或太寬？ |
-| RCA | RCA output 是否區分 evidence、hypothesis、recommended action？ |
-| Deployment | Grafana Local dashboard、Prometheus rules 與 notebook 輸出是否對得起來？ |
-
----
+| 環境設定 | `00-check-your-setup.ipynb` 四格是否全部通過 |
+| Observability | Prometheus 的 `up` 對 node_exporter 與 aiops-detector 兩個 job 是否都是 1 |
+| Feature engineering | 算出來的欄位是否能一路追溯回 raw counters |
+| Detection | 每種 anomaly flag 是否有明確 threshold 或 score 解釋 |
+| Alerting | alert 是否被合理聚合，是否犧牲了需要立即處理的訊號 |
+| Deployment | 換掉偵測服務裡的演算法之後，dashboard 與 alert rules 是否不用改也能跟著變 |
 
 ## 驗證指令
 
-互動式檢查請開啟：
+本機是否就緒，以 `labs/getting-started/00-check-your-setup.ipynb` 為準。這是唯一建議的檢查入口，可避免 command-line script 與 notebook kernel 使用不同 Python 環境而造成誤判。
 
-```text
-labs/getting-started/00-check-your-setup.ipynb
-```
-
-若要確認本機是否已就緒，請直接執行 setup check notebook。這是唯一建議的檢查入口，可避免 command-line script 與 notebook kernel 使用不同 Python 環境而造成誤判。
-
-Prometheus 設定可用 `promtool` 檢查：
+Prometheus 設定用 `promtool` 檢查：
 
 ```bash
 promtool check config infra/prometheus/prometheus.macos.yml
-promtool check config infra/prometheus/prometheus.windows.yml
 ```
 
----
+`alerts.yml` 的規則打在自己這台機器上，所以隨時驗得起來。下載一個大檔案，`TrafficAnomaly` 會從 Normal 走到 Pending 再到 Firing。
 
 ## Repository 結構
 
 ```text
 .
-├── README.md                    # 本文件
-├── environment.yml              # conda 課程環境
+├── README.md                  # 本文件
+├── environments/              # conda 課程環境，三個平台各一份
+├── diagrams/                  # 課程圖表，各章共用同一份，來源在 materials/diagrams/
 ├── labs/
-│   ├── getting-started/         # setup 主入口、互動式檢查 notebook、各平台安裝指南
-│   ├── workshop/                # 工作坊短版 notebooks
-│   └── self-study/              # 完整自學版 notebooks
+│   ├── getting-started/       # setup 主入口、互動式檢查 notebook、安裝指南、screenshots/
+│   └── workshop/              # 工作坊 notebooks、detector.py
 ├── data/
-│   ├── synthetic/               # 可重建的 organized network telemetry CSV
-│   └── sample/                  # 原始 LibreNMS/RRDTool sample data（選讀）
-├── outputs/                     # Labs 產出（gitignored）
-│   ├── workshop/
-│   ├── self-study/
-│   └── prometheus-dropzone/      # current_results.csv feeds python_results_exporter
+│   ├── synthetic/             # 可重建的 organized network telemetry CSV
+│   └── sample/                # 原始 LibreNMS/RRDTool sample data（選讀）
+├── outputs/
+│   └── workshop/              # Labs 產出（gitignored）
 └── infra/
-    ├── prometheus/              # Prometheus 設定（macOS / Linux / Windows）
-    ├── grafana/                 # Dashboard JSON 與 datasource 設定
-    ├── rrd_exporter.py          # organized telemetry CSV to Prometheus metrics
-    └── python_results_exporter.py # Python result CSV to Prometheus metrics
+    ├── prometheus/            # 三個平台的 scrape 設定，以及 recording / alert rules
+    └── grafana/
+        ├── provisioning/      # datasource 的 YAML，用 Grafana 內建的 file provisioning
+        └── dashboards/        # dashboard JSON，建完之後核對用的答案卷
 ```
 
----
+工作坊 notebook 是自足的，載入、baseline、偵測、評估的函式就寫在每一份 notebook 開頭的 toolkit cell 裡，可以讀、可以改，不必先理解另一個函式庫。
 
 ## License
 

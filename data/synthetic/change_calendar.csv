@@ -1,0 +1,5 @@
+change_id,change_type,scope,start_time,end_time,owner,description,expected_signal
+CH-01,scheduled_backup,port-id7431,2026-02-08 00:50,2026-02-08 04:10,infra-ops,週日夜間全量備份至異地儲存,sustained traffic surge on backup-storage
+CH-02,business_change,port-id7430,2026-02-04 08:50,2026-02-04 11:05,app-team,新業務系統上線導流至 office VLAN,permanent level shift upward
+CH-03,maintenance,core-sw-01,2026-02-16 02:00,2026-02-16 04:00,network-ops,核心交換器韌體升級維護視窗,any deviation
+CH-04,maintenance,edge-fw-01,2026-02-21 03:00,2026-02-21 05:00,security-ops,邊界防火牆規則批次更新,brief traffic dip

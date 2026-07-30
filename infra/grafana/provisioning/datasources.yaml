@@ -1,0 +1,16 @@
+# Grafana 內建的檔案 provisioning。複製到 Grafana 的 provisioning 目錄再重新啟動，
+# 不必呼叫 API，也不必寫腳本。指令見 labs/getting-started/03-install-grafana-local.md。
+#
+# 只有一個 datasource。原始指標存在 Prometheus 裡，detector.py 算出來的分數與告警狀態
+# 也一樣，所以 Grafana 這一端一律用 PromQL 查詢。
+
+apiVersion: 1
+
+datasources:
+
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    url: http://localhost:9090
+    isDefault: true

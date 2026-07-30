@@ -1,176 +1,68 @@
-# 啟動課程 exporter，安裝並啟動 Prometheus
+# 安裝並啟動 Prometheus
 
-官方文件：[prometheus.io/docs/prometheus/latest/installation](https://prometheus.io/docs/prometheus/latest/installation/)
-官方下載頁：[prometheus.io/download](https://prometheus.io/download/)
+官方文件：[安裝說明](https://prometheus.io/docs/prometheus/latest/installation/)、[下載頁](https://prometheus.io/download/)
 
-參考閱讀：
+Prometheus 每 5 秒去抓一次 exporter 的 `/metrics`，把時間序列存起來給 Grafana 查詢。開始之前先完成 [01-setup-python-environment.md](01-setup-python-environment.md)。
 
-- [普羅米修斯 Prometheus 監控](https://hackmd.io/@cheese-owner/BkF8Kmlc5)
-- [DevOps 課程 Prometheus 1](https://wade-software-study-note.medium.com/devops%E8%AA%B2%E7%A8%8B-prometheus-1-7a690f7d4426)
+## 1. 安裝
 
-這兩篇文章的重點是 Prometheus 的 pull model、target、metric、exporter 與 Grafana data source。本課程沿用這個學習順序，但不照抄舊版 binary 與 Raspberry Pi 路徑。請以本頁指令、repository 內的 `infra/prometheus/*.yml`，以及官方下載頁為準。
-
-Prometheus 是系統級監控服務，安裝方式依作業系統與權限設定而異。本課程的 Python 環境設定只處理 notebook 需要的套件，不會自動安裝 Prometheus。
-
-本課程還需要一個 course exporter。Prometheus 不會直接讀取 CSV 或 notebook 輸出，它只會定期抓取 HTTP `/metrics` 端點。`infra/rrd_exporter.py` 會把 `data/synthetic/synthetic_rrd_metrics.csv` 轉成 Prometheus 格式，並在 `http://localhost:8000/metrics` 提供給 Prometheus scrape。這份 CSV 代表「整理好的 network telemetry」。在真實環境中，它可能來自 SNMP、RRDTool、設備匯出或資料管線；在本課程中，它用 synthetic data 模擬，讓每位 cadet 都能重現同一組訊號。也就是說，Prometheus 是監控資料庫，course exporter 是課程 telemetry 進入 Prometheus 的資料來源。
-
-本課程提供三份 Prometheus 設定檔，每份說明自己適用的平台：
-
-```text
-infra/prometheus/prometheus.macos.yml    macOS   — rrd-exporter :8000 + node_exporter :9100
-infra/prometheus/prometheus.linux.yml    Linux   — rrd-exporter :8000 + node_exporter :9100
-infra/prometheus/prometheus.windows.yml  Windows — rrd-exporter :8000 + windows_exporter :9182
-```
-
-設定檔會同時放入 Prometheus self target、課程 rrd-exporter target、Python results exporter target，以及對應作業系統的 OS exporter target。Prometheus 對 DOWN 的 target 會顯示為 `0`，但不會阻止其他 target 正常收集：
-
-```text
-localhost:9090  Prometheus self
-localhost:8000  rrd-exporter  ← self-study 路線：整理好的 network telemetry CSV
-localhost:8010  python-results-exporter ← 後續 lab：outputs/prometheus-dropzone/current_results.csv drop zone
-localhost:9100  node-exporter ← workshop 路線：真實 PC 網路指標（macOS / Linux）
-localhost:9182  windows-exporter ← workshop 路線：真實 PC 網路指標（Windows）
-```
-
-先完成 [01a](01a-setup-macos-python-environment.md)、[01b](01b-setup-linux-python-environment.md) 或 [01c](01c-setup-windows-python-environment.md)，確認 conda 環境已建立。
-
-## 先啟動課程 exporter
-
-開啟第一個終端機，回到 repository 根目錄後執行：
-
-```bash
-conda activate aiops-anomaly-zero-to-hero
-python infra/rrd_exporter.py
-```
-
-看到 `Exporting metrics on http://localhost:8000/metrics` 後保持這個終端機開著。另開一個終端機繼續安裝與啟動 Prometheus。
-
-驗證 exporter：
-
-```bash
-curl http://localhost:8000/metrics
-```
-
-Windows PowerShell 可用：
-
-```powershell
-Invoke-WebRequest http://localhost:8000/metrics
-```
-
-## 選用：先啟動 Python results exporter
-
-後續 labs 會用 Python 讀取整理好的 CSV，產生 anomaly score、forecast、SPC result 等結果 CSV。若你想把這些 Python 結果也放到 Grafana，另開一個終端機執行：
-
-macOS / Linux：
-
-```bash
-conda activate aiops-anomaly-zero-to-hero
-python infra/python_results_exporter.py
-```
-
-Windows PowerShell：
-
-```powershell
-conda activate aiops-anomaly-zero-to-hero
-python infra\python_results_exporter.py
-```
-
-這個 exporter 會讀：
-
-```text
-outputs/prometheus-dropzone/current_results.csv
-```
-
-之後 cadets 只要把 lab 產生的 CSV 複製到這個檔名，Prometheus 會 scrape，Grafana 會更新。完整流程見 [05-prometheus-dropzone.md](05-prometheus-dropzone.md)。
-
-## macOS（Homebrew）
+**macOS：**
 
 ```bash
 brew install prometheus
 ```
 
-安裝後開啟第二個終端機，回到 repository 根目錄，使用本課程提供的設定檔啟動：
-
-```bash
-prometheus --config.file=infra/prometheus/prometheus.macos.yml --web.enable-lifecycle
-```
-
-如果終端機顯示 `prometheus: command not found`，先確認 Homebrew 的 `bin` 目錄已加入 `PATH`：
-
-```bash
-brew --prefix
-```
-
-瀏覽器開啟 [http://localhost:9090](http://localhost:9090) 確認是否正常運作。
-
-## Linux（二進制）
+**Linux：** 到[下載頁](https://prometheus.io/download/)確認最新版本再填入 `PROM_VERSION`。
 
 ```bash
 PROM_VERSION="3.12.0"
 curl -LO "https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz"
 tar xvf "prometheus-${PROM_VERSION}.linux-amd64.tar.gz"
 cd "prometheus-${PROM_VERSION}.linux-amd64"
-./prometheus --config.file=/path/to/aiops-anomaly-zero-to-hero/infra/prometheus/prometheus.linux.yml --web.enable-lifecycle
 ```
 
-請先到 [prometheus.io/download](https://prometheus.io/download/) 確認目前最新版本，再更新 `PROM_VERSION`。也可以使用發行版套件管理器安裝，但版本可能落後官方 release。
+**Windows：** 在[下載頁](https://prometheus.io/download/)下載 `prometheus-*windows-amd64.zip`，解壓縮到任意目錄，例如 `C:\prometheus`。
 
-若你的系統已透過套件管理器安裝 `prometheus` 指令，也可以在 repository 根目錄執行：
+## 2. 啟動
+
+在終端機執行，Windows 用 PowerShell。切換到 repository 根目錄再啟動，設定檔依據自己平台。
 
 ```bash
-prometheus --config.file=infra/prometheus/prometheus.linux.yml --web.enable-lifecycle
+cd <你 clone 的位置>/aiops-anomaly-zero-to-hero
+prometheus --config.file=infra/prometheus/prometheus.<你的 OS {macos, linux, windows}>.yml --web.enable-lifecycle
 ```
 
-其他發行版請參考[官方安裝文件](https://prometheus.io/docs/prometheus/latest/installation/)。
+這個視窗請保持開啟**維持執行，並開新的終端機執行之後的指令**。**不要用 `brew services start prometheus` 或 `systemctl start prometheus` 直接啟動**，那會載入套件自己的預設設定檔。
 
-## Windows
+## 3. 驗收
 
-1. 至 [prometheus.io/download](https://prometheus.io/download/) 下載 `prometheus-*windows-amd64.zip`。
-2. 解壓縮到任意目錄，例如 `C:\prometheus`。
-3. 開啟第二個 PowerShell，在 Prometheus 解壓縮目錄執行：
+在瀏覽器開啟 <http://localhost:9090>，在 Expression 欄位查詢 `up`。
 
-```powershell
-.\prometheus.exe --config.file="C:\path\to\aiops-anomaly-zero-to-hero\infra\prometheus\prometheus.windows.yml" --web.enable-lifecycle
-```
+`job="prometheus"` 應該是 `1`；`job="node-exporter"`（Windows 是 `windows-exporter`）在你完成 [04-install-node-exporter.md](04-install-node-exporter.md) 之前會是 `0`，那是正常的。
+![Prometheus 的 Expression 欄位查詢 up，兩個 job 各自的值](screenshots/02-prometheus-1.png)
+<http://localhost:9090/targets> 是對應的圖形介面。
+![Prometheus 的 Targets 頁面，逐一列出每個 job 的狀態](screenshots/02-prometheus-2.png)
+確認完即完成本章節 Prometheus 安裝。
 
-瀏覽器開啟 [http://localhost:9090](http://localhost:9090) 確認是否正常運作。
-
-## 確認安裝成功
-
-瀏覽器開啟 [http://localhost:9090](http://localhost:9090)，在 Expression 欄位輸入 `up`，點擊 **Execute**。回傳結果中看到任何一筆 `value="1"` 即表示 Prometheus 正在收集資料。
-
-建議逐一查詢：
-
-```promql
-up{job="prometheus"}
-up{job="rrd-exporter"}
-up{job="python-results-exporter"}
-```
-
-若你已完成 node_exporter 或 windows_exporter 安裝，也查詢對應項目：
-
-```promql
-up{job="node-exporter"}
-```
-
-```promql
-up{job="windows-exporter"}
-```
-
-Prometheus、rrd-exporter 與你的 OS exporter 都回傳 `1` 表示設定正確。`python-results-exporter` 是給後續 lab 結果用的選用 target；如果你還沒有啟動 `python infra/python_results_exporter.py`，它會是 `0`。若 OS exporter 尚未安裝，這個目標也會暫時是 `0` 或不存在，完成 [04-install-node-exporter.md](04-install-node-exporter.md) 後再確認即可。
+若查詢結果裡完全沒有 `node-exporter`，就是設定檔載錯了，請再次確認`aiops-anomaly-zero-to-hero/infra/prometheus` 中的 .yaml。
 
 ## 常見問題
 
+**Grafana 上的流量 panel 一直是空的？**
+查詢 `up`，看有沒有 `job="node-exporter"` 這一筆。找不到就是載入了套件預設設定檔，見〈用 service 啟動〉。有這一筆但值是 `0`，代表設定對了、exporter 還沒啟動，去做 [04-install-node-exporter.md](04-install-node-exporter.md)。
+
+**分數 panel 一直是空的？**
+查詢 `up{job="aiops-detector"}`。那個 job 抓的是 Lab 00 才會啟動的 `detector.py`，setup 階段是 `0`，屬於正常。
+
+**`curl -X POST http://localhost:9090/-/reload` 回 405？**
+啟動時沒有帶 `--web.enable-lifecycle`。前景啟動就直接加這個參數，service 啟動就把它加進 `prometheus.args` 再重啟。
+
 **瀏覽器無法開啟 `localhost:9090`？**
-確認 Prometheus 指令視窗仍在執行中。若看到 `address already in use`，表示 9090 連接埠已被占用，請先關閉舊的 Prometheus 程序。
+確認指令視窗仍在執行中。看到 `address already in use` 表示 9090 已被占用，先關閉舊的 Prometheus 程序。
 
 **macOS 顯示 `brew: command not found`？**
-請先安裝 Homebrew：[https://brew.sh](https://brew.sh)，或改用 Prometheus 官方下載頁的 binary 安裝方式。
+先安裝 [Homebrew](https://brew.sh)，或改用官方下載頁的 binary。
 
 ## 下一步
 
-Prometheus 本機安裝完成後，繼續 [03a-install-grafana-local.md](03a-install-grafana-local.md) 安裝 Grafana Local。
-
-工作坊短版也需要 node_exporter，可以同步完成 [04-install-node-exporter.md](04-install-node-exporter.md)。
-
-完成 Grafana Local 後，若想額外把指標推送到雲端，可選擇繼續 [03b-setup-grafana-cloud.md](03b-setup-grafana-cloud.md)（選用）。
+[04-install-node-exporter.md](04-install-node-exporter.md) 與 [03-install-grafana-local.md](03-install-grafana-local.md)。`alerts.yml` 的規則全部打在 node_exporter 指標上，沒有它，recording rule 與 alert rule 都不會有值。
