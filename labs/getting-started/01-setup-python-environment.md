@@ -16,7 +16,7 @@
 
 ## 步驟
 
-### 1. 進入專案根目錄
+### 1. 進入教材根目錄
 
 ```bash
 cd aiops-anomaly-zero-to-hero
@@ -28,7 +28,7 @@ cd aiops-anomaly-zero-to-hero
 在終端機執行，Windows 用 PowerShell，路徑分隔改成反斜線。
 
 ```bash
-cd <你 clone 的位置>/aiops-anomaly-zero-to-hero
+cd <你放教材的位置>/aiops-anomaly-zero-to-hero
 conda env create -f environments/environment.<你的 OS {macos, linux, windows}>.yml
 ```
 
@@ -83,7 +83,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 確認後重新執行 `conda activate aiops-anomaly-zero-to-hero`。
 
 **指令顯示找不到環境檔？**
-請確認你目前在專案根目錄，也就是可以看到 `environments/` 與 `labs/` 的那一層。
+請確認你目前在教材根目錄，也就是可以看到 `environments/` 與 `labs/` 的那一層。
 
 **notebook 的 kernel 選單列不出課程環境？**
 編輯器通常會自己列出 conda environment。找不到時先啟用環境，把它註冊成一個具名 kernel：

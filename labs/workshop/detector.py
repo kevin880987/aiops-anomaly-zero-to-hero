@@ -11,8 +11,8 @@ Prometheus 抓它的方式跟抓 node_exporter 一樣，所以 `aiops_traffic_sc
 
 啟動之後，<http://localhost:9200/metrics> 會列出 aiops_traffic_score。
 
-Lab 01 與 Lab 02 動的是 `rolling_zscore()` 這一個函式。Lab 01 換掉它的基線，Lab 02
-在它外面包門檻與政策。其餘的程式碼在後面兩節都不會再改。
+Lab 00 之後的每一節動的都是 `rolling_zscore()` 這一個函式。Lab 01 換掉它的基線，Lab 02
+在它外面包門檻與政策。其餘的程式碼從頭到尾都不會再改。
 """
 import os
 import time

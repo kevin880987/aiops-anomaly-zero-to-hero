@@ -25,10 +25,10 @@ cd "prometheus-${PROM_VERSION}.linux-amd64"
 
 ## 2. 啟動
 
-在終端機執行，Windows 用 PowerShell。切換到 repository 根目錄再啟動，設定檔依據自己平台。
+在終端機執行，Windows 用 PowerShell。切換到教材根目錄再啟動，設定檔依據自己平台。
 
 ```bash
-cd <你 clone 的位置>/aiops-anomaly-zero-to-hero
+cd <你放教材的位置>/aiops-anomaly-zero-to-hero
 prometheus --config.file=infra/prometheus/prometheus.<你的 OS {macos, linux, windows}>.yml --web.enable-lifecycle
 ```
 
