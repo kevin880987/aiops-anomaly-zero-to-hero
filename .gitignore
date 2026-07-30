@@ -57,3 +57,7 @@ outputs/self-study/*
 outputs/prometheus-dropzone/*
 !outputs/prometheus-dropzone/.gitkeep
 outputs/setup/*
+
+# Stack runtime state written by labs/workshop/start_week6_stack.sh (pids, logs,
+# the generated additive Prometheus config). Never source.
+outputs/.stack/

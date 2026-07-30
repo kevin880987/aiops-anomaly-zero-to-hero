@@ -313,15 +313,30 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "red",
                 "value": null
               },
               {
-                "color": "red",
+                "color": "green",
                 "value": 1
               }
             ]
-          }
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "1": {
+                  "text": "UP",
+                  "index": 0
+                },
+                "0": {
+                  "text": "DOWN",
+                  "index": 1
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
