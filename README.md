@@ -2,7 +2,7 @@
 
 這門課走一遍營運監控的完整資料流，而且是接得起來、跑得下去的那一種。OS 產生 telemetry，exporter 曝露 `/metrics`，Prometheus scrape 並儲存時間序列。接著課程自己寫的一支偵測服務回頭查 Prometheus、算出偏離分數、把分數曝露成 `/metrics`，於是 Prometheus 把它當成一般指標抓回去，Grafana 與告警規則查詢的就是那個分數。
 
-重點在演算法，不在畫面。Lab 00 一次把整條 pipeline 接完，之後每一節處理的都是那個分數該怎麼算。
+重點在演算法，不在畫面。Lab 00 一次建立完整的 pipeline，之後每一節處理的都是這個分數的計算方式。
 
 每個方法都要能解釋它為什麼被選、用什麼數字驗證，以及在真實系統裡該放在哪一層。不需要雲端帳號，Grafana Cloud 是選用延伸。
 
@@ -25,13 +25,13 @@
 1. 啟動本機 Prometheus、Grafana Local 與 node_exporter，並確認資料真的被抓取。
 2. 用 PromQL 查詢 counter、rate、label filtering 與 aggregation。
 3. 從 raw network counters 建立可解釋的 time-series features，並比較四種 baseline。
-4. 把偏離量收斂成 score、設門檻得到 label、加上 policy 成為 alert，並用 event recall、detection delay 與 alerts per day 評估這組設定。
+4. 把偏離量彙整成單一分數、以門檻把分數判定成 label、套上 policy 之後送出 alert，並用 event recall、detection delay 與 alerts per day 評估這組設定。
 5. 把 Python 算出來的分數送回 Prometheus，讓 Grafana 與 alert rules 以查詢一般指標的方式取用。
 
 ## 教材路線
 
 ```text
-getting-started -> 把整條 pipeline 接起來 -> feature engineering -> anomaly detection 與 alerting
+getting-started -> 建立完整 pipeline -> feature engineering -> anomaly detection 與 alerting
 ```
 
 Lab 00 讀的是這台機器此刻的流量，走 Prometheus。凡是要評演算法好壞的單元，讀的都是 `data/synthetic/` 底下標好真值的歷史 CSV，因為沒有答案就量不出好壞，那些單元全程用 matplotlib 畫圖。在歷史資料上挑出來的 baseline 與政策，就是要放進 Lab 00 那支服務裡的演算法。
@@ -40,7 +40,7 @@ Lab 00 讀的是這台機器此刻的流量，走 Prometheus。凡是要評演�
 
 位置：`labs/workshop/`，入口是 [`labs/workshop/README.md`](labs/workshop/README.md)。
 
-`labs/workshop/detector.py` 是這門課唯一自己寫的服務，六十行上下，讀得懂也改得動。它算分數的那個函式正是後面每一節要換掉的部分，其餘的程式碼從頭到尾都不會再動。
+`labs/workshop/detector.py` 是這門課唯一自己寫的服務，六十行上下，可以完整閱讀，也可以直接修改。它算分數的那個函式正是後面每一節要換掉的部分，其餘的程式碼從頭到尾都不會再動。
 
 Grafana 端全部走官方功能，datasource 用內建的檔案 provisioning（`infra/grafana/provisioning/datasources.yaml`）接上 Prometheus。Dashboard 在 Lab 00 逐格建立，一張 panel 畫原始速率，一張畫算出來的分數，第三張畫告警現在的狀態，`infra/grafana/dashboards/aiops-workshop.json` 是建完之後核對用的答案卷。告警規則寫在 `infra/prometheus/alerts.yml`，隨時可以用一次下載讓它響。
 

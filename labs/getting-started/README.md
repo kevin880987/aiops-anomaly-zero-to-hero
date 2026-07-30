@@ -19,11 +19,11 @@
 | Grafana | <http://localhost:3000> | Step 5 |
 | `detector.py` | <http://localhost:9200/metrics> | Lab 00 第 4 節 |
 
-前三個是官方 binary，這裡先裝好。第四個是這門課唯一自己寫的服務，Lab 00 會帶你當場啟動它。
+前三個是官方 binary，在這一章先完成安裝。第四個是這門課唯一自己寫的服務，Lab 00 會在課堂上啟動它。
 
 ## Step 1. 進入教材根目錄
 
-所有指令都從教材根目錄執行，也就是看得到 `environments/`、`labs/`、`infra/` 的那一層。
+所有指令都從教材根目錄執行，也就是同時包含 `environments/`、`labs/`、`infra/` 的那一層。
 
 ```bash
 cd <你放教材的位置>/aiops-anomaly-zero-to-hero
@@ -39,7 +39,7 @@ Windows PowerShell 是 `cd C:\Users\<你的帳號>\aiops-anomaly-zero-to-hero`�
 
 ## Step 3. 安裝並啟動 Prometheus
 
-照 [02-install-prometheus.md](02-install-prometheus.md) 做。那份文件用一整節寫這一步唯一的坑：Prometheus 必須載到教材裡的設定檔，否則它照常執行、照常回答查詢，只是永遠 scrape 不到 node_exporter。
+照 [02-install-prometheus.md](02-install-prometheus.md) 做。那份文件用一整節說明這一步唯一的失敗模式：Prometheus 必須載入教材裡的設定檔，否則它照常執行、照常回答查詢，只是永遠 scrape 不到 node_exporter。
 
 驗收：<http://localhost:9090> 能開啟，`up{job="prometheus"}` 查詢得到值。
 
@@ -57,7 +57,7 @@ Windows PowerShell 是 `cd C:\Users\<你的帳號>\aiops-anomaly-zero-to-hero`�
 Prometheus 一個。
 
 驗收：`Connections → Data sources` 列得出 `Prometheus`，Save & test 顯示成功。URL 填成 `3000` 是最
-常見的失敗，`3000` 是 Grafana 自己。dashboard 在 Lab 00 自己建，這裡不驗收。
+常見的失敗，`3000` 是 Grafana 自己。dashboard 在 Lab 00 逐格建立，這裡不驗收。
 
 ## Step 6. 執行 setup check notebook
 
@@ -73,8 +73,8 @@ Prometheus 一個。
 labs/workshop/
 ```
 
-從這個資料夾裡編號最小的那一份 notebook 開始。Lab 00 把整條 pipeline 接起來，從網卡的 counter 到會
-響的告警，中間那一段偵測是自己寫的 Python 服務。接完之後的每一節都只處理演算法。編號就是順序，不能
+從這個資料夾裡編號最小的那一份 notebook 開始。Lab 00 建立完整的 pipeline，從網卡的 counter 一路到
+觸發的告警，中間的偵測環節是自己寫的 Python 服務。建立完成之後的每一節都只處理演算法。編號就是順序，不能
 跳，後一節的分數建立在前一節的 baseline 上。各單元的分工見
 [`labs/workshop/README.md`](../workshop/README.md)，那份以你收到的教材為準。
 

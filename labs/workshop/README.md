@@ -1,12 +1,12 @@
 # 工作坊：從 telemetry 到 alert
 
 講堂上把 anomaly 定義成在脈絡下相對於一條明確 baseline 的偏離。工作坊把這個定義變成可以執行的
-步驟：親手選 baseline、算 score、把 score 收成 label、讓 label 經過 policy 篩選才成為 alert，最後用
-event recall 與 alerts per day 去評這套設定值不值得帶進值班室。
+步驟：自行選定 baseline、計算偏離分數、以門檻把分數判定成 label、讓 label 通過 policy 篩選才成為
+alert，最後用 event recall 與 alerts per day 評估這組設定是否值得交給值班人員。
 
 ## pipeline 的五個環節
 
-Lab 00 把這條 pipeline 接起來，之後不再動它。
+Lab 00 建立這條 pipeline，之後不再改動它。
 
 ![Lab 00 的資料流](../../diagrams/lab00_pipeline.svg)
 
@@ -71,12 +71,14 @@ Windows 的 exporter 是 `windows_exporter`，聽在 9182，設定檔用 `promet
 單元會補進同一個資料夾。檔名前面的編號就是順序，不能跳，後一節的分數建立在前一節算出來的
 baseline 欄位上。
 
-Lab 00 把線接起來，counter 與 rate、`up`、Python 服務怎麼進到 Prometheus、`for:` 怎麼擋掉雜訊，
-再故意弄壞四次讀出斷在哪，大約 45 到 60 分鐘。之後每一節換的都是算分數的那一段。Lab 01 做網路流量
-的 feature engineering，同一段流量對四種 baseline 比較，rolling mean、median 與 MAD、same seasonal
-position 與 peer group。Lab 02 把偏離量收斂成 score，設門檻得到 label，再加上 duration、minimum
-volume 與 maintenance exclusion 才成為 alert，最後用 scorecard 檢查代價。Lab 01 與 Lab 02 各約 60 到
-75 分鐘。
+Lab 00 把 node_exporter、Prometheus、`detector.py` 與 Grafana 串成一條可運作的 pipeline。內容包括
+counter 與 rate 的換算、`up` 怎麼判讀、Python 服務怎麼註冊成 Prometheus 的 scrape target、`for:`
+怎麼濾掉單一取樣的越線，最後刻意在四個位置製造故障，逐一定位是哪一段中斷，大約 45 到 60 分鐘。
+之後每一節替換的都是計算偏離分數的那一段。Lab 01 從網路流量的 raw counter 建立可比較的特徵，並在
+同一段流量上比較四種 baseline 的表現，分別是 rolling mean、median 與 MAD、same seasonal position
+與 peer group。Lab 02 把偏離量彙整成單一分數，以門檻把分數判定成 label，再套上 duration、minimum
+volume 與 maintenance exclusion 三道政策才送出 alert，最後用 scorecard 量這組設定的誤報代價。
+Lab 01 與 Lab 02 各約 60 到 75 分鐘。
 
 ## notebook 裡的 toolkit
 
