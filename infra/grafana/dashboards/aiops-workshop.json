@@ -3,13 +3,94 @@
     "list": []
   },
   "editable": true,
-  "description": "Lab 00 的答案卷。三張 panel 全部讀 Prometheus：原始速率來自 node_exporter，分數來自 labs/workshop/detector.py，告警狀態來自 infra/prometheus/alerts.yml。建議一格一格自己建，卡住的時候再打開這一份對照。",
+  "description": "示範用的 dashboard。四張 panel 讀的都是環境設定完成之後就有的資料：scrape 狀態來自 Prometheus 自己，速率、封包大小與封包數來自 node_exporter 與 infra/prometheus/alerts.yml 的 recording rules，告警狀態來自同一份規則檔。匯入之後就該看得到線，看不到表示前面某一步沒接上。",
   "graphTooltip": 1,
   "panels": [
     {
       "id": 1,
+      "type": "stat",
+      "title": "Scrape targets",
+      "description": "每個 job 的 up。prometheus 與 node-exporter 應該都是 1。aiops-detector 要等偵測服務啟動才會變成 1，在那之前是 0。",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "up",
+          "legendFormat": "{{job}}",
+          "instant": true,
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "down",
+                  "index": 0
+                },
+                "1": {
+                  "text": "up",
+                  "index": 1
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      }
+    },
+    {
+      "id": 2,
       "type": "timeseries",
       "title": "Throughput, receive and transmit",
+      "description": "$iface 這張網卡的收送速率，對 node_exporter 的 counter 取 rate()。",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -18,7 +99,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 4
       },
       "targets": [
         {
@@ -88,18 +169,19 @@
       }
     },
     {
-      "id": 2,
+      "id": 3,
       "type": "timeseries",
-      "title": "Anomaly score",
+      "title": "Average packet size",
+      "description": "net:avg_pkt_bytes，由 alerts.yml 的 recording rules 算出來。位元組流量與封包數一起上升的時候這一欄不動，只有封包本身變小才會塌下去。",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
         "h": 9,
-        "w": 14,
+        "w": 12,
         "x": 0,
-        "y": 9
+        "y": 13
       },
       "targets": [
         {
@@ -108,7 +190,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "aiops_traffic_score",
+          "expr": "net:avg_pkt_bytes{device=\"$iface\"}",
           "legendFormat": "{{device}}",
           "range": true,
           "refId": "A"
@@ -128,27 +210,19 @@
             "lineWidth": 1,
             "pointSize": 5,
             "showPoints": "never",
-            "spanNulls": false,
-            "thresholdsStyle": {
-              "mode": "line"
-            }
+            "spanNulls": false
           },
           "mappings": [],
+          "unit": "bytes",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 3
               }
             ]
-          },
-          "min": -6,
-          "max": 6
+          }
         },
         "overrides": []
       },
@@ -166,18 +240,19 @@
       }
     },
     {
-      "id": 3,
-      "type": "state-timeline",
-      "title": "Alert state",
+      "id": 4,
+      "type": "timeseries",
+      "title": "Packet rate",
+      "description": "net:packets_pps，收送封包數相加。與左邊那張並排，就分得出流量的變化是封包變多還是封包變大。",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
         "h": 9,
-        "w": 10,
-        "x": 14,
-        "y": 9
+        "w": 12,
+        "x": 12,
+        "y": 13
       },
       "targets": [
         {
@@ -186,8 +261,79 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "ALERTS{alertname=\"TrafficAnomaly\"}",
-          "legendFormat": "{{alertstate}}",
+          "expr": "net:packets_pps{device=\"$iface\"}",
+          "legendFormat": "{{device}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "never",
+            "spanNulls": false
+          },
+          "mappings": [],
+          "unit": "pps",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "state-timeline",
+      "title": "Alert state",
+      "description": "alerts.yml 每一條規則現在的狀態。偵測服務還沒啟動的時候，通常只有 DetectorDown 是 firing。",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "ALERTS",
+          "legendFormat": "{{alertname}} {{alertstate}}",
           "range": true,
           "refId": "A"
         }
@@ -199,15 +345,30 @@
           },
           "custom": {
             "fillOpacity": 70,
-            "lineWidth": 0
+            "lineWidth": 0,
+            "spanNulls": false
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "1": {
+                  "text": "active",
+                  "index": 0
+                }
+              }
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "orange",
+                "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
               }
             ]
           }
@@ -215,7 +376,7 @@
         "overrides": []
       },
       "options": {
-        "alignValue": "left",
+        "alignValue": "center",
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
@@ -257,7 +418,7 @@
           "refId": "A"
         },
         "refresh": 1,
-        "regex": "",
+        "regex": "/^(en|eth|ens|eno|enp|wl)[a-z0-9]*$/",
         "skipUrlSync": false,
         "sort": 1,
         "type": "query"
@@ -265,7 +426,7 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},

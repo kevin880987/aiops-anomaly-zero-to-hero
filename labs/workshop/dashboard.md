@@ -3,8 +3,9 @@
 三張 panel 與一個變數，全部讀 Prometheus。原始速率存在那裡，`detector.py` 算出來的分數與告警
 狀態也存在那裡，所以三張 panel 用的是同一個 datasource。
 
-不匯入現成的 dashboard，逐格建立。`infra/grafana/dashboards/aiops-workshop.json` 是建完
-之後核對用的答案卷，卡在某一張 panel 的設定上可以打開來對，不要整份匯入。
+這三張自己逐格建立，不要匯入現成的。`infra/grafana/dashboards/aiops-workshop.json` 是另一份
+示範用的 dashboard，panel 不一樣，讀的是環境設定完成之後就有的資料，拿它確認接線可以，
+拿它取代這一節要建立的三張不行。
 
 **前提：** Prometheus 這個 datasource 在 setup 就設定完成，做法見
 [`labs/getting-started/03-install-grafana-local.md`](../getting-started/03-install-grafana-local.md)。
