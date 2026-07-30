@@ -77,3 +77,11 @@ Legend 填 `{{alertstate}}`，Title 填 `Alert state`。`ALERTS` 是 Prometheus 
 | 第三張永遠空白 | 分數沒有越過 3，或者越過了但沒有撐滿 `for: 1m` |
 | 三張都空白，時間軸卻有刻度 | 時間範圍。先改回 Last 1 hour |
 | 重新整理後剛才建的 panel 不見了 | 沒有存 dashboard，Ctrl/Cmd+S 存一次 |
+
+## 第六週的第二張 dashboard
+
+Lab 06 與 Lab 07 用另一張 dashboard，`infra/grafana/dashboards/forecast_rca_risk.json`（uid `aiops-forecast-rca`）。
+
+那一張是匯入的，不逐格建立。這裡逐格建立是因為重點就在自己寫一次 PromQL，那一張有十二格，而且讀的是
+notebook 算完之後才存在的欄位，逐格建立換不到相應的學習。做法寫在 Lab 06 的「在 Grafana 上看 forecast
+risk」那一節，資料由 `labs/workshop/results_exporter.py` 重播進 Prometheus。

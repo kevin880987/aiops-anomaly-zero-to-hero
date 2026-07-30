@@ -1,6 +1,6 @@
 # macOS。Linux 用 prometheus.linux.yml，Windows 用 prometheus.windows.yml。
 #
-# 三個 scrape job 接成一條迴路。exporter 曝露原始 OS 指標，Prometheus 抓進來存著，
+# 前三個 scrape job 接成一條迴路。exporter 曝露原始 OS 指標，Prometheus 抓進來存著，
 # detector.py 回頭查 Prometheus、算出分數、把分數曝露在 :9200/metrics，Prometheus
 # 再把分數當成一般指標抓回來。分數進了 Prometheus 之後，Grafana 與 alerts.yml 看待這個
 # 分數，跟看待 node_exporter 的指標沒有分別。
@@ -29,3 +29,10 @@ scrape_configs:
   - job_name: "aiops-detector"
     static_configs:
       - targets: ["localhost:9200"]
+
+  # Week 6 的重播：labs/workshop/results_exporter.py 把 Lab 06 與 Lab 07 算完寫出的 CSV
+  # 重播成 metrics。只有跑 Week 6 的時候才需要啟動，沒啟動時這個 job 的 up 是 0，上面三個
+  # 不受影響，也不會觸發 DetectorDown，那條規則只看 aiops-detector。
+  - job_name: "week6-results-exporter"
+    static_configs:
+      - targets: ["localhost:8010"]

@@ -30,7 +30,7 @@
       }
     ]
   },
-  "description": "Forecast risk (Notebook 06) and Root Cause Analysis (Notebook 07) — additive companion to the network_metrics dashboard. Reads recording rules from alerts.yml + forecast_alerts.yml and notebook results via the Prometheus drop zone (aiops_python_result).",
+  "description": "Forecast risk (Notebook 06) and root cause analysis (Notebook 07). Reads the notebook results replayed into Prometheus by labs/workshop/results_exporter.py, plus the alerts defined in infra/prometheus/forecast_alerts.yml. Companion to aiops-workshop, not a replacement for it.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -54,7 +54,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Actual traffic (recording rule from alerts.yml) vs Notebook 06 Prophet forecast via the drop zone (aiops_python_result column=y_hat).",
+      "description": "Actual traffic and the Notebook 06 Prophet forecast, both replayed from outputs/workshop/forecast_results.csv by labs/workshop/results_exporter.py.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -95,7 +95,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "network:traffic_total{device_id=~\"$device\", port_id=~\"$port\"}",
+          "expr": "aiops_python_result{column=\"traffic_total\", device_id=~\"$device\", port_id=~\"$port\"}",
           "legendFormat": "actual {{port_id}}",
           "refId": "A"
         },
@@ -243,7 +243,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "From the additive infra/prometheus/forecast_alerts.yml (predict_linear capacity forecast).",
+      "description": "From the additive infra/prometheus/forecast_alerts.yml: the notebook's forecast_30m against the notebook's own capacity column.",
       "fieldConfig": {
         "defaults": {
           "unit": "short",
@@ -302,7 +302,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "1 when infra/python_results_exporter.py is being scraped.",
+      "description": "1 when labs/workshop/results_exporter.py is being scraped.",
       "fieldConfig": {
         "defaults": {
           "unit": "short",
@@ -363,12 +363,12 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "up{job=\"python-results-exporter\"}",
+          "expr": "up{job=\"week6-results-exporter\"}",
           "legendFormat": "exporter up",
           "refId": "A"
         }
       ],
-      "title": "Python results exporter",
+      "title": "Week 6 results exporter",
       "type": "stat"
     },
     {
@@ -388,7 +388,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Per-port z-scores (recording rules from alerts.yml). The signature metric tells you the RCA event type; this is the evidence Notebook 07 ranks on.",
+      "description": "Per-port z-scores exported by Notebook 07 (rca_results.csv, z_* columns). The signature metric tells you the event type; this is the evidence the ranking uses.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -429,7 +429,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "network:traffic_zscore{port_id=~\"$port\"}",
+          "expr": "aiops_python_result{column=\"z_traffic_total\", port_id=~\"$port\"}",
           "legendFormat": "traffic z",
           "refId": "A"
         },
@@ -438,7 +438,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "network:error_rate_zscore{port_id=~\"$port\"}",
+          "expr": "aiops_python_result{column=\"z_error_rate\", port_id=~\"$port\"}",
           "legendFormat": "error z",
           "refId": "B"
         },
@@ -447,7 +447,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "network:discard_rate_zscore{port_id=~\"$port\"}",
+          "expr": "aiops_python_result{column=\"z_discard_rate\", port_id=~\"$port\"}",
           "legendFormat": "discard z",
           "refId": "C"
         },
@@ -456,7 +456,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "network:broadcast_zscore{port_id=~\"$port\"}",
+          "expr": "aiops_python_result{column=\"z_broadcast_total\", port_id=~\"$port\"}",
           "legendFormat": "broadcast z",
           "refId": "D"
         }
@@ -510,7 +510,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "network:broadcast_zscore",
+          "expr": "aiops_python_result{column=\"z_broadcast_total\"}",
           "legendFormat": "{{port_id}}",
           "refId": "A"
         }
@@ -697,7 +697,7 @@
         "refresh": 2,
         "includeAll": true,
         "multi": true,
-        "query": "label_values(network_rrd_inoctets, device_id)",
+        "query": "label_values(aiops_python_result, device_id)",
         "current": {
           "text": "All",
           "value": "$__all"
@@ -714,7 +714,7 @@
         "refresh": 2,
         "includeAll": true,
         "multi": true,
-        "query": "label_values(network_rrd_inoctets{device_id=~\"$device\"}, port_id)",
+        "query": "label_values(aiops_python_result{device_id=~\"$device\"}, port_id)",
         "current": {
           "text": "All",
           "value": "$__all"

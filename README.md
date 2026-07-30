@@ -6,7 +6,7 @@
 
 每個方法都要能解釋它為什麼被選、用什麼數字驗證，以及在真實系統裡該放在哪一層。不需要雲端帳號，Grafana Cloud 是選用延伸。
 
-教材按課程進度釋出。這一份涵蓋環境設定與 Lab 00 到 Lab 02，也就是第一天要用到的全部內容；RCA capstone 與自學路線在後續梯次發布。
+教材按課程進度釋出。這一份涵蓋環境設定、Lab 00 到 Lab 02，以及第六週的 Lab 06 預警與 Lab 07 根因分析。自學路線在後續梯次發布。
 
 ## 開始使用
 
@@ -32,6 +32,7 @@
 
 ```text
 getting-started -> 把整條 pipeline 接起來 -> feature engineering -> anomaly detection 與 alerting
+                -> 預警與管制界限 -> 根因分析
 ```
 
 Lab 00 讀的是這台機器此刻的流量，走 Prometheus。Lab 01 與 Lab 02 讀 `data/synthetic/` 底下標好真值的歷史 CSV，因為演算法要拿有答案的資料才評得出好壞，那兩節全程用 matplotlib 畫圖。在歷史資料上挑出來的 baseline 與政策，就是要放進 Lab 00 那支服務裡的演算法。
@@ -49,6 +50,8 @@ Grafana 端全部走官方功能，datasource 用內建的檔案 provisioning（
 | `00_end_to_end_pipeline.ipynb` | 把整條 pipeline 接起來。counter 與 rate、Python 服務怎麼進到 Prometheus、`for:` 怎麼擋掉雜訊，再故意弄壞四次讀出斷在哪一段 | 45 到 60 分鐘 |
 | `01_network_traffic_feature_engineering.ipynb` | 單位契約、資料剖面、四種 baseline（rolling mean、median 與 MAD、seasonal、peer group）與 shape features | 60 到 75 分鐘 |
 | `02_anomaly_detection_and_alerting.ipynb` | score 收成 label、label 通過 policy 成為 alert，以 event recall、detection delay 與 alerts per day 評估 | 60 到 75 分鐘 |
+| `06_forecasting.ipynb` | 從偵測跨到預警。Prophet 分解、時序 holdout 評估、把管制界限分別畫在原始序列、預測殘差與預測值三個地方 | 60 到 75 分鐘 |
+| `07_root_cause_analysis.ipynb` | 五種證據加權成 hybrid 排名，再用 hit@k、MRR 與信心校準分別回答排得準不準、說的信心可不可以信 | 60 到 75 分鐘 |
 
 ## 資料流
 
@@ -74,6 +77,8 @@ notebook 裡的每個參數，都可以回到這張表找它在真實系統中�
 | 00 Pipeline | 指標是否真的被收集、算完的分數是否回得去 | scrape interval、label 設計、counter 與 rate、哪一段計算該放在 PromQL 哪一段放在服務裡 | Prometheus scrape config、偵測服務、Grafana dashboard |
 | 01 Feature engineering | raw counters 如何變成可比較的訊號 | rate、ratio、rolling window、lag、多解析度 | Prometheus recording rules 或 feature service |
 | 02 Detection 與 alerting | 哪些偏離值得告警，代價是多少 | 閾值、baseline 視窗、deadband、duration、誤報預算 | Prometheus alert rules、Alertmanager |
+| 06 Forecasting 與預警 | 事情發生之前多久看得出來，界限該畫在哪一條序列上 | 季節性階數、預測區間寬度、界限畫在原始值或殘差、誤報預算換偵測率 | 預測服務、recording rules、Grafana |
+| 07 Root cause analysis | 五個 port 同時亮的時候誰是根因，這個答案可不可以信 | 證據權重、樣本數夠不夠估、因果檢定的前處理、信心怎麼校準 | 事件關聯服務、值班手冊、事後檢討 |
 
 ## 每章自我檢核
 
@@ -85,6 +90,8 @@ notebook 裡的每個參數，都可以回到這張表找它在真實系統中�
 | Detection | 每種 anomaly flag 是否有明確 threshold 或 score 解釋 |
 | Alerting | alert 是否被合理聚合，是否犧牲了需要立即處理的訊號 |
 | Deployment | 換掉偵測服務裡的演算法之後，dashboard 與 alert rules 是否不用改也能跟著變 |
+| Forecasting | 預測模型是否真的贏過 naive 基準，界限畫在哪一條序列上是否說得出理由 |
+| Root cause | 排名用了哪幾種證據，證據算不出來的時候是否標成 unavailable 而不是 0 |
 
 ## 驗證指令
 
@@ -107,7 +114,7 @@ promtool check config infra/prometheus/prometheus.macos.yml
 ├── diagrams/                  # 課程圖表，各章共用同一份，來源在 materials/diagrams/
 ├── labs/
 │   ├── getting-started/       # setup 主入口、互動式檢查 notebook、安裝指南、screenshots/
-│   └── workshop/              # 工作坊 notebooks、detector.py
+│   └── workshop/              # 工作坊 notebooks、detector.py、results_exporter.py、screenshots/
 ├── data/
 │   ├── synthetic/             # 可重建的 organized network telemetry CSV
 │   └── sample/                # 原始 LibreNMS/RRDTool sample data（選讀）

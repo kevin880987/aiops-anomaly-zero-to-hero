@@ -64,15 +64,17 @@ Windows 的 exporter 是 `windows_exporter`，聽在 9182，設定檔用 `promet
 三張 panel 在 Lab 00 逐格建立，做法寫在 [`dashboard.md`](dashboard.md)。
 `infra/grafana/dashboards/aiops-workshop.json` 是建完之後核對用的答案卷。
 
-## 下午三節
+## 下午三節，加上第六週的兩節
 
 | Lab | 主題 | Notebook |
 | --- | --- | --- |
 | 00 | 把線接起來。counter 與 rate、`up`、Python 服務怎麼進到 Prometheus、`for:` 怎麼擋掉雜訊，故意弄壞四次再讀出斷在哪 | `00_end_to_end_pipeline.ipynb` |
 | 01 | 網路流量 feature engineering。同一段流量對四種 baseline 比較：rolling mean、median 與 MAD、same seasonal position、peer group | `01_network_traffic_feature_engineering.ipynb` |
 | 02 | 偵測與告警。偏離量收斂成 score，設門檻得到 label，加上 duration、minimum volume 與 maintenance exclusion 才成為 alert，最後用 scorecard 檢查代價 | `02_anomaly_detection_and_alerting.ipynb` |
+| 06 | 預測、管制界限與預警。Prophet 分解、時序 holdout 與區間覆蓋率，管制界限分別畫在原始序列、預測殘差與預測值上 | `06_forecasting.ipynb` |
+| 07 | Hybrid 根因分析。統計、時序、因果、拓樸、知識五種證據加權排名，再用 hit@k、MRR 與信心校準評估 | `07_root_cause_analysis.ipynb` |
 
-順序不能跳。Lab 02 的分數建立在 Lab 01 算出來的 baseline 欄位上。
+順序不能跳。Lab 02 的分數建立在 Lab 01 算出來的 baseline 欄位上，Lab 06 的殘差建立在同一組特徵上，Lab 07 讀 Lab 06 的輸出。
 
 ## notebook 裡的 toolkit
 
@@ -80,6 +82,6 @@ Windows 的 exporter 是 `windows_exporter`，聽在 9182，設定檔用 `promet
 那裡，可以直接閱讀與修改。這門課不把它們收進要另外理解的函式庫，資料科學的邏輯留在 notebook
 裡，不藏在 `import` 後面。
 
-三份 notebook 各自帶自己需要的函式，所以有些函式會重複出現。重複是為了讓每一份 notebook 都能
+五份 notebook 各自帶自己需要的函式，所以有些函式會重複出現。重複是為了讓每一份 notebook 都能
 單獨開啟、單獨讀完。唯一的例外是 Lab 00，它直接 `import` `detector.py` 裡的函式，因為那一節要
 說明的正是「notebook 裡試的那一段，跟服務跑的是同一段」。

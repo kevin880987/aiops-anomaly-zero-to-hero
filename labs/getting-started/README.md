@@ -74,7 +74,7 @@ labs/workshop/00_end_to_end_pipeline.ipynb
 ```
 
 Lab 00 把整條 pipeline 接起來，從網卡的 counter 到會響的告警，中間那一段偵測是自己寫的 Python 服務。
-接完之後 Lab 01 與 Lab 02 只處理演算法。順序不能跳，Lab 02 的分數建立在 Lab 01 的 baseline 上。
+接完之後 Lab 01 與 Lab 02 只處理演算法。順序不能跳，Lab 02 的分數建立在 Lab 01 的 baseline 上。第六週的 Lab 06 與 Lab 07 接在後面，把偵測推到預警與根因，讀的是同一份 `data/synthetic/` 歷史資料。
 三份 notebook 的分工見 [`labs/workshop/README.md`](../workshop/README.md)。
 
 ## 選用：Grafana Cloud
