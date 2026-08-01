@@ -19,11 +19,8 @@ datasource 選 Prometheus。Query type 選 `Classic query`，
 下面那一格填 `label_values(node_network_receive_bytes_total, device)`。
 Windows 的 exporter 換成 `label_values(windows_net_bytes_received_total, nic)`。
 
-Query type 的預設值不是 `Classic query`，沒有切過去這個字串貼不進去。
-`label_values()` 只在變數的上下文成立，在 Explore 裡打它會得到語法錯誤。
-另一個選項 `Label values` 查出來的是同一份清單，差別在 Label 與 Metric 分成兩格填。
-
 ![00-grafana-dashboard-03](00-grafana-dashboard-03.png)
+![00-grafana-dashboard-04](00-grafana-dashboard-04.png)
 
 存檔。左上角會多一個 **iface** 下拉，選 notebook 第 2 節印出來的那一張網路卡。
 
@@ -35,6 +32,7 @@ Query type 的預設值不是 `Classic query`，沒有切過去這個字串貼�
 rate(node_network_receive_bytes_total{device="$iface"}[1m])
 rate(node_network_transmit_bytes_total{device="$iface"}[1m])
 ```
+![00-grafana-dashboard-05](00-grafana-dashboard-05.png)
 
 兩條的 Legend 分別填 `receive`、`transmit`。Panel options 的 Title 填 `Throughput, receive and
 transmit`，Standard options 的 Unit 選 `Bytes/sec (Bps)`。
@@ -43,7 +41,8 @@ transmit`，Standard options 的 Unit 選 `Bytes/sec (Bps)`。
 
 ## 第二張：Anomaly score
 
-`detector.py` 算出來的分數。Add > Visualization，同一個 datasource：
+`detector.py` 算出來的分數，這是第二張 panel。先按 `Back to dashboard` 退出第一張的編輯畫面，
+再點右側編輯面板頂端那個 `+`，選 `Panel`。datasource 一樣是 Prometheus：
 
 ```promql
 aiops_traffic_score
@@ -59,7 +58,8 @@ Legend 填 `{{device}}`，Title 填 `Anomaly score`。再到 Standard options �
 
 ## 第三張：Alert state
 
-告警現在的狀態。Add > Visualization，Type 選 `State timeline`：
+告警現在的狀態，第三張 panel。一樣退回 dashboard、`+` 選 `Panel`，
+再到右側那一欄切到 `All visualizations`，選 `State timeline`：
 
 ```promql
 ALERTS{alertname="TrafficAnomaly"}
