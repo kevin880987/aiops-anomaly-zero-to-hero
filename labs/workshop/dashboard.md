@@ -15,13 +15,13 @@ Dashboards > New > New dashboard > Add visualization，datasource 選 Prometheus
 ![00-grafana-dashboard-02](00-grafana-dashboard-02.png)
 
 再開右上角齒輪 Settings > Variables > New variable：Name 填 `iface`，Type 選 `Query`，
-datasource 選 Prometheus。接著 Query type 選 `Label values`，下面會換出兩格，Label 填 `device`，
-Metric 填 `node_network_receive_bytes_total`。Windows 的 exporter 兩格都不一樣，Label 填 `nic`，
-Metric 填 `windows_net_bytes_received_total`。
+datasource 選 Prometheus。Query type 選 `Classic query`，
+下面那一格填 `label_values(node_network_receive_bytes_total, device)`。
+Windows 的 exporter 換成 `label_values(windows_net_bytes_received_total, nic)`。
 
-別處的教學多半把這個變數寫成 `label_values(node_network_receive_bytes_total, device)`。
-那是舊寫法，Query type 要先切成 `Classic query` 才貼得進去。
+Query type 的預設值不是 `Classic query`，沒有切過去這個字串貼不進去。
 `label_values()` 只在變數的上下文成立，在 Explore 裡打它會得到語法錯誤。
+另一個選項 `Label values` 查出來的是同一份清單，差別在 Label 與 Metric 分成兩格填。
 
 ![00-grafana-dashboard-03](00-grafana-dashboard-03.png)
 
