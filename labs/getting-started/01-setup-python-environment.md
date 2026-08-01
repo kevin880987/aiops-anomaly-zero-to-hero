@@ -31,7 +31,7 @@ cd <你放教材的位置>/aiops-anomaly-zero-to-hero
 | --- | --- |
 | macOS | `conda env create -f environments/environment.macos.yml` |
 | Linux | `conda env create -f environments/environment.linux.yml` |
-| Windows | `conda env create -f environments\environment.windows.yml` |
+| Windows | `conda env create -f environments/environment.windows.yml` |
 
 環境已經存在時，建立會失敗，改用同一份環境檔更新。`--prune` 會移除環境檔裡已經刪掉的套件。
 
@@ -39,7 +39,7 @@ cd <你放教材的位置>/aiops-anomaly-zero-to-hero
 | --- | --- |
 | macOS | `conda env update -f environments/environment.macos.yml --prune` |
 | Linux | `conda env update -f environments/environment.linux.yml --prune` |
-| Windows | `conda env update -f environments\environment.windows.yml --prune` |
+| Windows | `conda env update -f environments/environment.windows.yml --prune` |
 
 ### 3. 啟用環境
 
