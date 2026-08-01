@@ -36,13 +36,13 @@ Windows 用 PowerShell，寫成 `cd C:\Users\<你的帳號>\aiops-anomaly-zero-t
 | Linux | `conda env create -f environments/environment.linux.yml` |
 | Windows | `conda env create -f environments\environment.windows.yml` |
 
-環境已經存在時，建立會失敗，改用同一份環境檔更新：
+環境已經存在時，建立會失敗，改用同一份環境檔更新。`--prune` 會移除環境檔裡已經刪掉的套件，目標環境由 `name:` 決定。
 
-```bash
-conda env update -n aiops-anomaly-zero-to-hero -f environments/environment.macos.yml --prune
-```
-
-`--prune` 會移除環境檔裡已經刪掉的套件。環境檔路徑換成上表你那一列。
+| 平台 | 更新指令 |
+| --- | --- |
+| macOS | `conda env update -f environments/environment.macos.yml --prune` |
+| Linux | `conda env update -f environments/environment.linux.yml --prune` |
+| Windows | `conda env update -f environments\environment.windows.yml --prune` |
 
 ### 3. 啟用環境
 
@@ -118,4 +118,4 @@ python -m ipykernel install --user --name aiops-anomaly-zero-to-hero --display-n
 conda env remove -n aiops-anomaly-zero-to-hero
 ```
 
-刪完之後回到步驟 2，執行表格裡你那一列的建立指令。
+刪完之後回到步驟 2，執行建立指令表格裡你那一列。
