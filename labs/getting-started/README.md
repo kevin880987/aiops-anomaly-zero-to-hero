@@ -56,8 +56,7 @@ Windows PowerShell 是 `cd C:\Users\<你的帳號>\aiops-anomaly-zero-to-hero`�
 照 [03-install-grafana-local.md](03-install-grafana-local.md) 做。這門課的 datasource 只有
 Prometheus 一個。
 
-驗收：`Connections → Data sources` 列得出 `Prometheus`，Save & test 顯示成功。URL 填成 `3000` 是最
-常見的失敗，`3000` 是 Grafana 自己。dashboard 在課堂上建立，這裡不驗收。
+驗收：`Connections → Data sources` 列得出 `Prometheus`，Save & test 顯示成功。URL 填成 `3000` 是最常見的失敗，`3000` 是 Grafana 自己。dashboard 在課堂上建立，這裡不驗收。
 
 ## Step 6. 執行 setup check notebook
 

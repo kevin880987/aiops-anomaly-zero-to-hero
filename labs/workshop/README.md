@@ -1,7 +1,6 @@
 # 工作坊：從 telemetry 到 alert
 
-講堂上把 anomaly 定義成在脈絡下相對於一條明確 baseline 的偏離。工作坊把這個定義變成可以執行的
-步驟：自行選定 baseline、計算偏離分數、以門檻把分數判定成 label、讓 label 通過 policy 篩選才成為
+講堂上把 anomaly 定義成在脈絡下相對於一條明確 baseline 的偏離。工作坊把這個定義變成可以執行的步驟：自行選定 baseline、計算偏離分數、以門檻把分數判定成 label、讓 label 通過 policy 篩選才成為
 alert，最後用 event recall 與 alerts per day 評估這組設定是否值得交給值班人員。
 
 ## pipeline 的五個環節
@@ -15,18 +14,14 @@ Lab 00 建立這條 pipeline，之後不再改動它。
 `/metrics`，於是 Prometheus 把它當成一般指標抓回去。Grafana 用 PromQL 查詢分數，
 `infra/prometheus/alerts.yml` 的規則也直接打在分數上。
 
-除了 `detector.py`，pipeline 上每一個元件都是官方軟體。分數送回 Prometheus 之後，下游沒有任何
-一格知道它是 Python 算的，這一點是刻意設計的，因為上線要換的只有演算法，pipeline 可以原封不動。
+除了 `detector.py`，pipeline 上每一個元件都是官方軟體。分數送回 Prometheus 之後，下游沒有任何一格知道它是 Python 算的，這一點是刻意設計的，因為上線要換的只有演算法，pipeline 可以原封不動。
 
-所以 Lab 00 之後的每一節都只做一件事，把 `detector.py` 裡 `rolling_zscore()` 那個函式換成撐得住
-真實流量的版本。Lab 01 決定基線該怎麼算，Lab 02 決定分數之外還要包什麼政策才配送出去，之後補進來的
-單元同樣落在這個函式上。
+所以 Lab 00 之後的每一節都只做一件事，把 `detector.py` 裡 `rolling_zscore()` 那個函式換成撐得住真實流量的版本。Lab 01 決定基線該怎麼算，Lab 02 決定分數之外還要包什麼政策才配送出去，之後補進來的單元同樣落在這個函式上。
 
 ## 評估用的資料來源
 
 Lab 00 之後的每一節讀的都是 `data/synthetic/synthetic_rrd_metrics.csv`，五個 port、一整個月、
-十八個標好的事件。用歷史資料是因為演算法要拿有真值的資料去量，而 Lab 00 的 pipeline 上跑的是這台
-機器此刻的流量，沒有真值可比。
+十八個標好的事件。用歷史資料是因為演算法要拿有真值的資料去量，而 Lab 00 的 pipeline 上跑的是這台機器此刻的流量，沒有真值可比。
 
 這些 notebook 全程用 matplotlib 畫圖，產出留在 notebook 裡。定住的圖適合逐條比較，Grafana
 上那三張 panel 畫的是即時的線，適合換條件驗證。
@@ -61,8 +56,7 @@ Windows 的 exporter 是 `windows_exporter`，聽在 9182，設定檔用 `promet
 
 ## Grafana 這一端
 
-只有 Prometheus 一個 datasource，在 setup 那一步就設定完成。原始速率存在裡面，偏離分數與
-告警狀態也一樣，所以 Grafana 這一端一律用 PromQL 查詢。
+只有 Prometheus 一個 datasource，在 setup 那一步就設定完成。原始速率存在裡面，偏離分數與告警狀態也一樣，所以 Grafana 這一端一律用 PromQL 查詢。
 
 三張 panel 在 Lab 00 逐格建立，做法寫在 [`dashboard.md`](dashboard.md)。
 `infra/grafana/dashboards/aiops-workshop.json` 不是這三張，那是一份示範用的 dashboard，
@@ -76,18 +70,14 @@ Windows 的 exporter 是 `windows_exporter`，聽在 9182，設定檔用 `promet
 Lab 00 把 node_exporter、Prometheus、`detector.py` 與 Grafana 串成一條可運作的 pipeline。內容包括
 counter 與 rate 的換算、`up` 怎麼判讀、Python 服務怎麼註冊成 Prometheus 的 scrape target、`for:`
 怎麼濾掉單一取樣的越線，最後刻意在四個位置製造故障，逐一定位是哪一段中斷，大約 45 到 60 分鐘。
-之後每一節替換的都是計算偏離分數的那一段。Lab 01 從網路流量的 raw counter 建立可比較的特徵，並在
-同一段流量上比較四種 baseline 的表現，分別是 rolling mean、median 與 MAD、same seasonal position
+之後每一節替換的都是計算偏離分數的那一段。Lab 01 從網路流量的 raw counter 建立可比較的特徵，並在同一段流量上比較四種 baseline 的表現，分別是 rolling mean、median 與 MAD、same seasonal position
 與 peer group。Lab 02 把偏離量彙整成單一分數，以門檻把分數判定成 label，再套上 duration、minimum
 volume 與 maintenance exclusion 三道政策才送出 alert，最後用 scorecard 量這組設定的誤報代價。
 Lab 01 與 Lab 02 各約 60 到 75 分鐘。
 
 ## notebook 裡的 toolkit
 
-每一份 notebook 開頭有 toolkit cell，載入、baseline、偵測器、alert policy、事件評估的函式都寫在
-那裡，可以直接閱讀與修改。這門課不把它們收進要另外理解的函式庫，資料科學的邏輯留在 notebook
+每一份 notebook 開頭有 toolkit cell，載入、baseline、偵測器、alert policy、事件評估的函式都寫在那裡，可以直接閱讀與修改。這門課不把它們收進要另外理解的函式庫，資料科學的邏輯留在 notebook
 裡，不藏在 `import` 後面。
 
-每一份 notebook 各自帶自己需要的函式，所以有些函式會重複出現。重複是為了讓每一份都能
-單獨開啟、單獨讀完。唯一的例外是 Lab 00，它直接 `import` `detector.py` 裡的函式，因為那一節要
-說明的正是「notebook 裡試的那一段，跟服務跑的是同一段」。
+每一份 notebook 各自帶自己需要的函式，所以有些函式會重複出現。重複是為了讓每一份都能單獨開啟、單獨讀完。唯一的例外是 Lab 00，它直接 `import` `detector.py` 裡的函式，因為那一節要說明的正是「notebook 裡試的那一段，跟服務跑的是同一段」。

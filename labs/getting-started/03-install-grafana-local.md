@@ -4,8 +4,7 @@
 
 **前置條件：** Prometheus 已安裝並正在運作（[02-install-prometheus.md](02-install-prometheus.md)）。
 
-這一步要安裝 Grafana，並且接上 Prometheus。原始指標存在 Prometheus 裡，Python 算出來的偏離分數與
-告警狀態也一樣，所以 Grafana 這一端只需要這一個 datasource。
+這一步要安裝 Grafana，並且接上 Prometheus。原始指標存在 Prometheus 裡，Python 算出來的偏離分數與告警狀態也一樣，所以 Grafana 這一端只需要這一個 datasource。
 
 ## 1. 安裝 Grafana
 
@@ -75,8 +74,7 @@ Restart-Service Grafana
 值是 `1`。
 
 另外兩個 job 現在還不會有值，那是正常的。`job="node-exporter"` 要等你完成
-[04-install-node-exporter.md](04-install-node-exporter.md)，`job="aiops-detector"` 要等
-課堂上啟動那支偵測服務。
+[04-install-node-exporter.md](04-install-node-exporter.md)，`job="aiops-detector"` 要等課堂上啟動那支偵測服務。
 
 ## 常見問題
 
