@@ -42,7 +42,7 @@ transmit`，Standard options 的 Unit 選 `Bytes/sec (Bps)`。
 ## 第二張：Anomaly score
 
 `detector.py` 算出來的分數，這是第二張 panel。先按 `Back to dashboard` 退出第一張的編輯畫面，
-再點右側編輯面板頂端那個 `+`，選 `Panel`。datasource 一樣是 Prometheus：
+再點右側編輯面板頂端那個 `+`，選 `Panel`。datasource 一樣是 Prometheus，PromQL query：
 
 ```promql
 aiops_traffic_score
@@ -51,6 +51,7 @@ aiops_traffic_score
 Legend 填 `{{device}}`，Title 填 `Anomaly score`。再到 Standard options 把 Min 填 `-6`、Max 填
 `6`，然後在 Thresholds 新增一條 `3`，Show thresholds 選 `As lines`。門檻畫成線之後，這張 panel 與
 `alerts.yml` 裡 `TrafficAnomaly` 的條件就是同一件事的兩種表示。
+![00-grafana-dashboard-06](00-grafana-dashboard-06.png)
 
 這條 query 不篩 `$iface`，因為 detector 只監看它自己挑中的那一張網路卡，寫死篩選條件反而容易得到空白。Legend 的 `{{device}}` 會告訴你它挑了哪一張，正常情況下就是上面那張 panel 選的那一張。
 
@@ -59,18 +60,16 @@ Legend 填 `{{device}}`，Title 填 `Anomaly score`。再到 Standard options �
 ## 第三張：Alert state
 
 告警現在的狀態，第三張 panel。一樣退回 dashboard、`+` 選 `Panel`，
-再到右側那一欄切到 `All visualizations`，選 `State timeline`：
+再到右側那一欄切到 `All visualizations`，選 `State timeline`，PromQL query：
 
 ```promql
 ALERTS{alertname="TrafficAnomaly"}
 ```
 
 Legend 填 `{{alertstate}}`，Title 填 `Alert state`。`ALERTS` 是 Prometheus 自己維護的指標，
-每一則處於 Pending 或 Firing 的告警都會在這裡出現一筆，`alertstate` 這個 label 分得開兩者。
+每一則處於 Pending 或 Firing 的告警都會在這裡出現一筆，`alertstate` 這個 label 會區分兩者。
 沒有告警的時候這張是空的。
-
-下載一個大檔案，觀察三張 panel 出現變化的先後：第一張的線先抬起來，第二張的分數隨後越過 3，
-第三張要再等 60 秒才出現 pending。那段延遲就是 `for: 1m` 這個設定。
+![00-grafana-dashboard-07](00-grafana-dashboard-07.png)
 
 ## 排查
 
