@@ -23,9 +23,6 @@
 ```bash
 cd <你放教材的位置>/aiops-anomaly-zero-to-hero
 ```
-
-Windows 用 PowerShell，寫成 `cd C:\Users\<你的帳號>\aiops-anomaly-zero-to-hero`。
-
 ### 2. 從環境檔建立 conda 環境
 
 環境檔按平台分成三份，三份建立出來的是同一個 conda environment：`aiops-anomaly-zero-to-hero`。Python 直譯器與課程用得到的套件，都由環境檔一次安裝。找到你那一列，整行複製執行。
@@ -36,7 +33,7 @@ Windows 用 PowerShell，寫成 `cd C:\Users\<你的帳號>\aiops-anomaly-zero-t
 | Linux | `conda env create -f environments/environment.linux.yml` |
 | Windows | `conda env create -f environments\environment.windows.yml` |
 
-環境已經存在時，建立會失敗，改用同一份環境檔更新。`--prune` 會移除環境檔裡已經刪掉的套件，目標環境由 `name:` 決定。
+環境已經存在時，建立會失敗，改用同一份環境檔更新。`--prune` 會移除環境檔裡已經刪掉的套件。
 
 | 平台 | 更新指令 |
 | --- | --- |
