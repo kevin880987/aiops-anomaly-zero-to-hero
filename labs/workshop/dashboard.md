@@ -1,11 +1,6 @@
 # 建這門課的 dashboard
 
-三張 panel 與一個變數，全部讀 Prometheus。原始速率存在那裡，`detector.py` 算出來的分數與告警
-狀態也存在那裡，所以三張 panel 用的是同一個 datasource。
-
-這三張自己逐格建立，不要匯入現成的。`infra/grafana/dashboards/aiops-workshop.json` 是另一份
-示範用的 dashboard，panel 不一樣，讀的是環境設定完成之後就有的資料，拿它確認接線可以，
-拿它取代這一節要建立的三張不行。
+三張 panel 與一個變數，全部讀 Prometheus。原始速率存在那裡，`detector.py` 算出來的分數與告警狀態也存在那裡，所以三張 panel 用的是同一個 datasource。
 
 **前提：** Prometheus 這個 datasource 在 setup 就設定完成，做法見
 [`labs/getting-started/03-install-grafana-local.md`](../getting-started/03-install-grafana-local.md)。
@@ -16,10 +11,21 @@
 
 Dashboards > New > New dashboard > Add visualization，datasource 選 Prometheus。先存檔
 （Ctrl/Cmd+S）取個名字，例如 `AIOps workshop`。
+![00-grafana-dashboard-01](00-grafana-dashboard-01.png)
+![00-grafana-dashboard-02](00-grafana-dashboard-02.png)
 
 再開右上角齒輪 Settings > Variables > New variable：Name 填 `iface`，Type 選 `Query`，
-datasource 選 Prometheus，Query 填 `label_values(node_network_receive_bytes_total, device)`，
-存檔。左上角會多一個 **iface** 下拉，選 notebook 第 2 節印出來的那一張網卡。
+datasource 選 Prometheus。接著 Query type 選 `Label values`，下面會換出兩格，Label 填 `device`，
+Metric 填 `node_network_receive_bytes_total`。Windows 的 exporter 兩格都不一樣，Label 填 `nic`，
+Metric 填 `windows_net_bytes_received_total`。
+
+別處的教學多半把這個變數寫成 `label_values(node_network_receive_bytes_total, device)`。
+那是舊寫法，Query type 要先切成 `Classic query` 才貼得進去。
+`label_values()` 只在變數的上下文成立，在 Explore 裡打它會得到語法錯誤。
+
+![00-grafana-dashboard-03](00-grafana-dashboard-03.png)
+
+存檔。左上角會多一個 **iface** 下拉，選 notebook 第 2 節印出來的那一張網路卡。
 
 ## 第一張：Throughput, receive and transmit
 
@@ -47,8 +53,7 @@ Legend 填 `{{device}}`，Title 填 `Anomaly score`。再到 Standard options �
 `6`，然後在 Thresholds 新增一條 `3`，Show thresholds 選 `As lines`。門檻畫成線之後，這張 panel 與
 `alerts.yml` 裡 `TrafficAnomaly` 的條件就是同一件事的兩種表示。
 
-這條 query 不篩 `$iface`，因為 detector 只監看它自己挑中的那一張網卡，寫死篩選條件反而容易得到
-空白。Legend 的 `{{device}}` 會告訴你它挑了哪一張，正常情況下就是上面那張 panel 選的那一張。
+這條 query 不篩 `$iface`，因為 detector 只監看它自己挑中的那一張網路卡，寫死篩選條件反而容易得到空白。Legend 的 `{{device}}` 會告訴你它挑了哪一張，正常情況下就是上面那張 panel 選的那一張。
 
 分數貼著 0 是對的，代表這段時間沒有事情發生。剛啟動 detector 的前 150 秒是暖機期，分數固定是 0。
 
