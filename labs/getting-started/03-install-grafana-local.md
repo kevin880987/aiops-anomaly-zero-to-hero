@@ -1,4 +1,4 @@
-# 安裝 Grafana 並連接 Prometheus
+# 安裝 Grafana 並連線 Prometheus
 
 官方文件：[安裝說明](https://grafana.com/docs/grafana/latest/setup-grafana/installation/)、[下載頁](https://grafana.com/grafana/download/)
 

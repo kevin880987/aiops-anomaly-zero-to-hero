@@ -58,7 +58,7 @@ curl -s http://localhost:9100/metrics | grep node_network_receive_bytes_total | 
 2. 雙擊安裝。預設 port 是 **9182**，不是 9100。
 3. 瀏覽器開啟 <http://localhost:9182/metrics> 驗證。
 
-Windows 的指標名稱前綴是 `windows_net_*` 而不是 `node_network_*`，Prometheus 請直接使用 `infra/prometheus/prometheus.windows.yml`（在教材根目錄執行），不要修改 macOS / Linux 設定檔。`alerts.yml` 的 recording rules 寫的是 node_exporter 的指標名稱，在 Windows 上不會有值，dashboard 的流量 panel 與課堂上會用到的 PromQL 同理，要自己換成 `windows_net_bytes_received_total` 這一組。偵測服務不用改，它啟動的時候兩種指標名都問過一次，哪一個回得出資料就用哪一個。
+Windows 的指標名稱開頭是 `windows_net_*`，對應 Linux 的 `node_network_*`，Prometheus 請直接使用 `infra/prometheus/prometheus.windows.yml`（在教材根目錄執行），不要修改 macOS / Linux 設定檔。`alerts.yml` 的 recording rules 寫的是 node_exporter 的指標名稱，在 Windows 上不會有值，dashboard 的流量 panel 與課堂上會用到的 PromQL 同理，要自己換成 `windows_net_bytes_received_total` 這一組。偵測服務不用改，它啟動的時候兩種指標名都問過一次，哪一個回得出資料就用哪一個。
 
 ## 2. 驗收
 

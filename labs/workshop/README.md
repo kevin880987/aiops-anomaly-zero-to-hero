@@ -32,7 +32,7 @@ Lab 00 之後的每一節讀的都是 `data/synthetic/synthetic_rrd_metrics.csv`
 
 ## 開課前要維持執行的四個服務
 
-前三個安裝完成後就常駐執行，第四個在 Lab 00 第 4 節啟動，啟動之後整場工作坊都留著。
+前三個安裝完成後就常駐執行，第四個在 Lab 00 第 5 節啟動，啟動之後整場工作坊都留著。
 
 ```bash
 brew services start prometheus     # http://localhost:9090

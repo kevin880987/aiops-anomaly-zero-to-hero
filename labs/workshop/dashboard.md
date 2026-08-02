@@ -5,7 +5,7 @@
 **前提：** Prometheus 這個 datasource 在 setup 就設定完成，做法見
 [`labs/getting-started/03-install-grafana-local.md`](../getting-started/03-install-grafana-local.md)。
 `Connections > Data sources` 列得出 `Prometheus` 才往下做。第二張與第三張 panel 還需要
-`detector.py` 正在執行，那是 Lab 00 第 4 節的事。
+`detector.py` 正在執行，那是 Lab 00 第 5 節的事。
 
 ## 建立 dashboard 與變數
 
