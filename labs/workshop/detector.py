@@ -72,10 +72,10 @@ def rolling_zscore(window, value):
     十幾二十的分數，門檻 3 會被這種數字灌爆。基線要暖機，這一行就是暖機期。
     """
     if len(window) < MIN_SAMPLES:
-        return 0.0
-    mean = sum(window) / len(window)
-    stdev = (sum((x - mean) ** 2 for x in window) / len(window)) ** 0.5
-    return (value - mean) / stdev if stdev > 0 else 0.0
+        return 0.0  # fewer samples than MIN_SAMPLES: population stdev would be unstable, skip scoring
+    mean = sum(window) / len(window)  # center: arithmetic mean over the window
+    stdev = (sum((x - mean) ** 2 for x in window) / len(window)) ** 0.5  # scale: population standard deviation (divide by n, not n-1)
+    return (value - mean) / stdev if stdev > 0 else 0.0  # standardized deviation (value - mean) / stdev; 0 when stdev is zero, avoids division by zero
 
 
 def main():
