@@ -1,4 +1,4 @@
-# 建這門課的 dashboard
+# 建立這門課的 dashboard
 
 三張 panel 與一個變數，全部讀 Prometheus。原始速率存在那裡，`detector.py` 算出來的分數與告警狀態也存在那裡，所以三張 panel 用的是同一個 datasource。
 
