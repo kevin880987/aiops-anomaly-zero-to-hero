@@ -58,7 +58,7 @@ Windows 的 exporter 是 `windows_exporter`，聽在 9182，設定檔用 `promet
 
 只有 Prometheus 一個 datasource，在 setup 那一步就設定完成。原始速率存在裡面，偏離分數與告警狀態也一樣，所以 Grafana 這一端一律用 PromQL 查詢。
 
-三張 panel 在 Lab 00 逐格建立，做法寫在 [`dashboard.md`](dashboard.md)。
+三張 panel 在 Lab 00 逐格建立，做法寫在 [`00-dashboard.md`](00-dashboard.md)。
 `infra/grafana/dashboards/aiops-workshop.json` 不是這三張，那是一份示範用的 dashboard，
 讀的都是環境設定完成之後就有的資料，匯入就能確認 Prometheus 與 Grafana 之間接通了。
 
