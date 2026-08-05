@@ -10,9 +10,6 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 from cycler import cycler
-from sklearn.ensemble import IsolationForest
-from sklearn.svm import OneClassSVM
-from sklearn.neighbors import LocalOutlierFactor
 
 # One colour means one thing everywhere: blue is the measured signal, orange the baseline or a
 # ground-truth window, purple a derived score, red an alert or a limit. Green means inside
@@ -438,47 +435,5 @@ def evaluate(name, port, score, target, budget):
     return {"port": port[-4:], "method": name, "alerts": int(a.sum()),
             "caught": int((a & t).sum()), "of": int(t.sum()),
             "precision": round(float((a & t).sum() / a.sum()), 3) if a.sum() else np.nan}
-
-
-def fit_models(train, full, seed=0):
-    """Fit three off-the-shelf detectors on `train`, score `full`. Higher score = more anomalous.
-
-    Each library method returns higher-is-more-normal, so every score is negated. OneClassSVM is
-    fitted on every tenth training row, which keeps a quadratic-time solver inside a teaching
-    notebook's patience.
-    """
-    return {
-        "IsolationForest": -IsolationForest(n_estimators=100, random_state=seed)
-                            .fit(train).score_samples(full),
-        "OneClassSVM": -OneClassSVM(kernel="rbf", nu=0.01, gamma="scale")
-                        .fit(train[::10]).score_samples(full),
-        "LOF": -LocalOutlierFactor(n_neighbors=20, novelty=True).fit(train).score_samples(full),
-    }
-
-
-def framings(g, port, col, n_input, train_frac, scalers):
-    """{name: (X, split, pad)} for the three representations a detector gets compared on.
-
-    `raw` and `deseasonalised` each read one scaler out of `scalers[f"{port}|{col}"]`, fitted on
-    the training half elsewhere and never refitted here. `window{n_input}` scales each sliding
-    window against its own training slice instead, since one scalar mean/scale cannot flatten a
-    window's internal shape.
-    """
-    k = int(train_frac * len(g))
-
-    W = sliding_windows(g["value"], n_input=n_input)
-    kw = int(train_frac * len(W))
-    scale = W[:kw].std(axis=0)
-    Xw = (W - W[:kw].mean(axis=0)) / np.where(scale == 0, 1.0, scale)
-
-    def scaled(values, key):
-        sc = scalers[key]
-        return apply_scaler(values, sc["mean"], sc["scale"])
-
-    return {
-        "raw": (scaled(g["value"], f"{port}|{col}").reshape(-1, 1), k, 0),
-        "deseasonalised": (scaled(g["resid"], f"{port}|resid_{col}").reshape(-1, 1), k, 0),
-        f"window{n_input}": (Xw, kw, n_input - 1),
-    }
 
 
