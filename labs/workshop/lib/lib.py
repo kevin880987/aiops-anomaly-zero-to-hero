@@ -53,6 +53,7 @@ def set_figure_style():
     plt.rcParams.update({
         "figure.dpi": 110,
         "figure.figsize": (14, 4.6),
+        "font.family": "serif",
         "font.size": 14,
         "axes.titlesize": 16, "axes.titlelocation": "left", "axes.titleweight": "bold",
         "axes.labelsize": 14,
