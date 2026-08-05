@@ -419,3 +419,19 @@ def series_of(port, col, data, events, resid_col=None):
 def apply_scaler(values, mean, scale):
     """(values - mean) / scale, as the one place both labs run this transform."""
     return (np.asarray(values, dtype=float) - mean) / scale
+
+
+def evaluate(name, port, score, target, budget):
+    """Alert on the top `budget` share of one score, then count hits against `target`.
+
+    Cutting every method at the same budget is what makes them comparable: a matrix-profile
+    distance and an IsolationForest score do not live on the same axis, and only equal alert
+    counts put them on one.
+    """
+    s = pd.Series(score, dtype=float)
+    thr = np.nanquantile(s.dropna(), budget)
+    a = (s > thr).fillna(False).to_numpy()
+    t = np.asarray(target, bool)[:len(a)]
+    return {"port": port[-4:], "method": name, "alerts": int(a.sum()),
+            "caught": int((a & t).sum()), "of": int(t.sum()),
+            "precision": round(float((a & t).sum() / a.sum()), 3) if a.sum() else np.nan}
