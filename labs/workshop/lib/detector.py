@@ -78,6 +78,22 @@ def rolling_zscore(window, value):
     return (value - mean) / stdev if stdev > 0 else 0.0  # standardized deviation (value - mean) / stdev; 0 when stdev is zero, avoids division by zero
 
 
+def your_detector(window, value):
+    """空位，放你自己的偵測邏輯。介面跟 `rolling_zscore()` 一致，才能直接互換。
+
+    輸入
+        `window` — `value` 進來之前的滾動視窗，`deque(maxlen=WINDOW)`，暖機期沒裝滿。
+        `value`  — 這一輪新量到的值，還沒被放進 `window`。
+    輸出
+        一個 float 分數，意義自訂，只要能配合下面的告警門檻。
+
+    掛回 Prometheus：`main()` 裡把 `rolling_zscore(window, rate)` 換成
+    `your_detector(window, rate)`，其餘不用動。分數一樣寫進 `traffic_score` 這個 Gauge，
+    Prometheus 照原本的 scrape 設定抓回去，Grafana 與 `alerts.yml` 的規則不必跟著改。
+    """
+    raise NotImplementedError("在這裡放你的偵測邏輯，介面見上面的 docstring")
+
+
 def main():
     metric, label, device = pick_target()
     start_http_server(EXPORT_PORT)
@@ -90,6 +106,7 @@ def main():
         rate = receive_rate(metric, label, device)
         if rate is not None:
             # 分數用「這個值進視窗之前」的視窗算，否則異常值會自己抬高自己的 baseline。
+            # 接上 your_detector()：這一行的 rolling_zscore 換成 your_detector 就好，其餘不用動。
             traffic_score.labels(device).set(rolling_zscore(window, rate))
             traffic_bps.labels(device).set(rate)
             window.append(rate)
