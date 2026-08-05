@@ -35,7 +35,8 @@ EXPORTERS = [
 ]
 
 traffic_bps = Gauge("aiops_traffic_bps", "Interface receive rate this detector queried", ["device"])
-traffic_score = Gauge("aiops_traffic_score", "Deviation of the receive rate from its rolling baseline", ["device"])
+traffic_score = Gauge("aiops_traffic_score", "Deviation of the receive rate from its rolling baseline",
+                      ["device", "detector"])
 window_fill = Gauge("aiops_detector_window_samples", "Samples currently in the rolling window", ["device"])
 
 
@@ -68,7 +69,7 @@ def receive_rate(metric, label, device):
 def rolling_zscore(window, value):
     """離平均幾個標準差。這是最素樸的一種偏離分數，Lab 01 會說明它什麼時候會騙人。
 
-    視窗裝不滿就先回 0，因為兩三個樣本算出來的標準差小到沒有意義，隨便一點變動都會得到
+    視窗裝不滿就先 return 0，因為兩三個樣本算出來的標準差小到沒有意義，隨便一點變動都會得到
     十幾二十的分數，門檻 3 會被這種數字灌爆。基線要暖機，這一行就是暖機期。
     """
     if len(window) < MIN_SAMPLES:
@@ -79,7 +80,7 @@ def rolling_zscore(window, value):
 
 
 def your_detector(window, value):
-    """空位，放你自己的偵測邏輯。介面跟 `rolling_zscore()` 一致，才能直接互換。
+    """空位，放你自己的偵測邏輯。介面跟 `rolling_zscore()` 一致，才能跟它並存，不必互相取代。
 
     輸入
         `window` — `value` 進來之前的滾動視窗，`deque(maxlen=WINDOW)`，暖機期沒裝滿。
@@ -87,18 +88,31 @@ def your_detector(window, value):
     輸出
         一個 float 分數，意義自訂，只要能配合下面的告警門檻。
 
-    掛回 Prometheus：`main()` 裡把 `rolling_zscore(window, rate)` 換成
-    `your_detector(window, rate)`，其餘不用動。分數一樣寫進 `traffic_score` 這個 Gauge，
-    Prometheus 照原本的 scrape 設定抓回去，Grafana 與 `alerts.yml` 的規則不必跟著改。
+    掛回 Prometheus：實作完把下面 `DETECTORS` 那一行的註解打開，不用碰 `main()`。多開的是
+    `aiops_traffic_score{detector="your_detector"}` 這一組系列，跟 `rolling_zscore` 並存，不會
+    蓋掉它。Prometheus 照原本的 scrape 設定抓回去；Grafana 要疊圖比較還是分開看自己決定。
     """
     raise NotImplementedError("在這裡放你的偵測邏輯，介面見上面的 docstring")
+
+
+# 一次可以掛好幾個偵測器，各自獨立算、獨立曝露。新增一個就在這裡多加一行：介面跟
+# rolling_zscore()/your_detector() 一樣，(window, value) -> float。key 是這個偵測器在
+# Prometheus 裡的名字，寫進 aiops_traffic_score 的 detector label。
+#
+# alerts.yml 的 TrafficAnomaly 查的是裸的 aiops_traffic_score，不分 detector，所以每多開一個
+# 偵測器，越線時就多一組告警實例，光看 device 分不出是哪一個觸發的。只想看某一個偵測器，查詢
+# 或告警規則自己加 {detector="..."} 篩選。
+DETECTORS = {
+    "rolling_zscore": rolling_zscore,
+    # "your_detector": your_detector,   # 實作好之後打開這一行
+}
 
 
 def main():
     metric, label, device = pick_target()
     start_http_server(EXPORT_PORT)
-    print(f"detector 監看 {device}（{metric}），每 {POLL_SECONDS} 秒查一次，"
-          f"曝露在 http://localhost:{EXPORT_PORT}/metrics\n"
+    print(f"detector 監看 {device}（{metric}），偵測器 {', '.join(DETECTORS)}，"
+          f"每 {POLL_SECONDS} 秒查一次，曝露在 http://localhost:{EXPORT_PORT}/metrics\n"
           f"前 {MIN_SAMPLES * POLL_SECONDS} 秒是暖機期，分數固定是 0", flush=True)
 
     window = deque(maxlen=WINDOW)
@@ -106,8 +120,14 @@ def main():
         rate = receive_rate(metric, label, device)
         if rate is not None:
             # 分數用「這個值進視窗之前」的視窗算，否則異常值會自己抬高自己的 baseline。
-            # 接上 your_detector()：這一行的 rolling_zscore 換成 your_detector 就好，其餘不用動。
-            traffic_score.labels(device).set(rolling_zscore(window, rate))
+            # 每個偵測器獨立算、獨立失敗：還沒實作完的那個只印訊息，不會拖垮其他偵測器的分數。
+            for name, detect in DETECTORS.items():
+                try:
+                    score = detect(window, rate)
+                except Exception as exc:
+                    print(f"detector {name} 失敗：{exc}", flush=True)
+                    continue
+                traffic_score.labels(device, name).set(score)
             traffic_bps.labels(device).set(rate)
             window.append(rate)
             window_fill.labels(device).set(len(window))
