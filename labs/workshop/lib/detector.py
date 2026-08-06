@@ -92,7 +92,8 @@ def your_detector(window, value):
     `aiops_traffic_score{detector="your_detector"}` 這一組系列，跟 `rolling_zscore` 並存，不會
     蓋掉它。Prometheus 照原本的 scrape 設定抓回去；Grafana 要疊圖比較還是分開看自己決定。
     """
-    raise NotImplementedError("在這裡放你的偵測邏輯，介面見上面的 docstring")
+    return value / len(window)
+    # raise NotImplementedError("在這裡放你的偵測邏輯，介面見上面的 docstring")
 
 
 # 一次可以掛好幾個偵測器，各自獨立算、獨立曝露。新增一個就在這裡多加一行：介面跟
@@ -104,7 +105,7 @@ def your_detector(window, value):
 # 或告警規則自己加 {detector="..."} 篩選。
 DETECTORS = {
     "rolling_zscore": rolling_zscore,
-    # "your_detector": your_detector,   # 實作好之後打開這一行
+    "your_detector": your_detector,
 }
 
 
