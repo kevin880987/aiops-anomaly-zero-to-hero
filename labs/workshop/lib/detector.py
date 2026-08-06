@@ -87,20 +87,6 @@ def _median(values):
 
 
 def your_detector(window, value):
-    """離中位數幾個 MAD，換算成跟標準差同一個單位，`rolling_zscore()` 的穩健版本。
-
-    量的是同一件事，換掉的只有「平均」跟「標準差」這兩個估計量：中位數要超過一半的視窗被污染才會
-    被拖走，算術平均一個離群值就夠。乘上 1.4826（Lab 01 10a 推導過的那個常數）換算成同一個尺度，
-    所以跟 `rolling_zscore` 共用同一張 Grafana panel、同一條門檻線都不用改。
-
-    輸入
-        `window` — `value` 進來之前的滾動視窗，`deque(maxlen=WINDOW)`，暖機期沒裝滿。
-        `value`  — 這一輪新量到的值，還沒被放進 `window`。
-    輸出
-        跟 `rolling_zscore()` 同單位的偏離分數，門檻可以直接沿用。
-
-    這是範例實作，不是唯一解。換成你自己的偵測邏輯，介面不變，`DETECTORS` 那一行也不用改。
-    """
     if len(window) < MIN_SAMPLES:
         return 0.0  # 樣本太少，中位數跟 MAD 一樣不穩定，理由跟 rolling_zscore() 的暖機期一樣
     m = _median(window)
@@ -111,16 +97,9 @@ def your_detector(window, value):
     return score
 
 
-# 一次可以掛好幾個偵測器，各自獨立算、獨立曝露。新增一個就在這裡多加一行：介面跟
-# rolling_zscore()/your_detector() 一樣，(window, value) -> float。key 是這個偵測器在
-# Prometheus 裡的名字，寫進 aiops_traffic_score 的 detector label。
-#
-# alerts.yml 的 TrafficAnomaly 查的是裸的 aiops_traffic_score，不分 detector，所以每多開一個
-# 偵測器，越線時就多一組告警實例，光看 device 分不出是哪一個觸發的。只想看某一個偵測器，查詢
-# 或告警規則自己加 {detector="..."} 篩選。
 DETECTORS = {
     "rolling_zscore": rolling_zscore,
-    # "your_detector": your_detector,
+    "your_detector": your_detector,
 }
 
 
