@@ -265,26 +265,6 @@ def plot_signals(data, columns, ports, events, half, alerts=None,
     plt.show()
 
 
-def plot_demo_then_full(demo_kwargs, **kwargs):
-    """plot_signals, twice, on the same already-computed data: the step family's shared demo
-    slice first, then the call exactly as written below, unchanged.
-
-    `demo_kwargs` overrides `ports`/`events`/`columns`/whatever else the first pass needs;
-    everything not named there falls through from `kwargs`, so the second call is `kwargs`
-    verbatim. This is deliberately not automatic: a detector's own score sits in a column
-    named for it (`cusum_traffic_bps`, `LOF`), never the raw signal's own name, so there is no
-    single rule that derives the right subset columns from a bare `{"port", "event", "column"}`
-    dict at every call site. Each site states its own `demo_kwargs` once, next to the DEMO
-    dict its family shares.
-
-    Two figures come out, titled `[demo — ...]` and `[full fleet]` ahead of whatever title the
-    call already had, so the pair reads as one comparison rather than two unrelated plots.
-    """
-    base = kwargs.get("title") or ""
-    plot_signals(**{**kwargs, **demo_kwargs, "title": f"[demo]  {base}"})
-    plot_signals(**{**kwargs, "title": f"[full fleet]  {base}"})
-
-
 def heatmap(frame, title=None, fmt="{:.2f}", ax=None, cmap=None, cbar_label="", log=False,
             annotate=None):
     """A sweep result as an annotated matrix: rows and columns from the frame, shade from value.
