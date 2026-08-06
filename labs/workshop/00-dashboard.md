@@ -48,14 +48,25 @@ transmit`，Standard options 的 Unit 選 `Bytes/sec (Bps)`。
 aiops_traffic_score
 ```
 
-Legend 填 `{{device}}`，Title 填 `Anomaly score`。再到 Standard options 把 Min 填 `-6`、Max 填
+Legend 填 `{{detector}}`，Title 填 `Anomaly score`。再到 Standard options 把 Min 填 `-6`、Max 填
 `6`，然後在 Thresholds 新增一條 `3`，Show thresholds 選 `As lines`。門檻畫成線之後，這張 panel 與
 `alerts.yml` 裡 `TrafficAnomaly` 的條件就是同一件事的兩種表示。
 ![00-grafana-dashboard-06](screenshots/00-grafana-dashboard-06.png)
 
-這條 query 不篩 `$iface`，因為 detector 只監看它自己挑中的那一張網路卡，寫死篩選條件反而容易得到空白。Legend 的 `{{device}}` 會告訴你它挑了哪一張，正常情況下就是上面那張 panel 選的那一張。
+這條 query 不篩 `$iface`，因為 detector 只監看它自己挑中的那一張網路卡，寫死篩選條件反而容易得到空白。
+
+**Legend 選 `{{detector}}`，不是 `{{device}}`，這是這張 panel 天生可擴充的地方。**
+`detector.py` 的 `DETECTORS` 字典可以同時掛好幾個偵測器，`rolling_zscore`、`your_detector`，或者
+自己再加的任何一個，每一個都各自寫一組 `aiops_traffic_score{device=..., detector="..."}`，同一個
+指標名稱，用 `detector` 這個 label 分開。`DETECTORS` 裡新增一行是 `detector.py` 唯一要碰的地方，
+這張 panel 不用重新編輯：新的偵測器一啟動，query 立刻多抓到一組序列，legend 自己多一條，不用手動
+加 query row。
 
 分數貼著 0 是對的，代表這段時間沒有事情發生。剛啟動 detector 的前 150 秒是暖機期，分數固定是 0。
+
+**`alerts.yml` 不會自動跟著擴充。** `TrafficAnomaly` 查的是裸的 `aiops_traffic_score`，不分
+`detector`，多掛一個偵測器只會讓同一次越線多開一組告警實例，光看 `device` 分不出是哪一個偵測器
+觸發的。要讓某條規則只盯著一個偵測器，得自己在 `alerts.yml` 裡加 `{detector="..."}` 篩選。
 
 ## 第三張：Alert state
 
