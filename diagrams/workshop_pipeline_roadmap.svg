@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Hand-authored companion to lab00_pipeline.svg and lab02_detection_methods.svg. Same visual convention: Georgia, #1F2933/#5A6472 text, box palette below. -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="740" viewBox="0 0 1320 740"
+     style="background:#FFFFFF;background-color:#FFFFFF;color-scheme:light;">
+<title>三份 notebook 在 data science pipeline 上的位置</title>
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+
+<!-- ================= Title ================= -->
+<text x="40" y="34" font-family="Georgia" font-size="18" font-weight="bold" fill="#1F2933">從 telemetry 到 alert：三份 notebook 在 pipeline 上的位置</text>
+<text x="40" y="58" font-family="Georgia" font-size="13" fill="#5A6472">Lab 00 建一次骨架，不再改動；Lab 01 與 Lab 02 只換 detector.py 裡 rolling_zscore() 那一格。</text>
+
+<!-- ================= Row 1 — Lab 00 shell ================= -->
+<g font-family="Georgia">
+  <!-- box1 network/node_exporter/prometheus -->
+  <rect x="40" y="96" width="300" height="86" rx="10" fill="#F4F6F8" stroke="#98A2B3" stroke-width="1.5"/>
+  <text x="56" y="120" font-size="14" font-weight="bold" fill="#1F2933">node_exporter → Prometheus</text>
+  <text x="56" y="138" font-size="11.5" fill="#5A6472">:9100 曝露 /metrics</text>
+  <text x="56" y="153" font-size="11.5" fill="#5A6472">Prometheus 每 5 秒 scrape 一次</text>
+
+  <!-- box2 detector.py, highlighted -->
+  <rect x="364" y="96" width="280" height="86" rx="10" fill="#FDF1E7" stroke="#E0752D" stroke-width="3"/>
+  <text x="380" y="120" font-size="14" font-weight="bold" fill="#1F2933">detector.py：rolling_zscore()</text>
+  <text x="380" y="138" font-size="11.5" fill="#5A6472">:9200，每 15 秒一輪</text>
+  <text x="380" y="153" font-size="11.5" fill="#E0752D">下面兩節只換這一格</text>
+
+  <!-- box3 prometheus score -->
+  <rect x="668" y="96" width="280" height="86" rx="10" fill="#F4F6F8" stroke="#98A2B3" stroke-width="1.5"/>
+  <text x="684" y="120" font-size="14" font-weight="bold" fill="#1F2933">Prometheus：aiops_traffic_score</text>
+  <text x="684" y="138" font-size="11.5" fill="#5A6472">detector 這個 label 分開偵測器</text>
+  <text x="684" y="153" font-size="11.5" fill="#5A6472">跟原始速率同一個 datasource</text>
+
+  <!-- box4 grafana + alerts -->
+  <rect x="972" y="96" width="308" height="86" rx="10" fill="#FBEDF0" stroke="#D6455D" stroke-width="2.5"/>
+  <text x="988" y="120" font-size="14" font-weight="bold" fill="#1F2933">Grafana 三張 panel ＋ alerts.yml</text>
+  <text x="988" y="138" font-size="11.5" fill="#5A6472">TrafficAnomaly，門檻 3，for: 1m</text>
+  <text x="988" y="153" font-size="11.5" fill="#5A6472">Normal → Pending → Firing</text>
+
+  <!-- row1 internal arrows -->
+  <path d="M340,139 L355,139" stroke="#98A2B3" stroke-width="2" fill="none"/>
+  <path d="M355,134 L364,139 L355,144 Z" fill="#98A2B3"/>
+  <path d="M644,139 L659,139" stroke="#E0752D" stroke-width="2" fill="none"/>
+  <path d="M659,134 L668,139 L659,144 Z" fill="#E0752D"/>
+  <path d="M948,139 L963,139" stroke="#98A2B3" stroke-width="2" fill="none"/>
+  <path d="M963,134 L972,139 L963,144 Z" fill="#98A2B3"/>
+</g>
+
+<!-- ① connector: box2 → Lab01 header, dashed orange -->
+<path d="M504,182 L504,213" stroke="#E0752D" stroke-width="2" stroke-dasharray="6,4" fill="none"/>
+<path d="M499,213 L504,222 L509,213 Z" fill="#E0752D"/>
+<text x="516" y="207" font-family="Georgia" font-size="13" font-weight="bold" fill="#E0752D">①</text>
+<text x="532" y="207" font-family="Georgia" font-size="11" fill="#5A6472">Lab 01 → Lab 02 接手這一格</text>
+
+<!-- ================= Header — Lab 01 ================= -->
+<rect x="40" y="222" width="1240" height="32" rx="6" fill="#F4F6F8" stroke="#E4E7EB"/>
+<rect x="40" y="222" width="6" height="32" fill="#3B7DD8"/>
+<text x="56" y="243" font-family="Georgia" font-size="13" font-weight="bold" fill="#1F2933">LAB 01 · Baselines, Windows and Alerts · Step 1–17 · 75–90 分鐘</text>
+
+<!-- ================= Row 2 — Lab 01 phases ================= -->
+<g font-family="Georgia">
+  <!-- A 載入與驗證 -->
+  <rect x="40" y="270" width="292" height="108" rx="10" fill="#F4F6F8" stroke="#98A2B3" stroke-width="1.5"/>
+  <text x="56" y="294" font-size="14" font-weight="bold" fill="#1F2933">載入與驗證</text>
+  <text x="56" y="312" font-size="11" fill="#98A2B3">Step 1–5</text>
+  <text x="56" y="330" font-size="11.5" fill="#5A6472">去重排序 · 缺值與時間軸完整性</text>
+  <text x="56" y="345" font-size="11.5" fill="#5A6472">平滑的代價 · 重採樣粗細</text>
+  <text x="56" y="360" font-size="11.5" fill="#5A6472">→ 漏掉多少事件</text>
+
+  <!-- B 六種 baseline -->
+  <rect x="356" y="270" width="292" height="108" rx="10" fill="#FDF1E7" stroke="#E0752D" stroke-width="3"/>
+  <text x="372" y="294" font-size="14" font-weight="bold" fill="#1F2933">六種 baseline，一張成績單</text>
+  <text x="372" y="312" font-size="11" fill="#E0752D">Step 6–10</text>
+  <text x="372" y="330" font-size="11.5" fill="#5A6472">固定門檻 · 全域 z-score</text>
+  <text x="372" y="345" font-size="11.5" fill="#5A6472">滾動窗格 · robust(median/MAD)</text>
+  <text x="372" y="360" font-size="11.5" fill="#5A6472">季節同位 · peer 訊號</text>
+
+  <!-- C score/label/alert -->
+  <rect x="672" y="270" width="292" height="108" rx="10" fill="#FBEDF0" stroke="#D6455D" stroke-width="2.5"/>
+  <text x="688" y="294" font-size="14" font-weight="bold" fill="#1F2933">score → label → alert 是三件事</text>
+  <text x="688" y="312" font-size="11" fill="#D6455D">Step 11–13</text>
+  <text x="688" y="330" font-size="11.5" fill="#5A6472">門檻是營運決策</text>
+  <text x="688" y="345" font-size="11.5" fill="#5A6472">不是統計事實</text>
+
+  <!-- D handoff -->
+  <rect x="988" y="270" width="292" height="108" rx="10" fill="#EAF1FB" stroke="#3B7DD8" stroke-width="2.5"/>
+  <text x="1004" y="294" font-size="14" font-weight="bold" fill="#1F2933">切分不洩漏 · 去季節 · 滑動視窗</text>
+  <text x="1004" y="312" font-size="11" fill="#3B7DD8">Step 14–17</text>
+  <text x="1004" y="330" font-size="11.5" fill="#5A6472">TRAIN_FRAC · 去季節 · N_INPUT</text>
+  <text x="1004" y="345" font-size="11.5" fill="#3B7DD8">→ feature_spec.json</text>
+
+  <!-- row2 internal arrows -->
+  <path d="M332,324 L347,324" stroke="#98A2B3" stroke-width="2" fill="none"/>
+  <path d="M347,319 L356,324 L347,329 Z" fill="#98A2B3"/>
+  <path d="M648,324 L663,324" stroke="#E0752D" stroke-width="2" fill="none"/>
+  <path d="M663,319 L672,324 L663,329 Z" fill="#E0752D"/>
+  <path d="M964,324 L979,324" stroke="#D6455D" stroke-width="2" fill="none"/>
+  <path d="M979,319 L988,324 L979,329 Z" fill="#D6455D"/>
+</g>
+
+<!-- D → E connector, solid blue, artifact handoff -->
+<path d="M1134,378 L1134,398 L186,398 L186,457" stroke="#3B7DD8" stroke-width="2" fill="none"/>
+<path d="M181,457 L186,466 L191,457 Z" fill="#3B7DD8"/>
+<text x="560" y="394" font-family="Georgia" font-size="11" fill="#3B7DD8">feature_spec.json</text>
+
+<!-- ================= Header — Lab 02 ================= -->
+<rect x="40" y="418" width="1240" height="32" rx="6" fill="#F4F6F8" stroke="#E4E7EB"/>
+<rect x="40" y="418" width="6" height="32" fill="#E0752D"/>
+<text x="56" y="439" font-family="Georgia" font-size="13" font-weight="bold" fill="#1F2933">LAB 02 · Detectors · Step 1–9 · 90–110 分鐘</text>
+
+<!-- ================= Row 3 — Lab 02 phases ================= -->
+<g font-family="Georgia">
+  <!-- E 載入 feature_spec -->
+  <rect x="40" y="466" width="292" height="108" rx="10" fill="#F4F6F8" stroke="#98A2B3" stroke-width="1.5"/>
+  <text x="56" y="490" font-size="14" font-weight="bold" fill="#1F2933">載入 feature_spec ＋ 參數</text>
+  <text x="56" y="508" font-size="11" fill="#98A2B3">Step 1–4</text>
+  <text x="56" y="526" font-size="11.5" fill="#5A6472">BUDGET 這個超參數</text>
+
+  <!-- F CUSUM/EWMA -->
+  <rect x="356" y="466" width="292" height="108" rx="10" fill="#FDF1E7" stroke="#E0752D" stroke-width="3"/>
+  <text x="372" y="490" font-size="14" font-weight="bold" fill="#1F2933">變點與控制界線</text>
+  <text x="372" y="508" font-size="11" fill="#E0752D">Step 5–6</text>
+  <text x="372" y="526" font-size="11.5" fill="#5A6472">CUSUM（k, h）</text>
+  <text x="372" y="541" font-size="11.5" fill="#5A6472">EWMA（λ）</text>
+  <text x="372" y="556" font-size="11.5" fill="#5A6472">逐欄逐 port</text>
+
+  <!-- G multivariate -->
+  <rect x="672" y="466" width="292" height="108" rx="10" fill="#FDF1E7" stroke="#E0752D" stroke-width="3"/>
+  <text x="688" y="490" font-size="14" font-weight="bold" fill="#1F2933">多變量偵測器</text>
+  <text x="688" y="508" font-size="11" fill="#E0752D">Step 7</text>
+  <text x="688" y="526" font-size="11.5" fill="#5A6472">LOF · One-Class SVM</text>
+  <text x="688" y="541" font-size="11.5" fill="#5A6472">Isolation Forest</text>
+  <text x="688" y="556" font-size="11.5" fill="#5A6472">同一張成績單比較</text>
+
+  <!-- H compose -->
+  <rect x="988" y="466" width="292" height="108" rx="10" fill="#EAF1FB" stroke="#3B7DD8" stroke-width="2.5"/>
+  <text x="1004" y="490" font-size="14" font-weight="bold" fill="#1F2933">組合已經有效的</text>
+  <text x="1004" y="508" font-size="11" fill="#3B7DD8">Step 8–9</text>
+  <text x="1004" y="526" font-size="11.5" fill="#5A6472">CAP 加總</text>
+  <text x="1004" y="541" font-size="11.5" fill="#3B7DD8">→ composed score</text>
+
+  <!-- row3 internal arrows -->
+  <path d="M332,520 L347,520" stroke="#98A2B3" stroke-width="2" fill="none"/>
+  <path d="M347,515 L356,520 L347,525 Z" fill="#98A2B3"/>
+  <path d="M648,520 L663,520" stroke="#E0752D" stroke-width="2" fill="none"/>
+  <path d="M663,515 L672,520 L663,525 Z" fill="#E0752D"/>
+  <path d="M964,520 L979,520" stroke="#E0752D" stroke-width="2" fill="none"/>
+  <path d="M979,515 L988,520 L979,525 Z" fill="#E0752D"/>
+</g>
+
+<!-- ② loop-back: H → detector.py, dashed orange, routed via right margin -->
+<path d="M1280,520 L1300,520 L1300,78 L504,78 L504,87" stroke="#E0752D" stroke-width="2" stroke-dasharray="6,4" fill="none"/>
+<path d="M499,87 L504,96 L509,87 Z" fill="#E0752D"/>
+<text x="700" y="72" font-family="Georgia" font-size="13" font-weight="bold" fill="#E0752D">②</text>
+<text x="716" y="72" font-family="Georgia" font-size="11" fill="#5A6472">DETECTORS{} 多掛一行 → Grafana 自動多一條線</text>
+
+<!-- ================= Legend + note ================= -->
+<g font-family="Georgia">
+  <rect x="56" y="618" width="14" height="14" rx="3" fill="#F4F6F8" stroke="#98A2B3" stroke-width="1.5"/>
+  <text x="78" y="629" font-size="11.5" fill="#5A6472">官方元件／既有骨架</text>
+  <rect x="286" y="618" width="14" height="14" rx="3" fill="#FDF1E7" stroke="#E0752D" stroke-width="2"/>
+  <text x="308" y="629" font-size="11.5" fill="#5A6472">候選的偏離分數演算法</text>
+  <rect x="546" y="618" width="14" height="14" rx="3" fill="#EAF1FB" stroke="#3B7DD8" stroke-width="2"/>
+  <text x="568" y="629" font-size="11.5" fill="#5A6472">比較／合併／輸出成果</text>
+  <rect x="806" y="618" width="14" height="14" rx="3" fill="#FBEDF0" stroke="#D6455D" stroke-width="2"/>
+  <text x="828" y="629" font-size="11.5" fill="#5A6472">門檻與政策 → alert</text>
+
+  <text x="40" y="662" font-size="12" fill="#5A6472">Lab 00 之後，每一節動的都是同一個函式：detector.py 的 rolling_zscore()。Lab 01 決定要餵什麼、怎麼比較六種基線；</text>
+  <text x="40" y="680" font-size="12" fill="#5A6472">Lab 02 決定要不要換成變點、控制界線或多變量模型，組合成最後那一條分數，塞進 DETECTORS{} 就送回 Prometheus。</text>
+  <text x="40" y="702" font-size="11" fill="#98A2B3">細節見 lab00_pipeline.svg（Lab 00 內部架構）與 lab02_detection_methods.svg（三種判斷方式的取捨）。</text>
+</g>
+
+</svg>

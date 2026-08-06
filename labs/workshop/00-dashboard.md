@@ -55,7 +55,7 @@ Legend 填 `{{detector}}`，Title 填 `Anomaly score`。再到 Standard options 
 
 這條 query 不篩 `$iface`，因為 detector 只監看它自己挑中的那一張網路卡，寫死篩選條件反而容易得到空白。
 
-**Legend 選 `{{detector}}`，不是 `{{device}}`，這是這張 panel 天生可擴充的地方。**
+**Legend 選 `{{detector}}`。**
 `detector.py` 的 `DETECTORS` 字典可以同時掛好幾個偵測器，`rolling_zscore`、`your_detector`，或者
 自己再加的任何一個，每一個都各自寫一組 `aiops_traffic_score{device=..., detector="..."}`，同一個
 指標名稱，用 `detector` 這個 label 分開。`DETECTORS` 裡新增一行是 `detector.py` 唯一要碰的地方，

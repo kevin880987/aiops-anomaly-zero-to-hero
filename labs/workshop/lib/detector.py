@@ -120,7 +120,7 @@ def your_detector(window, value):
 # 或告警規則自己加 {detector="..."} 篩選。
 DETECTORS = {
     "rolling_zscore": rolling_zscore,
-    "your_detector": your_detector,
+    # "your_detector": your_detector,
 }
 
 
