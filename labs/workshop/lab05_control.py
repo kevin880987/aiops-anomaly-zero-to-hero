@@ -89,6 +89,19 @@ def request_json(url: str, *, method: str = "GET", payload: dict | None = None) 
     return json.loads(body or b"null")
 
 
+def request_ok(url: str, *, method: str = "GET") -> None:
+    """Require a successful HTTP response without assuming a body format."""
+    request = Request(url, method=method)
+    try:
+        with urlopen(request, timeout=3):
+            return
+    except HTTPError as error:
+        detail = error.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"{url} returned HTTP {error.code}: {detail}") from error
+    except URLError as error:
+        raise RuntimeError(f"Cannot reach {url}: {error.reason}") from error
+
+
 def _run(command: list[str], *, capture: bool = False) -> subprocess.CompletedProcess:
     return subprocess.run(
         command,
@@ -129,7 +142,7 @@ def reload_configs() -> int:
         return result
     for component in ("prometheus", "alertmanager"):
         try:
-            request_json(_url(component, "/-/reload"), method="POST")
+            request_ok(_url(component, "/-/reload"), method="POST")
         except RuntimeError as error:
             print(error, file=sys.stderr)
             return 1
@@ -160,7 +173,7 @@ def health_report() -> int:
     for label, (component, path) in endpoints.items():
         url = _url(component, path)
         try:
-            request_json(url)
+            request_ok(url)
             rows.append((label, "PASS", url))
         except RuntimeError as error:
             rows.append((label, "FAIL", str(error)))
