@@ -207,7 +207,7 @@ def _inject_p1(frame: pd.DataFrame) -> None:
 
 def _inject_p2(frame: pd.DataFrame) -> None:
     _set(frame, "P2", "fw01", range(6, 30), mahalanobis_score=4.9)
-    _set(frame, "P2", "fw01", range(8, 30), lof_score=2.4)
+    _set(frame, "P2", "fw01", range(8, 30), lof_score=4.6)
     _set(frame, "P2", "fw01", range(10, 30), packet_loss_ratio=0.04)
 
 
@@ -237,7 +237,7 @@ def _inject_full(frame: pd.DataFrame) -> None:
     for index, value in zip(range(13, 17), (4.2, 2.7, 4.2, 2.7)):
         _set(frame, "full_incident", "fw01", index, mahalanobis_score=value)
     _set(frame, "full_incident", "fw01", range(18, 32), mahalanobis_score=5.0)
-    _set(frame, "full_incident", "fw01", range(20, 32), lof_score=2.5)
+    _set(frame, "full_incident", "fw01", range(20, 32), lof_score=4.6)
     _set(frame, "full_incident", "fw01", range(22, 32), packet_loss_ratio=0.04)
     _set(frame, "full_incident", "fw01", range(34, 50), service_up=0, mahalanobis_score=5.4)
     _set(frame, "full_incident", "web01", range(36, 50), service_up=0, mahalanobis_score=4.7)
