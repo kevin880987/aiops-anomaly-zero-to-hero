@@ -9,6 +9,7 @@ import math
 import os
 import threading
 import time
+import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from http import HTTPStatus
@@ -129,7 +130,8 @@ class ReplayEngine:
                 raise KeyError(f"Unknown scenario {scenario_id!r}; choose from {', '.join(self.scenario_names)}")
             self._run_counts[scenario_id] += 1
             self._scenario_id = scenario_id
-            self._run_id = f"{scenario_id}-{self._run_counts[scenario_id]:03d}"
+            token = uuid.uuid4().hex[:12]
+            self._run_id = f"{scenario_id}-{token}-{self._run_counts[scenario_id]:03d}"
             self._started_at = self._clock()
             self._speed = speed
             self._interval = interval
