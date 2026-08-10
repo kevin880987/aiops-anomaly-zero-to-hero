@@ -1,0 +1,5 @@
+scenario_id,event_id,event_type,start_time,end_time,description
+M1,M1-E1,small_packet_scan,2026-03-03 09:00:00,2026-03-03 15:00:00,小封包掃描破壞 throughput 與 packet-rate 關係
+M2,M2-E1,off_mode_traffic_mix,2026-03-03 09:00:00,2026-03-03 15:00:00,流量落在 ordinary 與 batch normal modes 的低密度中間
+M3,M3-E1,l2_composition_mismatch,2026-03-03 09:00:00,2026-03-03 15:00:00,總流量不變但 broadcast/multicast composition 偏離 normal subspace
+M4,M4-E1,coordinated_bulk_extreme,2026-03-03 09:00:00,2026-03-03 15:00:00,feature relationships 正常但沿主要 traffic direction 超出 operating envelope
