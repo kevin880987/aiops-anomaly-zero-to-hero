@@ -1,0 +1,6 @@
+scenario_id,event_id,event_type,start_time,end_time,description
+S1,S1-E1,large_spike,2026-03-04 10:00:00,2026-03-04 10:00:00,單一五分鐘 large spike；三次事件彼此分離，測試即時極端值偵測。
+S1,S1-E2,large_spike,2026-03-06 14:00:00,2026-03-06 14:00:00,單一五分鐘 large spike；三次事件彼此分離，測試即時極端值偵測。
+S1,S1-E3,large_spike,2026-03-08 10:00:00,2026-03-08 10:00:00,單一五分鐘 large spike；三次事件彼此分離，測試即時極端值偵測。
+S2,S2-E1,small_persistent_shift,2026-03-04 09:00:00,2026-03-05 20:55:00,持續 36 小時的小幅位移，測試跨時間累積證據。
+S3,S3-E1,gradual_drift,2026-03-04 00:00:00,2026-03-08 23:55:00,72 小時 gradual drift 至新水準，之後維持到視窗結束。
