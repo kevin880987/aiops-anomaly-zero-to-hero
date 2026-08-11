@@ -297,6 +297,31 @@ def attenuate_events(frame, counterfactual, strength):
     return out
 
 
+# How many buckets each seasonal key splits a week into. The choice is a bias-variance trade
+# rather than a matter of taste: a finer key models the shape more exactly and estimates each
+# bucket from fewer samples. Step 5 of the notebook measures the trade on this fleet instead of
+# assuming it, and `weekend_hour` wins there because a two-week reference leaves an hour-of-week
+# bucket holding about 24 samples.
+SEASON_KEYS = {"hour": 24, "weekend_hour": 48, "week": 168}
+
+
+def season_key(timestamps, kind="weekend_hour"):
+    """Seasonal bucket index per sample, under one of the three keys in SEASON_KEYS.
+
+        hour          hour of the day, assuming every day of the week is alike
+        weekend_hour  hour of the day split by weekday against weekend
+        week          hour of the week, every day of the week modelled separately
+    """
+    ts = pd.to_datetime(pd.Series(timestamps).reset_index(drop=True))
+    if kind == "hour":
+        return ts.dt.hour.to_numpy()
+    if kind == "weekend_hour":
+        return ((ts.dt.dayofweek >= 5).to_numpy().astype(int) * 24 + ts.dt.hour.to_numpy())
+    if kind == "week":
+        return (ts.dt.dayofweek * 24 + ts.dt.hour).to_numpy()
+    raise ValueError(f"unknown seasonal key {kind!r}; expected one of {sorted(SEASON_KEYS)}")
+
+
 def time_of_week(timestamps):
     """Bucket key for the seasonal profile: hour of the week, 0 to 167.
 

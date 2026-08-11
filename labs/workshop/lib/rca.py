@@ -17,6 +17,7 @@ untouched; the change calendar moves suppression and costs recall. Reporting one
 "RCA quality" would hide exactly those trades, so the four stay apart.
 """
 import json
+import re
 
 import numpy as np
 import pandas as pd
@@ -552,6 +553,175 @@ def run_rca_agent(packet, call_tool):
                         "check for an unfiled change ticket"],
             "escalate": escalate})
     return report, calls
+
+
+# --------------------------------------------------------------------------- copy-paste loop
+# An agentic loop is a cycle: the model reads evidence, asks for one more piece, reads the
+# answer, and only then commits to a conclusion. The API call is the least interesting part of
+# that, and it is the only part a classroom with no API key cannot run. So the cadet carries the
+# messages. Copy the block out, paste it into whatever chat window is open, paste the reply back.
+# What that exercises is the real skill: noticing when the model asked for something the tools
+# cannot answer, or answered without asking at all.
+#
+# The reply format has to be strict enough to parse and loose enough to type by hand.
+
+REPLY_CONTRACT = """Reply in exactly this format, nothing before or after.
+
+To request evidence:
+THOUGHT: <one line on what you still need and why>
+ACTION: TOOL
+TOOL: <one of the tool names listed above>
+INPUT: <a single-line JSON object of that tool's arguments>
+
+To conclude:
+THOUGHT: <one line>
+ACTION: REPORT
+CAUSE: <one sentence>
+TYPE: <exactly one of: %s>
+CONFIDENCE: <low | medium | high>
+EVIDENCE: <one sentence, citing packet fields in square brackets such as [score]>
+RUNNER_UP: <one sentence, and why the evidence does not settle it>
+NEXT_CHECK: <the one measurement that would separate them>
+ESCALATE: <yes | no>"""
+
+
+def reply_contract():
+    return REPLY_CONTRACT % ", ".join(sorted(FAULT_SIGNATURE))
+
+
+def show_prompt(text, title="COPY EVERYTHING BETWEEN THE LINES INTO YOUR LLM"):
+    """Print a prompt with hard delimiters, so a cadet can select it without catching output."""
+    rule = "=" * 78
+    print(f"{rule}\n{title}\n{rule}\n{text}\n{rule}\nEND OF PROMPT\n{rule}")
+
+
+def round_one_prompt(packet, tools=TOOLS):
+    """Triage. The model has the packet and may ask for exactly one more piece of evidence."""
+    listed = "\n".join(f"  {t['name']}: {t['description']}" for t in tools)
+    return (AGENT_SYSTEM_PROMPT
+            + "\n\nYou may call these tools, and nothing else:\n" + listed
+            + "\n\nEVIDENCE PACKET:\n"
+            + json.dumps(_redacted(packet), ensure_ascii=False, indent=2)
+            + "\n\nAsk for the single piece of evidence that would most change your conclusion. "
+              "If the packet already settles it, report instead.\n\n"
+            + reply_contract())
+
+
+def followup_prompt(packet, transcript, tools=TOOLS):
+    """Round two and beyond. The packet, everything asked so far, and every answer."""
+    listed = "\n".join(f"  {t['name']}: {t['description']}" for t in tools)
+    history = "\n".join(
+        f"\nYOU ASKED: {step['tool']} with {json.dumps(step['input'], ensure_ascii=False)}"
+        f"\nTOOL ANSWERED: {json.dumps(step['output'], ensure_ascii=False)}"
+        for step in transcript)
+    return (AGENT_SYSTEM_PROMPT
+            + "\n\nYou may call these tools, and nothing else:\n" + listed
+            + "\n\nEVIDENCE PACKET:\n"
+            + json.dumps(_redacted(packet), ensure_ascii=False, indent=2)
+            + "\n\nEVIDENCE GATHERED SO FAR:" + (history or "\n(nothing yet)")
+            + "\n\nAsk for one more piece of evidence, or report now.\n\n"
+            + reply_contract())
+
+
+def parse_reply(text):
+    """Read a pasted reply into a dict. Raises with a readable message when the format broke.
+
+    Loud rather than lenient. A silently mis-parsed reply would be scored as if the model had
+    said something it did not, and the cadet would never find out which half was wrong.
+    """
+    fields = {}
+    for line in str(text).strip().splitlines():
+        if ":" in line:
+            key, _, value = line.partition(":")
+            key = key.strip().upper()
+            if key in {"THOUGHT", "ACTION", "TOOL", "INPUT", "CAUSE", "TYPE", "CONFIDENCE",
+                       "EVIDENCE", "RUNNER_UP", "NEXT_CHECK", "ESCALATE"}:
+                fields[key] = value.strip()
+    action = fields.get("ACTION", "").upper()
+    if action == "TOOL":
+        missing = {"TOOL", "INPUT"} - set(fields)
+        if missing:
+            raise ValueError(f"a TOOL reply needs {sorted(missing)}; parsed keys {sorted(fields)}")
+        try:
+            fields["INPUT_PARSED"] = json.loads(fields["INPUT"])
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"INPUT is not valid JSON: {fields['INPUT']!r}") from exc
+        return {"action": "tool", **fields}
+    if action == "REPORT":
+        missing = {"CAUSE", "TYPE", "CONFIDENCE", "EVIDENCE"} - set(fields)
+        if missing:
+            raise ValueError(f"a REPORT reply needs {sorted(missing)}; parsed keys {sorted(fields)}")
+        return {"action": "report", **fields}
+    raise ValueError("no usable ACTION line found. Paste the whole reply, including the "
+                     f"ACTION line. Parsed keys: {sorted(fields)}")
+
+
+def run_requested_tool(reply, call_tool):
+    """Execute what the pasted reply asked for, and format the answer for pasting back.
+
+    The declared tool set is enforced here rather than trusted from the reply, because a model
+    that invents a tool name is the failure this boundary exists to catch.
+    """
+    if reply["action"] != "tool":
+        raise ValueError("this reply is a report, not a tool request")
+    name = reply["TOOL"].strip()
+    output = call_tool(name, reply["INPUT_PARSED"])
+    step = {"tool": name, "input": reply["INPUT_PARSED"], "output": output}
+    return step, json.dumps(output, ensure_ascii=False, indent=2)
+
+
+def mock_reply(packet, transcript=(), call_tool=None):
+    """A correctly formatted reply, so the notebook runs with nobody at the keyboard.
+
+    This is the fallback the paste cells start with and the worked example of the format. It is
+    deterministic and it is not a language model, so a cadet who replaces it with a real reply is
+    comparing against a fixed reference rather than against another sample.
+    """
+    if not transcript:
+        return ("THOUGHT: the packet shows a large deviation but cannot tell a port fault from "
+                "something upstream, so peer behaviour decides it\n"
+                "ACTION: TOOL\n"
+                "TOOL: check_related_devices\n"
+                "INPUT: " + json.dumps({
+                    "start": packet["window_start"],
+                    "end": str(pd.Timestamp(packet["window_start"])
+                              + pd.Timedelta(minutes=packet["duration_min"])),
+                    "exclude_port_id": packet["port_id"]}, ensure_ascii=False))
+
+    peers = next((s["output"] for s in transcript if s["tool"] == "check_related_devices"), {})
+    n_dev, n_peers = peers.get("n_deviating", 0), max(peers.get("n_peers", 1), 1)
+    common = n_dev >= 0.6 * n_peers
+    top = list(packet["attribution_top3"])[0]
+    cause = (f"a common-mode event upstream of every port, {n_dev} of {n_peers} peers deviating"
+             if common else f"a fault local to {packet['port_id']}, no peer deviating")
+    return (f"THOUGHT: peer behaviour settles whether this is local or upstream\n"
+            f"ACTION: REPORT\n"
+            f"CAUSE: {cause}, led by {top}\n"
+            f"TYPE: {packet['candidate_type_from_signature']}\n"
+            f"CONFIDENCE: {'high' if common else 'medium'}\n"
+            f"EVIDENCE: score {packet['score']} against threshold {packet['threshold']} is "
+            f"[score_over_threshold] times the limit, and [attribution_top3] puts {top} first\n"
+            f"RUNNER_UP: an unfiled change, which [planned_change] cannot rule out because an "
+            f"empty calendar entry only means nothing was filed\n"
+            f"NEXT_CHECK: whether {top} moved on the peer ports in the same minute\n"
+            f"ESCALATE: {'yes' if common else 'no'}")
+
+
+def score_parsed_report(reply, packet):
+    """Grade a pasted report on the two things a root cause can be held to."""
+    text = " ".join(reply.get(k, "") for k in ("CAUSE", "EVIDENCE", "RUNNER_UP", "NEXT_CHECK"))
+    fields = set(packet) - {"ground_truth_type"}
+    cited = {f for f in fields if f"[{f}]" in text}
+    invented = set(re.findall(r"\[([a-z_0-9]+)\]", text)) - fields
+    predicted = reply.get("TYPE", "").strip()
+    return {"predicted_type": predicted,
+            "true_type": packet["ground_truth_type"],
+            "type_correct": predicted == packet["ground_truth_type"],
+            "fields_cited": len(cited),
+            "cited": sorted(cited),
+            "invented_fields": sorted(invented),
+            "confidence": reply.get("CONFIDENCE", ""),
+            "escalate": reply.get("ESCALATE", "")}
 
 
 def score_rca_report(report, packet, predicted_type=None):

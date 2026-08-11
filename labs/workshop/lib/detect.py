@@ -24,7 +24,7 @@ from sklearn.decomposition import PCA
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
 
-from .features import FEATURES, time_of_week
+from .features import FEATURES, SEASON_KEYS, season_key
 
 MAD_TO_SIGMA = 1.4826
 SEED = 0
@@ -37,6 +37,78 @@ DETECTORS = ("Max |z|", "Mahalanobis", "Robust Mahalanobis", "PCA T2", "PCA SPE"
              "LOF", "IsolationForest")
 
 
+def baseline_scores(frame, features, fit_mask, kind):
+    """Deviation scores in the five flavours the first rungs of the ladder need.
+
+    Each flavour removes exactly one assumption from the one before it, so the gain from a rung
+    is the gain from dropping that assumption and nothing else:
+
+        raw         the measured value, which assumes a fixed capacity limit is known
+        global_z    distance from one mean in standard deviations, assuming a flat level
+        hourly_z    distance from this hour of the day, assuming every day is alike
+        seasonal_z  distance from this hour of the week, assuming weeks repeat
+        robust_z    the same, with median and MAD, assuming the reference may be contaminated
+
+    Give one feature name or a list. With a list the score is the largest deviation across them,
+    which is the naive way to watch several counters at once and is exactly what Lab 04 calls the
+    marginal baseline. Fitted per port on `fit_mask` rows only.
+    """
+    if isinstance(features, str):
+        features = [features]
+    fit_mask = np.asarray(fit_mask, bool)
+    if kind == "raw":
+        # No scale at all, so several features cannot be combined: their units differ.
+        if len(features) > 1:
+            raise ValueError("the raw flavour has no common scale, so it takes one feature")
+        return pd.Series(frame[features[0]].to_numpy(float), index=frame.index)
+    per_feature = [_one_baseline(frame, f, fit_mask, kind) for f in features]
+    return pd.concat(per_feature, axis=1).max(axis=1)
+
+
+def _one_baseline(frame, feature, fit_mask, kind):
+    values = frame[feature].to_numpy(float)
+    out = np.zeros(len(frame))
+    for _, group in frame.groupby("port_id", sort=True):
+        idx = group.index.to_numpy()
+        keep = fit_mask[idx]
+        if keep.sum() < 2:
+            raise ValueError("a port has fewer than two reference rows")
+        x = values[idx]
+        if kind == "global_z":
+            centre = np.full(len(idx), x[keep].mean())
+            scale = np.full(len(idx), max(x[keep].std(), 1e-12))
+        elif kind in SEASON_KEYS or kind in {f"robust_{k}" for k in SEASON_KEYS}:
+            robust = kind.startswith("robust_")
+            key = kind[len("robust_"):] if robust else kind
+            bucket = season_key(group["timestamp"], key)
+            n_buckets = SEASON_KEYS[key]
+            if robust:
+                base_c = np.median(x[keep])
+                base_s = max(np.median(np.abs(x[keep] - base_c)) * MAD_TO_SIGMA,
+                             x[keep].std(), 1e-12)
+            else:
+                base_c, base_s = x[keep].mean(), max(x[keep].std(), 1e-12)
+            centre_table = np.full(n_buckets, base_c)
+            scale_table = np.full(n_buckets, base_s)
+            for b in range(n_buckets):
+                rows = keep & (bucket == b)
+                if rows.sum() >= 2:
+                    if robust:
+                        centre_table[b] = np.median(x[rows])
+                        # MAD first, and the standard deviation only where the MAD collapses.
+                        # Step 6 of the notebook is about the three features where it does.
+                        mad = np.median(np.abs(x[rows] - centre_table[b])) * MAD_TO_SIGMA
+                        scale_table[b] = max(mad, x[rows].std(), 1e-12)
+                    else:
+                        centre_table[b] = x[rows].mean()
+                        scale_table[b] = max(x[rows].std(), 1e-12)
+            centre, scale = centre_table[bucket], scale_table[bucket]
+        else:
+            raise ValueError(f"unknown kind: {kind!r}")
+        out[idx] = np.abs(x - centre) / scale
+    return pd.Series(out, index=frame.index)
+
+
 class PortModel:
     """Seasonal profile, robust scale and fitted detectors for one port.
 
@@ -47,14 +119,19 @@ class PortModel:
     split is made instead of hiding it here.
     """
 
-    def __init__(self, features=FEATURES, n_components_variance=0.95, seed=SEED):
+    def __init__(self, features=FEATURES, season="weekend_hour",
+                 n_components_variance=0.95, seed=SEED):
+        if season not in SEASON_KEYS:
+            raise ValueError(f"unknown seasonal key {season!r}; expected {sorted(SEASON_KEYS)}")
         self.features = list(features)
+        self.season = season
         self.n_components_variance = n_components_variance
         self.seed = seed
 
     def fit(self, frame, fit_mask):
         values = frame[self.features].to_numpy(float)
-        bucket = time_of_week(frame["timestamp"])
+        bucket = season_key(frame["timestamp"], self.season)
+        n_buckets = SEASON_KEYS[self.season]
         fit_mask = np.asarray(fit_mask, bool)
         if fit_mask.sum() < 2 * len(self.features):
             raise ValueError(f"reference has {fit_mask.sum()} rows, too few to fit "
@@ -63,9 +140,11 @@ class PortModel:
         # Median per hour-of-week, taken over reference rows. Median rather than mean because a
         # bucket holds only a handful of samples per week and one survivor of the event purge
         # would move a mean.
-        self.profile_ = np.zeros((168, len(self.features)))
+        self.profile_ = np.zeros((n_buckets, len(self.features)))
         overall = np.median(values[fit_mask], axis=0)
-        for b in range(168):
+        self.samples_per_bucket_ = int(np.median(np.bincount(bucket[fit_mask],
+                                                             minlength=n_buckets)))
+        for b in range(n_buckets):
             rows = fit_mask & (bucket == b)
             self.profile_[b] = np.median(values[rows], axis=0) if rows.any() else overall
 
@@ -103,7 +182,7 @@ class PortModel:
     def standardize(self, frame):
         """Deviation of each sample from its own hour-of-week, in robust units."""
         values = frame[self.features].to_numpy(float)
-        bucket = time_of_week(frame["timestamp"])
+        bucket = season_key(frame["timestamp"], self.season)
         return (values - self.profile_[bucket]) / self.scale_
 
     def _pca_parts(self, z):
@@ -137,13 +216,13 @@ class PortModel:
         return (centred - reconstruction) ** 2
 
 
-def fit_fleet(frame, fit_mask, features=FEATURES, seed=SEED):
+def fit_fleet(frame, fit_mask, features=FEATURES, season="weekend_hour", seed=SEED):
     """One PortModel per port. Returns {port_id: PortModel}."""
     fit_mask = np.asarray(fit_mask, bool)
     models = {}
     for port, group in frame.groupby("port_id", sort=True):
         idx = group.index.to_numpy()
-        models[port] = PortModel(features=features, seed=seed).fit(
+        models[port] = PortModel(features=features, season=season, seed=seed).fit(
             group.reset_index(drop=True), fit_mask[idx])
     return models
 

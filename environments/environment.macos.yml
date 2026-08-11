@@ -11,7 +11,13 @@ dependencies:
   - pandas>=2.0,<4
   - scipy>=1.12,<2
   - scikit-learn>=1.4,<2
+  - statsmodels>=0.14
+  - shap>=0.46
   - matplotlib>=3.9
+  # Imported directly by the labs rather than reached through matplotlib and ipykernel.
+  # A transitive dependency that a lab imports by name is a dependency of the lab.
+  - cycler>=0.12
+  - ipython>=8.18
   - ipykernel>=6.29
   - requests>=2.31
   - pyyaml>=6.0

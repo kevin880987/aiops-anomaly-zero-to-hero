@@ -19,6 +19,54 @@ from scipy import stats
 SEED = 0
 
 
+# --------------------------------------------------------------------------- the ladder
+class Ladder:
+    """A running record of every trial the notebook runs, and what each one measured.
+
+    A lab that prints one table per method teaches that the methods exist. A lab that keeps the
+    score across every attempt teaches how the choice was reached, which is the part a beginner
+    cannot reconstruct afterwards from a pile of separate outputs.
+
+    Each row carries the measurement and the failure that sent the work to the next row. The
+    `next_step` column is the important one, and it is required rather than optional: a trial
+    whose result does not change what happens next did not need running.
+    """
+
+    def __init__(self):
+        self.rows = []
+
+    def record(self, step, trial, metric, value, verdict, next_step):
+        self.rows.append({"step": step, "trial": trial, "metric": metric,
+                          "value": value, "verdict": verdict, "next_step": next_step})
+        return self.rows[-1]
+
+    def table(self, since=None):
+        out = pd.DataFrame(self.rows)
+        return out if since is None else out[out["step"] >= since].reset_index(drop=True)
+
+    def show(self, since=None):
+        table = self.table(since)
+        return table[["step", "trial", "metric", "value", "verdict"]]
+
+    def plot(self, metric, ax=None, colour="#7A5AC7", title=None):
+        """Trials that share a metric, in the order they were run."""
+        import matplotlib.pyplot as plt
+        table = self.table()
+        table = table[table["metric"] == metric]
+        if table.empty:
+            raise ValueError(f"no trial recorded the metric {metric!r}")
+        ax = ax or plt.gca()
+        y = np.arange(len(table))
+        ax.barh(y, table["value"].astype(float), color=colour)
+        for n, row in enumerate(table.itertuples()):
+            ax.text(float(row.value) + 0.01, n, f"{float(row.value):.3f}",
+                    va="center", fontsize=11)
+        ax.set_yticks(y, [f"{r.step}. {r.trial}" for r in table.itertuples()])
+        ax.invert_yaxis()
+        ax.set(xlabel=metric, title=title or f"{metric} across every trial, in order")
+        return ax
+
+
 # --------------------------------------------------------------------------- data quality
 def data_quality_report(frame, raw_columns, features):
     """Two tables and a header: what the file is, before anything is fitted to it.
