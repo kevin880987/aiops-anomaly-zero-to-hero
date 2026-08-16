@@ -51,7 +51,7 @@ Grafana 端全部走官方功能，datasource 用內建的檔案 provisioning（
 | `01_network_traffic_feature_engineering.ipynb` | 單位契約、資料剖面、四種 baseline（rolling mean、median 與 MAD、seasonal、peer group）與 shape features | 60 到 75 分鐘 |
 | `02_anomaly_detection_and_alerting.ipynb` | score 收成 label、label 通過 policy 成為 alert，以 event recall、detection delay 與 alerts per day 評估 | 60 到 75 分鐘 |
 | `06_forecasting.ipynb` | 從偵測跨到預警。Prophet 分解、時序 holdout 評估、把管制界限分別畫在原始序列、預測殘差與預測值三個地方 | 60 到 75 分鐘 |
-| `07_root_cause_analysis.ipynb` | 五種證據加權成 hybrid 排名，再用 hit@k、MRR 與信心校準分別回答排得準不準、說的信心可不可以信 | 60 到 75 分鐘 |
+| `07_root_cause_analysis.ipynb` | 五種證據加權成 hybrid 排名，再用 hit@k、MRR 與名次差距分組分別回答排得準不準、什麼時候可以相信第一名 | 60 到 75 分鐘 |
 
 ## 資料流
 
@@ -77,7 +77,7 @@ notebook 裡的每個參數，都可以回到這張表找它在真實系統中�
 | 00 Pipeline | 指標是否真的被收集、算完的分數是否回得去 | scrape interval、label 設計、counter 與 rate、哪一段計算該放在 PromQL 哪一段放在服務裡 | Prometheus scrape config、偵測服務、Grafana dashboard |
 | 01 Feature engineering | raw counters 如何變成可比較的訊號 | rate、ratio、rolling window、lag、多解析度 | Prometheus recording rules 或 feature service |
 | 02 Detection 與 alerting | 哪些偏離值得告警，代價是多少 | 閾值、baseline 視窗、deadband、duration、誤報預算 | Prometheus alert rules、Alertmanager |
-| 06 Forecasting 與預警 | 事情發生之前多久看得出來，界限該畫在哪一條序列上 | 季節性階數、預測區間寬度、界限畫在原始值或殘差、誤報預算換偵測率 | 預測服務、recording rules、Grafana |
+| 06 Forecasting 與預警 | 事情發生之前多久看得出來，界限該畫在哪一條序列上 | 季節性階數、預測區間寬度、界限畫在原始值或殘差、誤報預算換偵測率 | 預測服務、recording rules |
 | 07 Root cause analysis | 五個 port 同時亮的時候誰是根因，這個答案可不可以信 | 證據權重、樣本數夠不夠估、因果檢定的前處理、信心怎麼校準 | 事件關聯服務、值班手冊、事後檢討 |
 
 ## 每章自我檢核

@@ -6,7 +6,7 @@
 Prophet 與 Lab 07 的 hybrid 排名都需要一整段歷史才配適得起來，在課堂上跑不成長駐服務，
 所以改成 notebook 算完寫 CSV、這支程式把 CSV 重播成 metrics。
 
-換句話說，兩支程式接的是同一條線的同一個位置：
+換句話說，兩支程式接的是同一條線的同一個位置:
 
     detector.py       Prometheus -> 算分數 -> /metrics -> Prometheus
     results_exporter  notebook CSV -> 重播 -> /metrics -> Prometheus
@@ -66,7 +66,7 @@ def pick_columns(frame):
     if CONFIGURED_COLUMNS:
         missing = [c for c in CONFIGURED_COLUMNS if c not in frame.columns]
         if missing:
-            raise SystemExit(f"{CSV_PATH} 沒有 RESULT_COLUMNS 指定的欄位：{missing}")
+            raise SystemExit(f"{CSV_PATH} 沒有 RESULT_COLUMNS 指定的欄位: {missing}")
         return CONFIGURED_COLUMNS
     preferred = [c for c in PREFERRED_COLUMNS if c in frame.columns]
     if preferred:
@@ -112,7 +112,7 @@ class Replay:
         self.wall_start = time.time()
         # 換 CSV 的時候要清掉舊的 series，否則上一份的欄位會一直停在最後一個值不動。
         result_value.clear()
-        print(f"重新載入 {self.path}，欄位：{', '.join(self.columns)}", flush=True)
+        print(f"重新載入 {self.path}，欄位: {', '.join(self.columns)}", flush=True)
 
     def now(self):
         """重播走到 CSV 時間軸的哪一點。走完就從頭再來一輪。"""
@@ -125,7 +125,7 @@ class Replay:
         return start + (t - start) % span if t > end and span.total_seconds() > 0 else min(t, end)
 
     def rows_at(self, t):
-        """這個時間點該曝露哪幾列：時間軸上最後一批不晚於 t 的列（每個 port 各一列）。"""
+        """這個時間點該曝露哪幾列: 時間軸上最後一批不晚於 t 的列(每個 port 各一列)。"""
         before = self.frame[self.frame["timestamp"] <= t]
         return before[before["timestamp"] == before["timestamp"].max()] if len(before) else self.frame.head(0)
 
@@ -134,8 +134,8 @@ def main():
     replay = Replay(CSV_PATH)
     start_http_server(EXPORT_PORT)
     print(f"重播 {CSV_PATH}，{REPLAY_SPEED_X:g} 倍速，曝露在 http://localhost:{EXPORT_PORT}/metrics")
-    print(f"數值欄位：{', '.join(replay.columns) if replay.columns else '（還沒有 CSV）'}")
-    print(f"label 欄位：{', '.join(LABEL_COLUMNS)}", flush=True)
+    print(f"數值欄位: {', '.join(replay.columns) if replay.columns else '(還沒有 CSV)'}")
+    print(f"label 欄位: {', '.join(LABEL_COLUMNS)}", flush=True)
 
     while True:
         replay.reload_if_changed()
