@@ -1,0 +1,35 @@
+global:
+  resolve_timeout: 1s
+
+route:
+  receiver: chat
+  group_by: [alertname, target, detector, run_id]
+  group_wait: 0s
+  group_interval: 1s
+  repeat_interval: 3s
+  # BEGIN LAB EDIT P2/P4
+  # P2 target: group_by [site, run_id], group_wait 2s,
+  # group_interval 3s, repeat_interval 6s.
+  # P4 目標：先將 maintenance="true" 導向 maintenance-sink，
+  # 再將 warning 導向 chat、critical 導向 pager。
+  # END LAB EDIT P2/P4
+
+receivers:
+  - name: chat
+    webhook_configs:
+      - url: http://receiver:9300/webhook/chat
+        send_resolved: true
+
+  - name: pager
+    webhook_configs:
+      - url: http://receiver:9300/webhook/pager
+        send_resolved: true
+
+  # BEGIN LAB EDIT P4 RECEIVER
+  # 新增名為 maintenance-sink 的空 receiver。
+  # END LAB EDIT P4 RECEIVER
+
+# BEGIN LAB EDIT P3
+# Add an inhibit_rules entry: FirewallDown suppresses WebDown and DatabaseDown
+# when site and run_id are equal. Prometheus alerts remain visible.
+# END LAB EDIT P3

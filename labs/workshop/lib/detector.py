@@ -11,8 +11,8 @@ Prometheus 抓它的方式跟抓 node_exporter 一樣，所以 `aiops_traffic_sc
 
 啟動之後，<http://localhost:9200/metrics> 會列出 aiops_traffic_score。
 
-Lab 01 與 Lab 02 動的是 `rolling_zscore()` 這一個函式。Lab 01 換掉它的基線，Lab 02
-在它外面包門檻與政策。其餘的程式碼在後面兩節都不會再改。
+Lab 00 之後的每一節動的都是 `rolling_zscore()` 這一個函式。Lab 01 換掉它的基線，Lab 02
+在它外面包門檻與政策。其餘的程式碼從頭到尾都不會再改。
 """
 import os
 import time
@@ -35,7 +35,8 @@ EXPORTERS = [
 ]
 
 traffic_bps = Gauge("aiops_traffic_bps", "Interface receive rate this detector queried", ["device"])
-traffic_score = Gauge("aiops_traffic_score", "Deviation of the receive rate from its rolling baseline", ["device"])
+traffic_score = Gauge("aiops_traffic_score", "Deviation of the receive rate from its rolling baseline",
+                      ["device", "detector"])
 window_fill = Gauge("aiops_detector_window_samples", "Samples currently in the rolling window", ["device"])
 
 
@@ -68,21 +69,45 @@ def receive_rate(metric, label, device):
 def rolling_zscore(window, value):
     """離平均幾個標準差。這是最素樸的一種偏離分數，Lab 01 會說明它什麼時候會騙人。
 
-    視窗裝不滿就先回 0，因為兩三個樣本算出來的標準差小到沒有意義，隨便一點變動都會得到
+    視窗裝不滿就先 return 0，因為兩三個樣本算出來的標準差小到沒有意義，隨便一點變動都會得到
     十幾二十的分數，門檻 3 會被這種數字灌爆。基線要暖機，這一行就是暖機期。
     """
     if len(window) < MIN_SAMPLES:
-        return 0.0
-    mean = sum(window) / len(window)
-    stdev = (sum((x - mean) ** 2 for x in window) / len(window)) ** 0.5
-    return (value - mean) / stdev if stdev > 0 else 0.0
+        return 0.0  # fewer samples than MIN_SAMPLES: population stdev would be unstable, skip scoring
+    mean = sum(window) / len(window)  # center: arithmetic mean over the window
+    stdev = (sum((x - mean) ** 2 for x in window) / len(window)) ** 0.5  # scale: population standard deviation (divide by n, not n-1)
+    return (value - mean) / stdev if stdev > 0 else 0.0  # standardized deviation (value - mean) / stdev; 0 when stdev is zero, avoids division by zero
+
+
+def _median(values):
+    s = sorted(values)
+    n = len(s)
+    mid = n // 2
+    return s[mid] if n % 2 else (s[mid - 1] + s[mid]) / 2
+
+
+def your_detector(window, value):
+    if len(window) < MIN_SAMPLES:
+        return 0.0  # 樣本太少，中位數跟 MAD 一樣不穩定，理由跟 rolling_zscore() 的暖機期一樣
+    m = _median(window)
+    mad = _median(abs(x - m) for x in window)
+    scale = mad * 1.4826  # MAD 換成跟標準差同一個單位的常數
+    score = (value - m) / scale if scale > 0 else 0.0
+    print(score)
+    return score
+
+
+DETECTORS = {
+    "rolling_zscore": rolling_zscore,
+    "your_detector": your_detector,
+}
 
 
 def main():
     metric, label, device = pick_target()
     start_http_server(EXPORT_PORT)
-    print(f"detector 監看 {device}（{metric}），每 {POLL_SECONDS} 秒查一次，"
-          f"曝露在 http://localhost:{EXPORT_PORT}/metrics\n"
+    print(f"detector 監看 {device}（{metric}），偵測器 {', '.join(DETECTORS)}，"
+          f"每 {POLL_SECONDS} 秒查一次，曝露在 http://localhost:{EXPORT_PORT}/metrics\n"
           f"前 {MIN_SAMPLES * POLL_SECONDS} 秒是暖機期，分數固定是 0", flush=True)
 
     window = deque(maxlen=WINDOW)
@@ -90,7 +115,14 @@ def main():
         rate = receive_rate(metric, label, device)
         if rate is not None:
             # 分數用「這個值進視窗之前」的視窗算，否則異常值會自己抬高自己的 baseline。
-            traffic_score.labels(device).set(rolling_zscore(window, rate))
+            # 每個偵測器獨立算、獨立失敗：還沒實作完的那個只印訊息，不會拖垮其他偵測器的分數。
+            for name, detect in DETECTORS.items():
+                try:
+                    score = detect(window, rate)
+                except Exception as exc:
+                    print(f"detector {name} 失敗：{exc}", flush=True)
+                    continue
+                traffic_score.labels(device, name).set(score)
             traffic_bps.labels(device).set(rate)
             window.append(rate)
             window_fill.labels(device).set(len(window))

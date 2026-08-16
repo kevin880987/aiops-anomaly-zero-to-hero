@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Hand-authored companion to lab00_pipeline.svg and lab02_detection_methods.svg. Same visual convention: Georgia, #1F2933/#5A6472 text, box palette below. -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="740" viewBox="0 0 1320 740"
+     style="background:#FFFFFF;background-color:#FFFFFF;color-scheme:light;">
+<title>Where the three notebooks sit in the data science pipeline</title>
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+
+<!-- ================= Title ================= -->
+<text x="40" y="34" font-family="Georgia" font-size="18" font-weight="bold" fill="#1F2933">From telemetry to alert: where the three notebooks sit in the pipeline</text>
+<text x="40" y="58" font-family="Georgia" font-size="13" fill="#5A6472">Lab 00 builds the shell once; Lab 01 and Lab 02 only swap rolling_zscore() in detector.py.</text>
+
+<!-- ================= Row 1 — Lab 00 shell ================= -->
+<g font-family="Georgia">
+  <!-- box1 network/node_exporter/prometheus -->
+  <rect x="40" y="96" width="300" height="86" rx="10" fill="#F4F6F8" stroke="#98A2B3" stroke-width="1.5"/>
+  <text x="56" y="120" font-size="14" font-weight="bold" fill="#1F2933">node_exporter → Prometheus</text>
+  <text x="56" y="138" font-size="11.5" fill="#5A6472">:9100 exposes /metrics</text>
+  <text x="56" y="153" font-size="11.5" fill="#5A6472">Prometheus scrapes every 5s</text>
+
+  <!-- box2 detector.py, highlighted -->
+  <rect x="364" y="96" width="280" height="86" rx="10" fill="#FDF1E7" stroke="#E0752D" stroke-width="3"/>
+  <text x="380" y="120" font-size="14" font-weight="bold" fill="#1F2933">detector.py: rolling_zscore()</text>
+  <text x="380" y="138" font-size="11.5" fill="#5A6472">:9200, one round every 15s</text>
+  <text x="380" y="153" font-size="11.5" fill="#E0752D">everything below only swaps this</text>
+
+  <!-- box3 prometheus score -->
+  <rect x="668" y="96" width="280" height="86" rx="10" fill="#F4F6F8" stroke="#98A2B3" stroke-width="1.5"/>
+  <text x="684" y="120" font-size="14" font-weight="bold" fill="#1F2933">aiops_traffic_score</text>
+  <text x="684" y="138" font-size="11.5" fill="#5A6472">flows back into Prometheus</text>
+  <text x="684" y="153" font-size="11.5" fill="#5A6472">same datasource as raw rates</text>
+
+  <!-- box4 grafana + alerts -->
+  <rect x="972" y="96" width="308" height="86" rx="10" fill="#FBEDF0" stroke="#D6455D" stroke-width="2.5"/>
+  <text x="988" y="120" font-size="14" font-weight="bold" fill="#1F2933">Grafana panels + alerts.yml</text>
+  <text x="988" y="138" font-size="11.5" fill="#5A6472">TrafficAnomaly, threshold 3, for: 1m</text>
+  <text x="988" y="153" font-size="11.5" fill="#5A6472">Normal → Pending → Firing</text>
+
+  <!-- row1 internal arrows -->
+  <path d="M340,139 L355,139" stroke="#98A2B3" stroke-width="2" fill="none"/>
+  <path d="M355,134 L364,139 L355,144 Z" fill="#98A2B3"/>
+  <path d="M644,139 L659,139" stroke="#E0752D" stroke-width="2" fill="none"/>
+  <path d="M659,134 L668,139 L659,144 Z" fill="#E0752D"/>
+  <path d="M948,139 L963,139" stroke="#98A2B3" stroke-width="2" fill="none"/>
+  <path d="M963,134 L972,139 L963,144 Z" fill="#98A2B3"/>
+</g>
+
+<!-- ① connector: box2 → Lab01 header, dashed orange -->
+<path d="M504,182 L504,213" stroke="#E0752D" stroke-width="2" stroke-dasharray="6,4" fill="none"/>
+<path d="M499,213 L504,222 L509,213 Z" fill="#E0752D"/>
+<text x="516" y="207" font-family="Georgia" font-size="13" font-weight="bold" fill="#E0752D">①</text>
+<text x="532" y="207" font-family="Georgia" font-size="11" fill="#5A6472">Lab 01 → Lab 02 take over this box</text>
+
+<!-- ================= Header — Lab 01 ================= -->
+<rect x="40" y="222" width="1240" height="32" rx="6" fill="#F4F6F8" stroke="#E4E7EB"/>
+<rect x="40" y="222" width="6" height="32" fill="#3B7DD8"/>
+<text x="56" y="243" font-family="Georgia" font-size="13" font-weight="bold" fill="#1F2933">LAB 01 · Baselines, Windows and Alerts · Step 1–17 · 75–90 min</text>
+
+<!-- ================= Row 2 — Lab 01 phases ================= -->
+<g font-family="Georgia">
+  <!-- A Load and validate -->
+  <rect x="40" y="270" width="292" height="108" rx="10" fill="#F4F6F8" stroke="#98A2B3" stroke-width="1.5"/>
+  <text x="56" y="294" font-size="14" font-weight="bold" fill="#1F2933">Load &amp; validate</text>
+  <text x="56" y="312" font-size="11" fill="#98A2B3">Step 1–5</text>
+  <text x="56" y="330" font-size="11.5" fill="#5A6472">dedupe &amp; sort · missing values</text>
+  <text x="56" y="345" font-size="11.5" fill="#5A6472">time-axis integrity · smoothing cost</text>
+  <text x="56" y="360" font-size="11.5" fill="#5A6472">resample coarseness → lost events</text>
+
+  <!-- B Six baselines -->
+  <rect x="356" y="270" width="292" height="108" rx="10" fill="#FDF1E7" stroke="#E0752D" stroke-width="3"/>
+  <text x="372" y="294" font-size="14" font-weight="bold" fill="#1F2933">Six baselines, one scorecard</text>
+  <text x="372" y="312" font-size="11" fill="#E0752D">Step 6–10</text>
+  <text x="372" y="330" font-size="11.5" fill="#5A6472">fixed threshold · global z-score</text>
+  <text x="372" y="345" font-size="11.5" fill="#5A6472">rolling window · robust (median/MAD)</text>
+  <text x="372" y="360" font-size="11.5" fill="#5A6472">seasonal · peer signal</text>
+
+  <!-- C score/label/alert -->
+  <rect x="672" y="270" width="292" height="108" rx="10" fill="#FBEDF0" stroke="#D6455D" stroke-width="2.5"/>
+  <text x="688" y="294" font-size="14" font-weight="bold" fill="#1F2933">Score ≠ label ≠ alert</text>
+  <text x="688" y="312" font-size="11" fill="#D6455D">Step 11–13</text>
+  <text x="688" y="330" font-size="11.5" fill="#5A6472">the threshold is an ops decision,</text>
+  <text x="688" y="345" font-size="11.5" fill="#5A6472">not a statistical fact</text>
+
+  <!-- D handoff -->
+  <rect x="988" y="270" width="292" height="108" rx="10" fill="#EAF1FB" stroke="#3B7DD8" stroke-width="2.5"/>
+  <text x="1004" y="294" font-size="14" font-weight="bold" fill="#1F2933">Split without leaking</text>
+  <text x="1004" y="312" font-size="11" fill="#3B7DD8">Step 14–17</text>
+  <text x="1004" y="330" font-size="11.5" fill="#5A6472">TRAIN_FRAC · deseasonalize</text>
+  <text x="1004" y="345" font-size="11.5" fill="#5A6472">sliding windows · N_INPUT</text>
+  <text x="1004" y="360" font-size="11.5" fill="#3B7DD8">→ feature_spec.json</text>
+
+  <!-- row2 internal arrows -->
+  <path d="M332,324 L347,324" stroke="#98A2B3" stroke-width="2" fill="none"/>
+  <path d="M347,319 L356,324 L347,329 Z" fill="#98A2B3"/>
+  <path d="M648,324 L663,324" stroke="#E0752D" stroke-width="2" fill="none"/>
+  <path d="M663,319 L672,324 L663,329 Z" fill="#E0752D"/>
+  <path d="M964,324 L979,324" stroke="#D6455D" stroke-width="2" fill="none"/>
+  <path d="M979,319 L988,324 L979,329 Z" fill="#D6455D"/>
+</g>
+
+<!-- D → E connector, solid blue, artifact handoff -->
+<path d="M1134,378 L1134,398 L186,398 L186,457" stroke="#3B7DD8" stroke-width="2" fill="none"/>
+<path d="M181,457 L186,466 L191,457 Z" fill="#3B7DD8"/>
+<text x="560" y="394" font-family="Georgia" font-size="11" fill="#3B7DD8">feature_spec.json</text>
+
+<!-- ================= Header — Lab 02 ================= -->
+<rect x="40" y="418" width="1240" height="32" rx="6" fill="#F4F6F8" stroke="#E4E7EB"/>
+<rect x="40" y="418" width="6" height="32" fill="#E0752D"/>
+<text x="56" y="439" font-family="Georgia" font-size="13" font-weight="bold" fill="#1F2933">LAB 02 · Detectors · Step 1–9 · 90–110 min</text>
+
+<!-- ================= Row 3 — Lab 02 phases ================= -->
+<g font-family="Georgia">
+  <!-- E Load feature_spec -->
+  <rect x="40" y="466" width="292" height="108" rx="10" fill="#F4F6F8" stroke="#98A2B3" stroke-width="1.5"/>
+  <text x="56" y="490" font-size="14" font-weight="bold" fill="#1F2933">Load feature_spec + params</text>
+  <text x="56" y="508" font-size="11" fill="#98A2B3">Step 1–4</text>
+  <text x="56" y="526" font-size="11.5" fill="#5A6472">BUDGET, the one hyperparameter</text>
+
+  <!-- F CUSUM/EWMA -->
+  <rect x="356" y="466" width="292" height="108" rx="10" fill="#FDF1E7" stroke="#E0752D" stroke-width="3"/>
+  <text x="372" y="490" font-size="14" font-weight="bold" fill="#1F2933">Change points &amp; control limits</text>
+  <text x="372" y="508" font-size="11" fill="#E0752D">Step 5–6</text>
+  <text x="372" y="526" font-size="11.5" fill="#5A6472">CUSUM (k, h)</text>
+  <text x="372" y="541" font-size="11.5" fill="#5A6472">EWMA (λ)</text>
+  <text x="372" y="556" font-size="11.5" fill="#5A6472">per column, per port</text>
+
+  <!-- G multivariate -->
+  <rect x="672" y="466" width="292" height="108" rx="10" fill="#FDF1E7" stroke="#E0752D" stroke-width="3"/>
+  <text x="688" y="490" font-size="14" font-weight="bold" fill="#1F2933">Multivariate detectors</text>
+  <text x="688" y="508" font-size="11" fill="#E0752D">Step 7</text>
+  <text x="688" y="526" font-size="11.5" fill="#5A6472">LOF · One-Class SVM</text>
+  <text x="688" y="541" font-size="11.5" fill="#5A6472">Isolation Forest</text>
+  <text x="688" y="556" font-size="11.5" fill="#5A6472">compared on one scorecard</text>
+
+  <!-- H compose -->
+  <rect x="988" y="466" width="292" height="108" rx="10" fill="#EAF1FB" stroke="#3B7DD8" stroke-width="2.5"/>
+  <text x="1004" y="490" font-size="14" font-weight="bold" fill="#1F2933">Combine what already works</text>
+  <text x="1004" y="508" font-size="11" fill="#3B7DD8">Step 8–9</text>
+  <text x="1004" y="526" font-size="11.5" fill="#5A6472">CAP the sum</text>
+  <text x="1004" y="541" font-size="11.5" fill="#3B7DD8">→ composed score</text>
+
+  <!-- row3 internal arrows -->
+  <path d="M332,520 L347,520" stroke="#98A2B3" stroke-width="2" fill="none"/>
+  <path d="M347,515 L356,520 L347,525 Z" fill="#98A2B3"/>
+  <path d="M648,520 L663,520" stroke="#E0752D" stroke-width="2" fill="none"/>
+  <path d="M663,515 L672,520 L663,525 Z" fill="#E0752D"/>
+  <path d="M964,520 L979,520" stroke="#E0752D" stroke-width="2" fill="none"/>
+  <path d="M979,515 L988,520 L979,525 Z" fill="#E0752D"/>
+</g>
+
+<!-- ② loop-back: H → detector.py, dashed orange, routed via right margin -->
+<path d="M1280,520 L1300,520 L1300,78 L504,78 L504,87" stroke="#E0752D" stroke-width="2" stroke-dasharray="6,4" fill="none"/>
+<path d="M499,87 L504,96 L509,87 Z" fill="#E0752D"/>
+<text x="700" y="72" font-family="Georgia" font-size="13" font-weight="bold" fill="#E0752D">②</text>
+<text x="716" y="72" font-family="Georgia" font-size="11" fill="#5A6472">DETECTORS{} gains a line → Grafana adds a series automatically</text>
+
+<!-- ================= Legend + note ================= -->
+<g font-family="Georgia">
+  <rect x="56" y="618" width="14" height="14" rx="3" fill="#F4F6F8" stroke="#98A2B3" stroke-width="1.5"/>
+  <text x="78" y="629" font-size="11.5" fill="#5A6472">official component / existing shell</text>
+  <rect x="341" y="618" width="14" height="14" rx="3" fill="#FDF1E7" stroke="#E0752D" stroke-width="2"/>
+  <text x="363" y="629" font-size="11.5" fill="#5A6472">candidate deviation-score algorithm</text>
+  <rect x="626" y="618" width="14" height="14" rx="3" fill="#EAF1FB" stroke="#3B7DD8" stroke-width="2"/>
+  <text x="648" y="629" font-size="11.5" fill="#5A6472">compare / combine / output</text>
+  <rect x="855" y="618" width="14" height="14" rx="3" fill="#FBEDF0" stroke="#D6455D" stroke-width="2"/>
+  <text x="877" y="629" font-size="11.5" fill="#5A6472">threshold &amp; policy → alert</text>
+
+  <text x="40" y="662" font-size="12" fill="#5A6472">After Lab 00, every lesson touches one function: detector.py's rolling_zscore(). Lab 01 decides what to feed it and compares six baselines;</text>
+  <text x="40" y="680" font-size="12" fill="#5A6472">Lab 02 decides whether to add change points, control limits, or multivariate models, then combines them into the score DETECTORS{} sends back.</text>
+  <text x="40" y="702" font-size="11" fill="#98A2B3">Detail: lab00_pipeline.svg (Lab 00 internals) and lab02_detection_methods.svg (trade-offs among the three detection methods).</text>
+</g>
+
+</svg>

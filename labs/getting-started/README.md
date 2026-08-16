@@ -17,16 +17,16 @@
 | Prometheus | <http://localhost:9090> | Step 3 |
 | node_exporter（Windows 是 windows_exporter） | <http://localhost:9100/metrics> | Step 4 |
 | Grafana | <http://localhost:3000> | Step 5 |
-| `detector.py` | <http://localhost:9200/metrics> | Lab 00 第 4 節 |
+| 偵測服務 | <http://localhost:9200/metrics> | 課堂上啟動 |
 
-前三個是官方 binary，這裡先裝好。第四個是這門課唯一自己寫的服務，Lab 00 會帶你當場啟動它。
+前三個是官方 binary，在這一章先完成安裝。第四個是這門課唯一自己寫的服務，課堂上會帶你啟動。
 
-## Step 1. 進入 course repo
+## Step 1. 進入教材根目錄
 
-所有指令都從 repository 根目錄執行。
+所有指令都從教材根目錄執行，也就是同時包含 `environments/`、`labs/`、`infra/` 的那一層。
 
 ```bash
-cd <你 clone 的位置>/aiops-anomaly-zero-to-hero
+cd <你放教材的位置>/aiops-anomaly-zero-to-hero
 ```
 
 Windows PowerShell 是 `cd C:\Users\<你的帳號>\aiops-anomaly-zero-to-hero`。
@@ -39,7 +39,7 @@ Windows PowerShell 是 `cd C:\Users\<你的帳號>\aiops-anomaly-zero-to-hero`�
 
 ## Step 3. 安裝並啟動 Prometheus
 
-照 [02-install-prometheus.md](02-install-prometheus.md) 做。那份文件用一整節寫這一步唯一的坑：Prometheus 必須載到本 repository 的設定檔，否則它照常執行、照常回答查詢，只是永遠 scrape 不到 node_exporter。
+照 [02-install-prometheus.md](02-install-prometheus.md) 做。那份文件用一整節說明這一步唯一的失敗模式：Prometheus 必須載入教材裡的設定檔，否則它照常執行、照常回答查詢，只是永遠 scrape 不到 node_exporter。
 
 驗收：<http://localhost:9090> 能開啟，`up{job="prometheus"}` 查詢得到值。
 
@@ -56,12 +56,11 @@ Windows PowerShell 是 `cd C:\Users\<你的帳號>\aiops-anomaly-zero-to-hero`�
 照 [03-install-grafana-local.md](03-install-grafana-local.md) 做。這門課的 datasource 只有
 Prometheus 一個。
 
-驗收：`Connections → Data sources` 列得出 `Prometheus`，Save & test 顯示成功。URL 填成 `3000` 是最
-常見的失敗，`3000` 是 Grafana 自己。dashboard 在 Lab 00 自己建，這裡不驗收。
+驗收：`Connections → Data sources` 列得出 `Prometheus`，Save & test 顯示成功。URL 填成 `3000` 是最常見的失敗，`3000` 是 Grafana 自己。dashboard 在課堂上建立，這裡不驗收。
 
 ## Step 6. 執行 setup check notebook
 
-逐格執行 `00-check-your-setup.ipynb`，四格都要通過：repo 路徑、Python 環境、Prometheus 與 Grafana 與 node_exporter、準備完成。
+逐格執行 `00-check-your-setup.ipynb`，四格都要通過：教材根目錄、Python 環境、Prometheus 與 Grafana 與 node_exporter、準備完成。
 
 某一格失敗時，它會列出對應的安裝指南。補齊之後重新執行整份。
 
@@ -69,15 +68,5 @@ Prometheus 一個。
 
 ## Step 7. 開始 labs
 
-```text
-labs/workshop/00_end_to_end_pipeline.ipynb
-```
+課程教材放在 `labs/workshop/`，從編號最小的那一份開始，編號就是順序。
 
-Lab 00 把整條 pipeline 接起來，從網卡的 counter 到會響的告警，中間那一段偵測是自己寫的 Python 服務。
-接完之後 Lab 01 與 Lab 02 只處理演算法。順序不能跳，Lab 02 的分數建立在 Lab 01 的 baseline 上。第六週的 Lab 06 與 Lab 07 接在後面，把偵測推到預警與根因，讀的是同一份 `data/synthetic/` 歷史資料。
-三份 notebook 的分工見 [`labs/workshop/README.md`](../workshop/README.md)。
-
-## 選用：Grafana Cloud
-
-課程主線只需要 Grafana Local。把指標推上雲端的做法在
-`03b-setup-grafana-cloud.md`，這份文件在 workspace 根目錄，不在這個 repo 裡。

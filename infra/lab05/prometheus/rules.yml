@@ -1,0 +1,43 @@
+groups:
+  - name: lab05-alert-pipeline
+    interval: 250ms
+    rules:
+      - alert: HighAnomalyScore
+        expr: lab05_anomaly_score > 3
+        labels:
+          severity: warning
+        annotations:
+          summary: "High {{ $labels.detector }} score on {{ $labels.target }}"
+        # BEGIN LAB EDIT P1
+        # Add these fields to reject brief spikes and reduce flapping:
+        # for: 2s
+        # keep_firing_for: 2s
+        # END LAB EDIT P1
+
+      - alert: PacketLossHigh
+        expr: lab05_packet_loss_ratio > 0.02
+        labels:
+          severity: critical
+        annotations:
+          summary: "Packet loss is high on {{ $labels.target }}"
+
+      - alert: FirewallDown
+        expr: lab05_service_up{target="fw01"} == 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "Firewall is down"
+
+      - alert: WebDown
+        expr: lab05_service_up{target="web01"} == 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "Web service is down"
+
+      - alert: DatabaseDown
+        expr: lab05_service_up{target="db01"} == 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database is down"

@@ -1,0 +1,105 @@
+{
+  "annotations": {"list": []},
+  "description": "Observe replayed anomaly scores as they become alerts and notifications.",
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "lab05-prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}}, "overrides": []},
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "showPercentChange": false, "textMode": "auto", "wideLayout": true},
+      "targets": [{"editorMode": "code", "expr": "lab05_replay_progress_ratio{run_id=~\"$run_id\",scenario=~\"$scenario\"}", "legendFormat": "{{scenario}} {{run_id}}", "range": true, "refId": "A"}],
+      "title": "Replay Status",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "lab05-prometheus"},
+      "fieldConfig": {"defaults": {"unit": "dateTimeAsIso"}, "overrides": []},
+      "gridPos": {"h": 5, "w": 6, "x": 6, "y": 0},
+      "id": 2,
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "showPercentChange": false, "textMode": "auto", "wideLayout": true},
+      "targets": [{"editorMode": "code", "expr": "lab05_replay_source_timestamp_seconds{run_id=~\"$run_id\",scenario=~\"$scenario\"} * 1000", "legendFormat": "Source clock", "range": true, "refId": "A"}],
+      "title": "Source Clock",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "lab05-prometheus"},
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "gridPos": {"h": 5, "w": 6, "x": 12, "y": 0},
+      "id": 3,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "showPercentChange": false, "textMode": "auto", "wideLayout": true},
+      "targets": [{"editorMode": "code", "expr": "max by (receiver, run_id) (lab05_last_notification_received_timestamp_seconds{run_id=~\"$run_id\",status=\"firing\"}) - on (run_id) group_left min by (run_id) (ALERTS_FOR_STATE{run_id=~\"$run_id\",alertstate=\"firing\"})", "legendFormat": "{{receiver}}", "range": true, "refId": "A"}],
+      "title": "Latency",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "lab05-prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 8, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "lineInterpolation": "linear", "lineWidth": 2, "pointSize": 3, "scaleDistribution": {"type": "linear"}, "showPoints": "auto", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "line"}}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 3}]}}, "overrides": []},
+      "gridPos": {"h": 9, "w": 18, "x": 0, "y": 5},
+      "id": 4,
+      "options": {"legend": {"calcs": [], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"hideZeros": false, "mode": "multi", "sort": "desc"}},
+      "targets": [{"editorMode": "code", "expr": "lab05_anomaly_score{run_id=~\"$run_id\",scenario=~\"$scenario\",target=~\"$target\"}", "legendFormat": "{{target}} / {{detector}}", "range": true, "refId": "A"}],
+      "title": "Anomaly Scores",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "lab05-prometheus"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 9, "w": 6, "x": 18, "y": 5},
+      "id": 5,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "horizontal", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "showPercentChange": false, "textMode": "auto", "wideLayout": true},
+      "targets": [
+        {"editorMode": "code", "expr": "sum by (alertname, alertstate) (ALERTS{run_id=~\"$run_id\",scenario=~\"$scenario\",target=~\"$target\"})", "legendFormat": "{{alertname}} / {{alertstate}}", "range": true, "refId": "A"}
+      ],
+      "title": "Alert State",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "lab05-prometheus"},
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+      "id": 6,
+      "options": {"legend": {"calcs": [], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"hideZeros": false, "mode": "multi", "sort": "none"}},
+      "targets": [
+        {"editorMode": "code", "expr": "lab05_notifications_total{run_id=~\"$run_id\",scenario=~\"$scenario\"}", "legendFormat": "deliveries / {{receiver}} / {{status}}", "range": true, "refId": "A"},
+        {"editorMode": "code", "expr": "lab05_notification_alerts_total{run_id=~\"$run_id\",scenario=~\"$scenario\"}", "legendFormat": "alerts / {{receiver}} / {{status}}", "range": true, "refId": "B"}
+      ],
+      "title": "Notifications",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "lab05-prometheus"},
+      "description": "Truth is for retrospective evaluation only. Alert rules must never use it.",
+      "fieldConfig": {"defaults": {"min": 0, "max": 1}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+      "id": 7,
+      "options": {"legend": {"calcs": [], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"hideZeros": false, "mode": "multi", "sort": "none"}},
+      "targets": [{"editorMode": "code", "expr": "lab05_truth_event_active{run_id=~\"$run_id\",scenario=~\"$scenario\",target=~\"$target\"}", "legendFormat": "{{event_type}} / {{target}}", "range": true, "refId": "A"}],
+      "title": "Event Truth (Evaluation Only)",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "1s",
+  "schemaVersion": 41,
+  "tags": ["aiops", "lab05", "alerting"],
+  "templating": {
+    "list": [
+      {"current": {}, "datasource": {"type": "prometheus", "uid": "lab05-prometheus"}, "definition": "label_values(lab05_replay_progress_ratio, run_id)", "includeAll": true, "label": "Run", "multi": true, "name": "run_id", "options": [], "query": {"query": "label_values(lab05_replay_progress_ratio, run_id)", "refId": "StandardVariableQuery"}, "refresh": 1, "regex": "", "sort": 2, "type": "query"},
+      {"current": {}, "datasource": {"type": "prometheus", "uid": "lab05-prometheus"}, "definition": "label_values(lab05_replay_progress_ratio, scenario)", "includeAll": true, "label": "Scenario", "multi": true, "name": "scenario", "options": [], "query": {"query": "label_values(lab05_replay_progress_ratio, scenario)", "refId": "StandardVariableQuery"}, "refresh": 1, "regex": "", "sort": 1, "type": "query"},
+      {"current": {}, "datasource": {"type": "prometheus", "uid": "lab05-prometheus"}, "definition": "label_values(lab05_anomaly_score, target)", "includeAll": true, "label": "Target", "multi": true, "name": "target", "options": [], "query": {"query": "label_values(lab05_anomaly_score, target)", "refId": "StandardVariableQuery"}, "refresh": 1, "regex": "", "sort": 1, "type": "query"}
+    ]
+  },
+  "time": {"from": "now-5m", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Lab05 Production Alert Pipeline",
+  "uid": "lab05-alert-pipeline",
+  "version": 1,
+  "weekStart": ""
+}

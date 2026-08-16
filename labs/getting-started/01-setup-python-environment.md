@@ -16,35 +16,40 @@
 
 ## 步驟
 
-### 1. 進入專案根目錄
+### 1. 進入教材根目錄
+
+所有指令都從教材根目錄執行，也就是同時包含 `environments/` 與 `labs/` 的那一層。
 
 ```bash
-cd aiops-anomaly-zero-to-hero
+cd <你放教材的位置>/aiops-anomaly-zero-to-hero
 ```
+### 2. 從環境檔建立 conda 環境
 
-### 2. 建立 conda 環境
+環境檔按平台分成三份，三份建立出來的是同一個 conda environment：`aiops-anomaly-zero-to-hero`。Python 直譯器與課程用得到的套件，都由環境檔一次安裝。找到你那一列，整行複製執行。
 
-環境檔按平台分成三份，建立出來的是同一個 conda environment：`aiops-anomaly-zero-to-hero`。
-在終端機執行，Windows 用 PowerShell，路徑分隔改成反斜線。
+| 平台 | 建立指令 |
+| --- | --- |
+| macOS | `conda env create -f environments/environment.macos.yml` |
+| Linux | `conda env create -f environments/environment.linux.yml` |
+| Windows | `conda env create -f environments/environment.windows.yml` |
 
-```bash
-cd <你 clone 的位置>/aiops-anomaly-zero-to-hero
-conda env create -f environments/environment.<你的 OS {macos, linux, windows}>.yml
-```
+環境已經存在時，建立會失敗，改用同一份環境檔更新。`--prune` 會移除環境檔裡已經刪掉的套件。
 
-環境已存在時改用更新指令：
+| 平台 | 更新指令 |
+| --- | --- |
+| macOS | `conda env update -f environments/environment.macos.yml --prune` |
+| Linux | `conda env update -f environments/environment.linux.yml --prune` |
+| Windows | `conda env update -f environments/environment.windows.yml --prune` |
 
-```bash
-conda env update -n aiops-anomaly-zero-to-hero -f environments/environment.<你的 OS {macos, linux, windows}>.yml --prune
-```
-
-啟用環境：
+### 3. 啟用環境
 
 ```bash
 conda activate aiops-anomaly-zero-to-hero
 ```
 
-### 3. 開啟 labs
+提示字元前面出現 `(aiops-anomaly-zero-to-hero)`，才算啟用成功。新開的終端機都要重新執行這一行，理由見常見問題的第一則。
+
+### 4. 開啟 labs
 
 用你慣用的 IDE 或 notebook 工具開啟 `labs/getting-started/00-check-your-setup.ipynb`，kernel 選擇課程環境，然後逐格執行。這份 notebook 是最終檢查入口，缺少任何項目時它會指向對應的安裝指南。
 
@@ -59,6 +64,15 @@ conda activate aiops-anomaly-zero-to-hero
 | JupyterLab | [Installation](https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html) | `conda install -n aiops-anomaly-zero-to-hero jupyterlab` 之後執行 `jupyter lab labs/` |
 
 ## 常見問題
+
+**新開的終端機執行 lab 腳本，出現 `ModuleNotFoundError`？**
+`conda activate` 只對執行過這道指令的終端機生效。另外開一個視窗，或是重新開機之後，提示字元會回到 `(base)`，課程套件不在那裡。這時執行 `python labs/workshop/detector.py`，會停在：
+
+```text
+ModuleNotFoundError: No module named 'prometheus_client'
+```
+
+先執行 `conda activate aiops-anomaly-zero-to-hero`，確認提示字元變成 `(aiops-anomaly-zero-to-hero)`，再執行一次。工作坊要同時開好幾個終端機，每一個都得各自啟用。
 
 **conda activate 沒有作用？**（macOS / Linux）
 執行 `conda init zsh` 或 `conda init bash`，重新開啟終端機，再試一次。
@@ -83,7 +97,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 確認後重新執行 `conda activate aiops-anomaly-zero-to-hero`。
 
 **指令顯示找不到環境檔？**
-請確認你目前在專案根目錄，也就是可以看到 `environments/` 與 `labs/` 的那一層。
+請確認你目前在教材根目錄，也就是可以看到 `environments/` 與 `labs/` 的那一層。
 
 **notebook 的 kernel 選單列不出課程環境？**
 編輯器通常會自己列出 conda environment。找不到時先啟用環境，把它註冊成一個具名 kernel：
@@ -99,7 +113,6 @@ python -m ipykernel install --user --name aiops-anomaly-zero-to-hero --display-n
 
 ```bash
 conda env remove -n aiops-anomaly-zero-to-hero
-conda env create -f environments/environment.macos.yml
 ```
 
-環境檔路徑換成上表你那一列。
+刪完之後回到步驟 2，執行建立指令表格裡你那一列。

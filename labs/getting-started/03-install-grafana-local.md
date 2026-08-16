@@ -1,11 +1,10 @@
-# 安裝 Grafana 並連接 Prometheus
+# 安裝 Grafana 並連線 Prometheus
 
 官方文件：[安裝說明](https://grafana.com/docs/grafana/latest/setup-grafana/installation/)、[下載頁](https://grafana.com/grafana/download/)
 
 **前置條件：** Prometheus 已安裝並正在運作（[02-install-prometheus.md](02-install-prometheus.md)）。
 
-這一步要安裝 Grafana，並且接上 Prometheus。原始指標存在 Prometheus 裡，Python 算出來的分數與
-告警狀態也一樣，所以 Grafana 這一端只需要這一個 datasource。
+這一步要安裝 Grafana，並且接上 Prometheus。原始指標存在 Prometheus 裡，Python 算出來的偏離分數與告警狀態也一樣，所以 Grafana 這一端只需要這一個 datasource。
 
 ## 1. 安裝 Grafana
 
@@ -56,11 +55,11 @@ sudo cp infra/grafana/provisioning/datasources.yaml \
 sudo systemctl restart grafana-server
 ```
 
-**Windows：** 在 PowerShell 執行，`$repo` 換成自己 clone 的位置：
+**Windows：** 在 PowerShell 執行，`$course` 換成教材放的位置：
 
 ```powershell
-$repo = "<你的路徑>\aiops-anomaly-zero-to-hero"
-Copy-Item "$repo\infra\grafana\provisioning\datasources.yaml" `
+$course = "<你的路徑>\aiops-anomaly-zero-to-hero"
+Copy-Item "$course\infra\grafana\provisioning\datasources.yaml" `
   "C:\Program Files\GrafanaLabs\grafana\conf\provisioning\datasources\aiops.yaml"
 Restart-Service Grafana
 ```
@@ -75,8 +74,7 @@ Restart-Service Grafana
 值是 `1`。
 
 另外兩個 job 現在還不會有值，那是正常的。`job="node-exporter"` 要等你完成
-[04-install-node-exporter.md](04-install-node-exporter.md)，`job="aiops-detector"` 要等
-Lab 00 啟動那支偵測服務。
+[04-install-node-exporter.md](04-install-node-exporter.md)，`job="aiops-detector"` 要等課堂上啟動那支偵測服務。
 
 ## 常見問題
 
@@ -86,5 +84,5 @@ Lab 00 啟動那支偵測服務。
 **Save & test 失敗？**
 先確認 Prometheus 能在 <http://localhost:9090> 開啟。資料來源 URL 應填 `http://localhost:9090`，`3000` 是 Grafana 自己。
 
-**`up` 這個 query 在 Explore 裡查不到 `node-exporter`？**
-整筆 job 不存在就是 Prometheus 載錯設定檔，見 [02-install-prometheus.md](02-install-prometheus.md)〈用 service 啟動〉。Dashboard 的排查在 [`labs/workshop/dashboard.md`](../workshop/dashboard.md)，這裡還沒有 dashboard 可以排查。
+**`up` 這個 query 在 Explore 裡查詢不到 `node-exporter`？**
+整筆 job 不存在就是 Prometheus 載錯設定檔，見 [02-install-prometheus.md](02-install-prometheus.md)〈用 service 啟動〉。Dashboard 的排查寫在 `labs/workshop/` 的教材裡，這裡還沒有 dashboard 可以排查。
