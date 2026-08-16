@@ -1,0 +1,319 @@
+{
+ "meta": {
+  "model": "claude-opus-5",
+  "recorded_at": "2026-08-16",
+  "how": "用 notebook 裡同一個 SYSTEM_PROMPT / RANK_SYSTEM_PROMPT 與同一份 payload 呼叫一次，回傳的 JSON 原樣存下來，一個字都沒有改。",
+  "note": "課堂上沒有 API 金鑰時 notebook 會讀這一份重播。設好 ANTHROPIC_API_KEY 與 USE_LLM=1 就會改成即時呼叫。"
+ },
+ "diagnose": {
+  "L": {
+   "incident_summary": "在 2026-03-02 14:00 → 17:55 (共 235 分鐘) 期間，signature metric error_rate 出現大規模異常，最高排名候選為 port-id7427 (edge-fw-01)，z=29.1、Score=75.55；共 3 個 port 受影響，跨 port 同步度為 0.23。onset 分布在 4 個不同取樣格 (5 分鐘粒度)，時序上具有先後差異，形狀偏向上游劣化後往下游擴散，而非單點同時爆發。",
+   "impact_scope": {
+    "ports": [
+     "port-id7427",
+     "port-id7429",
+     "port-id7431"
+    ],
+    "roles": [
+     "backup-storage",
+     "server-uplink",
+     "wan-primary"
+    ],
+    "devices": [
+     "core-sw-01",
+     "dist-sw-02",
+     "edge-fw-01"
+    ],
+    "duration_min": 235
+   },
+   "root_cause_hypotheses": [
+    {
+     "rank": 1,
+     "candidate": "port-id7427 (edge-fw-01): 光路劣化引發下游重傳",
+     "confidence": "Medium",
+     "reasoning": "Score(c)=75.55 為最高，且與第 2 名的 margin 為 16.8，排名分離度足夠，不是平手規則決定的。它同時是最早的 onset (2026-03-02 14:00:00)，符合上游先劣化的時序。信心只給 Medium 而不是 High，理由是 Granger 在每一個候選上都是 0，沒有任何模型層級的因果證據支持這條方向，而且 z=29.1 反而低於第 2、3 名，這個候選是被 Score(c) 的其他子項推上去的，不是被訊號強度推上去的。"
+    },
+    {
+     "rank": 2,
+     "candidate": "port-id7429 (core-sw-01): 光路劣化引發下游重傳",
+     "confidence": "Medium",
+     "reasoning": "z=76.7 是全部候選裡最大的，onset 與第 1 名同為 2026-03-02 14:00:00，但 Score=58.75 低於第 1 名。訊號強度與 onset 都不輸 port-id7427，只是綜合分數較低，所以它是「最嚴重的那個就是原因」這個較簡單解釋所指向的對象，必須與第 1 名一起驗證，不能因為排名第 2 就跳過。"
+    },
+    {
+     "rank": 3,
+     "candidate": "port-id7431 (dist-sw-02): 光路劣化引發下游重傳",
+     "confidence": "Low",
+     "reasoning": "z=55.4、Score=52.5，onset 為 2026-03-02 14:05:00，比前兩名晚一個取樣格。在時序上它是後發的，較可能是承接上游異常的下游端，而不是來源。列在這裡是為了完整覆蓋 affected_ports，不是因為它有獨立的來源證據。"
+    }
+   ],
+   "supporting_evidence": [
+    {
+     "claim": "簽章 metric error_rate 在 port-id7427 的 z=29.1，超出 3 sigma 判準",
+     "source": "metric:error_rate@port-id7427"
+    },
+    {
+     "claim": "最早的 onset 是 03-02 14:00 port-id7427 (edge-fw-01) 的 error_rate 偏離同時段常態超過 3 sigma",
+     "source": "onset:baseline+3sigma, k=3"
+    },
+    {
+     "claim": "onset 落在 4 個不同的取樣格 (14:00 兩個 port、14:05、14:30)，在 5 分鐘粒度下仍能看到先後順序，不是全部同時越線",
+     "source": "onset:distinct slots = 4"
+    },
+    {
+     "claim": "3 個 port 同時異常，跨 port 同步度 0.23",
+     "source": "zmatrix:3/5 ports over threshold"
+    },
+    {
+     "claim": "MI 子項對 C(c) 有非零貢獻 (0.012)",
+     "source": "C(c):mutual_information"
+    },
+    {
+     "claim": "co-occurrence 為 1.0，候選與異常在時間上完全同時出現",
+     "source": "C(c):co_occurrence"
+    },
+    {
+     "claim": "第 1 名與第 2 名的 Score 差距為 16.8，排名不是靠平手規則決定的",
+     "source": "ranking:Score(c) margin"
+    },
+    {
+     "claim": "事件窗有 48 個取樣點，長度足以支撐同時段基線比較",
+     "source": "context:window_samples=48"
+    }
+   ],
+   "contrary_evidence": [
+    {
+     "claim": "排名把 z 更大的 port-id7429 (z=76.7) 放在第 2 名，第 3 名 port-id7431 的 z=55.4 也高於第 1 名的 29.1。「最嚴重的那個就是原因」是更簡單的解釋，這份診斷否定了它，所以下一步必須實際去驗證上游那個 port，而不是直接接受排名結果",
+     "source": "ranking:Score(c) vs argmax|z|"
+    },
+    {
+     "claim": "Granger 在每一個候選上都是 0，這個結論沒有任何模型層級的因果證據支持，方向性完全來自 onset 的時間先後",
+     "source": "C(c):granger=0 on every candidate"
+    },
+    {
+     "claim": "MI 值只有 0.012，雖然非零，但貢獻極小，不足以單獨支撐候選之間的關聯強度",
+     "source": "C(c):mutual_information=0.012"
+    },
+    {
+     "claim": "port-id7427 與 port-id7429 的 onset 同為 2026-03-02 14:00:00，在 5 分鐘取樣粒度下這兩者的先後無法區分",
+     "source": "ranking:onset tie at 14:00:00"
+    },
+    {
+     "claim": "變更紀錄為「無紀錄」，K(c) 這一項沒有任何領域知識輸入；候選清單中的「設定變更或部署」與「上游 device 硬體故障」在本次證據裡都沒有支撐",
+     "source": "context:recent_changes=無紀錄"
+    },
+    {
+     "claim": "evidence_chain 裡出現的 port-id7430 (core-sw-01) 在 14:30 也越線，但它不在 affected_ports 的 3 個 port 之內，影響範圍與傳播鏈的口徑不一致",
+     "source": "evidence_chain:port-id7430 @ 14:30 vs affected_ports"
+    }
+   ],
+   "propagation_path": [
+    "03-02 14:00  port-id7427 (edge-fw-01) 的 error_rate 偏離同時段常態超過 3 sigma",
+    "03-02 14:00  port-id7429 (core-sw-01) 的 error_rate 偏離同時段常態超過 3 sigma",
+    "03-02 14:05  port-id7431 (dist-sw-02) 的 error_rate 偏離同時段常態超過 3 sigma",
+    "03-02 14:30  port-id7430 (core-sw-01) 的 error_rate 偏離同時段常態超過 3 sigma",
+    "時序摘要: 越線時間分布在 4 個取樣格，從 edge-fw-01 與 core-sw-01 (14:00) 到 dist-sw-02 (14:05) 再到 core-sw-01 的另一個 port (14:30)，順序與逐跳擴散一致；但 Granger=0，這條路徑只有時間先後支持，沒有因果模型支持"
+   ],
+   "missing_information": [
+    "變更與部署紀錄。目前 recent_changes 為「無紀錄」，接上變更管理系統之後 K(c) 才會有真正的領域知識證據",
+    "裝置本身的 log (STP、介面狀態、CPU)，本章只看得到介面計數器",
+    "5 分鐘取樣粒度下，port-id7427 與 port-id7429 的 14:00:00 onset 無法分先後，需要更細的粒度才能判定方向",
+    "topology 資訊。affected_ports 橫跨 edge-fw-01、core-sw-01、dist-sw-02 三個 device，但證據裡沒有實體連線關係，無法確認誰是誰的上游",
+    "為什麼 port-id7430 在 14:30 越線卻不在 affected_ports 名單內，需要確認篩選條件",
+    "235 分鐘的事件長度遠大於 onset 集中的前 30 分鐘，證據裡沒有說明後段時間發生了什麼"
+   ],
+   "next_steps": [
+    "調 edge-fw-01 在 2026-03-02 14:00 → 17:55 的裝置 log，確認同一時間有沒有對應的事件",
+    "同時調 core-sw-01 的 log，因為 port-id7429 的 z=76.7 是最高的且 onset 與第 1 名同時，兩個候選必須一起驗證",
+    "向變更管理查 2026-03-02 14:00 → 17:55 前 24 小時，edge-fw-01 及其上游有沒有異動，把 recent_changes 的「無紀錄」變成可查證的結果",
+    "把取樣粒度調到 1 分鐘重跑 onset，拆開 14:00:00 的 port-id7427 與 port-id7429 平手",
+    "取得 topology，確認 edge-fw-01、core-sw-01、dist-sw-02 之間的上下游關係，再判斷 14:00 → 14:05 → 14:30 的順序是不是真的逐跳擴散",
+    "先查共同上游，不要逐個 port 查"
+   ],
+   "problem_type": "光路劣化引發下游重傳",
+   "recommended_actions": [
+    "讀上游線路的光功率與 SFP 收發值",
+    "檢查主備切換紀錄與 CRC 計數器",
+    "確認下游的重傳與佇列是不是跟著上游錯誤率走",
+    "在補上 topology 與裝置 log 之前，不要只根據排名第 1 名就對 port-id7427 執行中斷性動作"
+   ],
+   "escalation_needed": true
+  },
+  "G": {
+   "incident_summary": "在 2026-02-19 11:30 → 12:25 (duration_min=55, window_samples=12) 期間, signature metric broadcast_total 在 5 個 port 上同時出現大幅偏離, 最大 z=113.8 出現在 port-id7427 (edge-fw-01), 跨 port 同步度 -0.1。onset 只有 1 個相異取樣格, 代表五個 port 在同一個 5 分鐘取樣格內一起越線, 因此本次事件呈現的是多點同時發作 (共同上游或共同 L2 廣播域) 的形狀, 而不是單一 port 可被指認為 root cause。",
+   "impact_scope": {
+    "ports": [
+     "port-id7427",
+     "port-id7428",
+     "port-id7429",
+     "port-id7430",
+     "port-id7431"
+    ],
+    "roles": [
+     "backup-storage",
+     "office-vlan",
+     "server-uplink",
+     "wan-primary",
+     "wan-secondary"
+    ],
+    "devices": [
+     "core-sw-01",
+     "dist-sw-02",
+     "edge-fw-01"
+    ],
+    "duration_min": 55
+   },
+   "root_cause_hypotheses": [
+    {
+     "rank": 1,
+     "candidate": "共同的 L2 廣播域層級問題 (Broadcast storm / L2 迴圈), 影響全部 5 個 port, 無法歸因到單一 port",
+     "confidence": "Medium",
+     "reasoning": "全部 5/5 port 都在 broadcast_total 上越線, 且 onset_distinct_slots=1, 五個 port 的 onset 都是 2026-02-19 11:30:00, 時序上分不出先後; 這個形狀支持共同來源 (跨 core-sw-01、dist-sw-02、edge-fw-01) 而不是單一 port 起頭。confidence 只能到 Medium, 因為 granger=0, 沒有任何模型證據能指向方向。"
+    },
+    {
+     "rank": 2,
+     "candidate": "port-id7427 (edge-fw-01): Broadcast storm / L2 迴圈",
+     "confidence": "Low",
+     "reasoning": "排名第一 (score=75.81, z=113.8), 但它的 onset 2026-02-19 11:30:00 與 port-id7429 (score=61.13)、port-id7430 (score=60.58) 完全相同, ranking_margin 只有 14.68 且來自非時序的權重項, 所以第一名有一部分是平手規則決定的, 不足以支持高信心的單點歸因。"
+    },
+    {
+     "rank": 3,
+     "candidate": "port-id7429 (core-sw-01) 或 port-id7430 (core-sw-01): Broadcast storm / L2 迴圈",
+     "confidence": "Low",
+     "reasoning": "z=109.2 與 z=88.8 都屬同一量級, onset 同為 2026-02-19 11:30:00, score 61.13 與 60.58 相差 0.55; 這三個候選彼此無法用現有證據區分, 只能並列為同一組可能性。"
+    }
+   ],
+   "supporting_evidence": [
+    {
+     "claim": "簽章 metric broadcast_total 在 port-id7427 的 z=113.8, 是本次窗內最大的偏離值",
+     "source": "metric:broadcast_total@port-id7427"
+    },
+    {
+     "claim": "最早的 onset 為 02-19 11:30, port-id7427 (edge-fw-01) 的 broadcast_total 偏離同時段常態超過 3 sigma",
+     "source": "onset:baseline+3sigma, k=3"
+    },
+    {
+     "claim": "5 個 port 全部越線 (5/5), 跨 port 同步度 -0.1, 影響面涵蓋 core-sw-01、dist-sw-02、edge-fw-01 三台 device",
+     "source": "zmatrix:5/5 ports over threshold"
+    },
+    {
+     "claim": "co-occurrence 子項為 1.0, 表示這些 port 的異常在時間上完全共同出現",
+     "source": "C(c):co_occurrence=1.0"
+    },
+    {
+     "claim": "MI 子項對 C(c) 有非零貢獻 (0.183)",
+     "source": "C(c):mutual_information"
+    }
+   ],
+   "contrary_evidence": [
+    {
+     "claim": "onset_distinct_slots=1, 五個 port 全部落在同一個 5 分鐘取樣格越線, 時序證據無法分出誰先誰後, 因此無法用 onset 指認任何單一 port 為 root cause",
+     "source": "onset:distinct slots = 1"
+    },
+    {
+     "claim": "排名前三名的 onset 都是 2026-02-19 11:30:00, ranking_margin 只有 14.68 (75.81 對 61.13 對 60.58), 第一名有一部分是平手規則決定的, 不是時序證據決定的",
+     "source": "ranking:Score(c) margin"
+    },
+    {
+     "claim": "因果家族在每一個候選上都是 0 (granger=0.0), 這個排序沒有任何方向性的模型證據支持",
+     "source": "C(c):granger=0 on every candidate"
+    },
+    {
+     "claim": "跨 port 同步度為 -0.1, 並沒有呈現一個 port 領先、其他 port 跟隨的相關結構, 與逐跳傳播的假設不一致",
+     "source": "zmatrix:cross_port_synchrony=-0.1"
+    },
+    {
+     "claim": "事件窗只有 12 個取樣點 (window_samples=12), mutual information 的估計不穩定, MI=0.183 不足以承擔單點歸因",
+     "source": "context:window_samples=12"
+    },
+    {
+     "claim": "recent_changes 為「無紀錄」, K(c) 沒有任何變更或部署證據可以佐證任一候選",
+     "source": "context:recent_changes=無紀錄"
+    }
+   ],
+   "propagation_path": [
+    "02-19 11:30  port-id7427 (edge-fw-01)、port-id7428 (edge-fw-01)、port-id7429 (core-sw-01)、port-id7430 (core-sw-01) 的 broadcast_total 在同一個取樣格同時偏離同時段常態超過 3 sigma",
+    "5 個 port 全部越線且 onset_distinct_slots=1, 在 5 分鐘的取樣粒度下看不到任何先後順序",
+    "這個形狀指向共同上游或共同廣播域, 而不是逐跳傳播; 共同涉及的 device 是 core-sw-01、dist-sw-02、edge-fw-01",
+    "要看到真正的傳播順序, 取樣粒度必須小於傳播延遲"
+   ],
+   "missing_information": [
+    "更細的取樣粒度 (1 分鐘或更短), 否則五個 port 是否真的同時發作、或只是被 5 分鐘取樣格合併, 無法區分",
+    "變更與部署紀錄。recent_changes 目前是「無紀錄」, 接上變更管理系統之後 K(c) 才會有真正的領域知識證據",
+    "事件窗只有 12 個取樣點, mutual information 估不動, 需要更長的窗或更細的粒度",
+    "裝置本身的 log (STP、介面狀態、CPU) 與 L2 拓撲 (VLAN、trunk、port 對應關係), 本次證據只看得到介面計數器, 無法確認五個 port 是否同屬一個廣播域"
+   ],
+   "next_steps": [
+    "把取樣粒度調到 1 分鐘重跑 onset, 確認 onset_distinct_slots=1 是真的同時越線, 還是 5 分鐘粒度太粗把先後壓成同一格",
+    "先查 core-sw-01、dist-sw-02、edge-fw-01 這三台共同 device 與其上游, 不要逐個 port 查, 因為 5/5 port 一起越線",
+    "調三台 device 在 2026-02-19 11:30 → 12:25 的 log (STP 事件、介面狀態變化), 確認同一時間有沒有對應事件",
+    "向變更管理查 2026-02-19 11:30 → 12:25 前 24 小時, 這三台 device 及其上游有沒有異動, 補上目前為「無紀錄」的 K(c)",
+    "取更長的觀測窗重估 causal 子項, 目前 window_samples=12 且 granger=0.0, 排序缺少方向性證據"
+   ],
+   "problem_type": "Broadcast storm / L2 迴圈 (多點同時發作, 無單一 root cause port)",
+   "recommended_actions": [
+    "檢查三台共同 device 的 STP / spanning-tree 狀態",
+    "找出最近新增的 port 或 VLAN 變更",
+    "必要時關閉疑似形成迴圈的 port",
+    "在接取層啟用 PortFast + BPDU Guard",
+    "在報告中明確標示本次為多點同時發作, 不要把 port-id7427 當成已確認的單一 root cause"
+   ],
+   "escalation_needed": true
+  }
+ },
+ "rank_causes": {
+  "L": [
+   {
+    "idx": 0,
+    "confidence": 82,
+    "main_reason": "排名分數 75.55 為全體最高，且 onset 2026-03-02 14:00:00 與 port-id7429 並列最早，evidence chain 也把 port-id7427 (edge-fw-01) 列在第一條，是唯一同時具備最高分與最早 onset 的候選。"
+   },
+   {
+    "idx": 1,
+    "confidence": 68,
+    "main_reason": "error_rate z=76.7 是全體最大偏離，onset 同為 14:00:00 與第一名並列，但排名分數 58.75 低於 75.55 (ranking margin 16.8)，證據強度僅次於 idx 0 而非勝過它。"
+   },
+   {
+    "idx": 2,
+    "confidence": 55,
+    "main_reason": "z=55.4 與分數 52.5 均為三個實際 port 中最低，onset 14:05:00 晚於前兩者 5 分鐘，較像被波及的下游而非來源。"
+   },
+   {
+    "idx": 4,
+    "confidence": 8,
+    "main_reason": "證據欄明寫本次證據裡沒有任何硬體錯誤計數的異常，沒有任何 metric 或 z 值支持硬體故障，僅憑常識推測不能給分。"
+   },
+   {
+    "idx": 3,
+    "confidence": 5,
+    "main_reason": "recent_changes 為無紀錄，missing_information 也指出變更與部署紀錄尚未接入，因此 K(c) 這一項完全沒有可查證的輸入。"
+   }
+  ],
+  "G": [
+   {
+    "idx": 0,
+    "confidence": 55,
+    "main_reason": "排名分數 75.81 為最高，broadcast_total z=113.8 也是五個 port 中最大，且 onset 落在最早的 2026-02-19 11:30:00。但 onset_distinct_slots = 1，五個 port 在同一個 5 分鐘取樣格一起越線，時序證據無法證明它在其他 port 之前，第一名有一部分來自平手規則; granger = 0，沒有任何因果模型證據支持它是來源。"
+   },
+   {
+    "idx": 1,
+    "confidence": 48,
+    "main_reason": "z=109.2 與 idx 0 的 113.8 差距很小，onset 同為 2026-02-19 11:30:00，排名分數 61.13 與 idx 0 的差距 (ranking_margin 14.68) 完全來自 Score(c) 的加權，而非可分辨的時間先後。跨 port 同步度 -0.1、granger = 0，沒有證據把它排除，也沒有證據把它抬高。"
+   },
+   {
+    "idx": 2,
+    "confidence": 45,
+    "main_reason": "z=88.8、排名分數 60.58，與 idx 1 的 61.13 只差 0.55，onset 同樣是 2026-02-19 11:30:00。在 5 分鐘粒度下它與前兩名在證據上幾乎無法區分，只能靠 z 值略低而排在後面; window_samples 只有 12，mutual information 0.183 也不足以分辨個別 port。"
+   },
+   {
+    "idx": 3,
+    "confidence": 5,
+    "main_reason": "候選本身附的證據欄位是「變更紀錄: 無紀錄」，evidence 內沒有任何部署或設定異動可以對上 2026-02-19 11:30 的 onset。missing_information 也把變更與部署紀錄列為尚未接上的來源，所以這是一個待查方向，不是有證據支持的原因。"
+   },
+   {
+    "idx": 4,
+    "confidence": 4,
+    "main_reason": "候選附的證據欄位明說本次證據裡沒有任何硬體錯誤計數的異常，signature metric 是 broadcast_total 而非硬體錯誤類指標，evidence_chain 四筆全部是 broadcast_total 越線。裝置 log (STP、介面狀態、CPU) 未取得，目前沒有任何資料支持硬體故障。"
+   }
+  ]
+ }
+}
