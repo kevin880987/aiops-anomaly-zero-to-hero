@@ -83,20 +83,69 @@ maintenance exclusion 三道政策才送出 alert，用 scorecard、二維參數
 Lab 01 約 75 到 90 分鐘，Lab 02 約 90 到 110 分鐘。
 
 Lab 06 走單元 07。主模型 Prophet 學「這個時刻的正常是多少」,殘差模型 XGBoost 學「不正常正在往哪裡
-走」,兩個相加碰到容量門檻就發預警。中間交代四件會直接改變結果的事: 季節性階數要靠交叉驗證挑而不是
+走」,兩個相加碰到容量門檻就發預警。程式裡實際用的是 scikit-learn 內建的
+`HistGradientBoostingRegressor`,同樣是梯度提升樹,課程環境不必多裝一個套件; notebook 裡有一段
+專門講這個對應關係,講義的用詞維持 XGBoost。中間交代四件會直接改變結果的事: 季節性階數要靠交叉驗證挑而不是
 挑訓練誤差最小的、預測 horizon 的上限由「看不看得出來」決定而下限由維運決定、分位數區間換到的是四級
 處置而不是準確度、以及已公告的排程要走維護視窗靜音才壓得下誤警。最後用一個完全沒有參與調參的事件
 驗一次，大約 75 到 90 分鐘。
 
-Lab 07 走單元 08。同一場事故上五個 port 一起亮的時候誰是根因: 幅度、位置 (拓樸可達)、關聯 (mutual
-information)、時序 (onset 與 lead-lag)、可預測性 (Granger) 五種證據，四項等權合成 Score(c) 排名。
-排完之後把散在各節的數字打包成一份帶 provenance 的 context，交給 LLM 做證據整合並寫成可稽核的診斷
-(沒有 API 金鑰時重播錄好的回應)，領域知識則透過可抽換的知識包以檢索補進來，所以換一個產業不用改
-RCA 程式。驗證只有兩塊，都報 Hit@1、MRR 與隨機基準。Lab 06 與 Lab 07 兩章的結果在這一章一起接上
-Grafana，大約 75 到 90 分鐘。
+Lab 07 走單元 08。同一場事故上五個 port 一起亮的時候誰是根因: 幅度、位置 (拓樸可達)、關聯 (Pearson
+相關)、可預測性 (Granger) 四種證據加上時序 (onset)，四項等權合成 Score(c) 排名。關聯挑 Pearson 是因為
+它有正負號、尺度本來就可讀、而且沒有估計器參數要調，代價是只看得到線性關係; 時序只算 onset，並且用
+「連續三格才算越線」的判準，那條規則的代價與收穫在該節量出來。排完之後 LLM 那一段走六個步驟: 打包
+context、用 BM25 從可抽換的知識包檢索 K(c)、把兩塊送進模型、讀模型寫回來的診斷、驗證這一層、換產業
+與回饋迴路。工具不先幫模型整理支持與反對，那本來就是要模型自己從證據裡挖出來的。檢索挑 BM25 是因為
+它指得出是哪幾個詞、各貢獻多少分，而且會處理三件數命中數處理不了的事 (詞出現多次會飽和、長文件不佔
+便宜、每篇都有的詞不加分);一個詞都沒命中就回答「知識包裡沒有」,不硬撈一篇最接近的來充數。所以換一
+個產業不用改 RCA 程式。這一本只需要 numpy / pandas / scipy / matplotlib。驗證報 Hit@1、MRR 與隨機
+基準，另外兩個上線前的機械檢查: 無證據的假候選要墊底、每一句證據的來源標籤要追得回工具。最後一節把
+值班的核可寫回知識包，跑一次回饋迴路，大約 75 到 90 分鐘。
 
-Lab 06 讀 `data/synthetic/` 底下的 `*_week6.csv`,那是同一組欄位與取樣的擴充版，事件目錄多了七種
-三竹的業務型別; Lab 07 讀 Lab 06 寫出來的 `outputs/workshop/forecast_results.csv`。
+### Lab 06 與 Lab 07 住在 repo 根目錄的 `week6/`
+
+Week 6 的東西全部搬到 repo 根目錄的 `week6/`,那個資料夾就是上課當天發給學員的那一包:
+解壓縮到桌面、在裡面開 JupyterLab、從頭跑到底,不需要 repo 的其他部分,也沒有任何一份複本。
+
+檔名前面的數字就是上課順序,學員照著 0、1、2、3、4 走即可:
+
+```
+week6/
+  0_README.md                          怎麼用這一包
+  1_pkg_checker.ipynb                  上課前的環境檢查
+  2_lab06_forecasting.ipynb            Lab 06 預警
+  3_lab07_root_cause_analysis.ipynb    Lab 07 根因分析
+  4_grafana.py                         把 Lab 07 的結果推上 Grafana
+  results_exporter.py  llm_diagnoses.json          (不用直接開,上面的檔案會用到)
+  slides/  screenshots/  data/synthetic/  outputs/workshop/  environments/  infra/stack/
+```
+
+搬過去的東西原本散在四個地方: 兩本 notebook 與三支檔案在 `labs/workshop/`、講義投影片圖在
+`labs/workshop/slides/`、Week 6 的資料在 `data/synthetic/`、Grafana 環境在 `infra/stack/`。
+它們都只有 Week 6 在用,所以是搬家不是複製,repo 裡不會有第二份。`week6/environments/` 是新寫的,
+只列 Week 6 真的 import 的套件,環境名字沿用課程環境,學員不會多建一個。
+
+notebook 與那兩支 `.py` 都從自己的位置往上找 `data/` 與 `infra/`,所以資料夾整個搬到桌面也一樣跑。
+
+學員第一件事是跑 `week6/1_pkg_checker.ipynb`: 它檢查套件、真的配一次 Prophet 與一次
+`HistGradientBoostingRegressor`、驗中文字型、印出三個 CSV 的列數與時間範圍、確認 `outputs/workshop/`
+可以寫,並檢查 Docker 與三個 port。每一個失敗都附該作業系統的修法。
+
+Lab 07 的 Grafana 環境包成 Docker Compose (`week6/infra/stack/`)，跟 Lab 05 同一個形狀，而且只有
+一行指令,三個作業系統都一樣 (在 `week6/` 裡執行):
+
+```bash
+python 4_grafana.py
+```
+
+它會檢查 Docker、檢查 notebook 有沒有寫出 `outputs/workshop/rca_case_L.csv`、檢查三個 port 有沒有被
+佔住，然後啟動重播服務 + Prometheus + Grafana,最後打開儀表板。**打開看到的就是上課走的那一次事故**
+(事故 L，光路劣化引發下游重傳)，不是別的資料。儀表板由 provisioning 掛好，不用手動匯入。
+
+Lab 06 讀 `week6/data/synthetic/` 底下的 `*_week6.csv`,那是同一組欄位與取樣的擴充版，事件目錄多了
+七種三竹的業務型別; Lab 07 讀同一份原始資料，並且寫出三份結果到 `week6/outputs/workshop/`:
+`rca_results.csv` (每個事故每個 port 一列)、`rca_case_L.csv` (上課那一次事故的逐格資料，Grafana
+重播用的就是它)、以及 `rca_feedback.jsonl` (回饋迴路寫回去的紀錄)。
 
 ## notebook 裡的 toolkit
 

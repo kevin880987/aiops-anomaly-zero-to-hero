@@ -1,0 +1,21 @@
+# Week 6 有兩個抓取目標，兩本 lab 各一個重播程式。
+# 兩秒抓一次，配上重播的倍速，資料裡的每五分鐘會被抓到好幾次。
+#
+# job_name 很重要: 兩支重播程式曝露的 metric 名稱都是 aiops_python_result，
+# Prometheus 會自動替每一條 series 加上 job label，儀表板就靠它分辨哪一份是誰的。
+global:
+  scrape_interval: 2s
+  evaluation_interval: 2s
+
+scrape_configs:
+  - job_name: lab06-replayer
+    static_configs:
+      - targets: [replayer06:8011]
+
+  - job_name: lab07-replayer
+    static_configs:
+      - targets: [replayer07:8010]
+
+  - job_name: prometheus
+    static_configs:
+      - targets: [localhost:9090]

@@ -16,7 +16,7 @@ Prophet 與 Lab 07 的 hybrid 排名都需要一整段歷史才配適得起來�
 
     RESULTS_CSV_PATH=outputs/workshop/forecast_results.csv \
     RESULT_COLUMNS=traffic_total,y_hat,forecast_30m,early_warning_30m,forecast_risk_score,resid_z \
-    python labs/workshop/results_exporter.py
+    python results_exporter.py
 
 啟動之後，<http://localhost:8010/metrics> 會列出 aiops_python_result。
 
@@ -29,7 +29,21 @@ from pathlib import Path
 import pandas as pd
 from prometheus_client import Gauge, start_http_server
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+def _find_root() -> Path:
+    """從這支程式所在的位置往上走，找到裝著 outputs/ 的那一層。
+
+    兩種擺法都要對得上:
+        直接執行: 程式在 week6/，輸出在 week6/outputs/
+        compose 起的 container: 程式掛在 /opt/app/，輸出掛在 /opt/outputs/
+    """
+    here = Path(__file__).resolve().parent
+    for candidate in (here, *here.parents):
+        if (candidate / "outputs").is_dir():
+            return candidate
+    return here
+
+
+REPO_ROOT = _find_root()
 DEFAULT_CSV = REPO_ROOT / "outputs" / "workshop" / "forecast_results.csv"
 
 CSV_PATH = Path(os.environ.get("RESULTS_CSV_PATH", DEFAULT_CSV))

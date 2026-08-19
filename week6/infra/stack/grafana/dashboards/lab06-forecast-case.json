@@ -1,0 +1,1374 @@
+{
+  "__inputs": [],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "9.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    }
+  ],
+  "annotations": {
+    "list": []
+  },
+  "description": "Lab 06 上課走的那兩晚 (2026-02-25 與 2026-02-26 的夜間傳檔) 。資料來自 2_lab06_forecasting.ipynb 寫出的 outputs/workshop/forecast_case_K.csv，由 week6/results_exporter.py 重播進 Prometheus。兩晚的流量形狀接近，只有 2/26 那一晚越過 capacity，預警規則也只在那一晚發。每一個 panel 的查詢都帶著 job=\"lab06-replayer\"，否則會撈到 Lab 07 那一份同名的 metric。",
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "title": "值班畫面看得到的: 兩晚的流量",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lab07-prometheus"
+      },
+      "description": "兩晚的形狀接近: port-id7427 在 2/25 那一晚的尖峰是 71.2 MB，在 2/26 那一晚是 99.3 MB，它的 capacity 是 82.3 MB。只有後面那一晚越線，這張圖是這本 lab 的對照組。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "decbytes",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"traffic_total\"}",
+          "instant": false,
+          "legendFormat": "{{port_id}} {{port_role}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "五個 port 的流量 (每 5 分鐘的位元組數) ",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 3,
+      "title": "回頭看: 示範 port 的實際值、預測區間與 capacity",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lab07-prometheus"
+      },
+      "description": "y_hat_lower 與 y_hat_upper 帶的是 135 分鐘之前站在那一刻對這一格畫出來的區間，所以可以直接跟同一列的實際值比。紅色虛線是 port-id7427 的 capacity，值是 82,273,842 位元組。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "decbytes",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "實際值 traffic_total"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "預測值 y_hat"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "區間下界 y_hat_lower"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "super-light-green",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "區間上界 y_hat_upper"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "super-light-green",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              },
+              {
+                "id": "custom.fillBelowTo",
+                "value": "區間下界 y_hat_lower"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 12
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "capacity"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 16,
+        "x": 0,
+        "y": 10
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"traffic_total\", port_id=\"port-id7427\"}",
+          "instant": false,
+          "legendFormat": "實際值 traffic_total",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"y_hat\", port_id=\"port-id7427\"}",
+          "instant": false,
+          "legendFormat": "預測值 y_hat",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"y_hat_lower\", port_id=\"port-id7427\"}",
+          "instant": false,
+          "legendFormat": "區間下界 y_hat_lower",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"y_hat_upper\", port_id=\"port-id7427\"}",
+          "instant": false,
+          "legendFormat": "區間上界 y_hat_upper",
+          "range": true,
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"capacity\", port_id=\"port-id7427\"}",
+          "instant": false,
+          "legendFormat": "capacity",
+          "range": true,
+          "refId": "E"
+        }
+      ],
+      "title": "port-id7427 wan-primary: 實際值對上 135 分鐘前畫出的區間",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lab07-prometheus"
+      },
+      "description": "traffic_total 除以同一個 port 的 capacity。超過 100% 那條紅線就是越線。port-id7427 在 2/25 那一晚有 0 格超過 100%，2/26 入夜之後有 39 格。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 100
+              }
+            ]
+          },
+          "unit": "percent",
+          "min": 0
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 10
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "100 * aiops_python_result{job=\"lab06-replayer\", column=\"traffic_total\"} / ignoring(column) aiops_python_result{job=\"lab06-replayer\", column=\"capacity\"}",
+          "instant": false,
+          "legendFormat": "{{port_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "用掉了 capacity 的百分之幾",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "id": 6,
+      "title": "往前看: forecast_30m 與預警旗標",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lab07-prometheus"
+      },
+      "description": "forecast_30m 帶的是站在這一格往前推 135 分鐘的值，也就是預警規則實際在測的那一條 (欄名沿用 30m，裡面裝的是 135 分鐘) 。它在 2/26 23:05 第一次超過 capacity，實際值在那一晚第一次超過是 2/27 01:05。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "decbytes",
+          "min": 0
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "往前推的預測 forecast_30m"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "實際值 traffic_total"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "capacity"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [
+                    10,
+                    10
+                  ],
+                  "fill": "dash"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 16,
+        "x": 0,
+        "y": 20
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"forecast_30m\", port_id=\"port-id7427\"}",
+          "instant": false,
+          "legendFormat": "往前推的預測 forecast_30m",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"capacity\", port_id=\"port-id7427\"}",
+          "instant": false,
+          "legendFormat": "capacity",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"traffic_total\", port_id=\"port-id7427\"}",
+          "instant": false,
+          "legendFormat": "實際值 traffic_total",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "port-id7427 wan-primary: 規則在測的那一條對上 capacity",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lab07-prometheus"
+      },
+      "description": "1 代表這個 port 這一格發出預警。整份資料 2,465 列裡只有 33 列是 1，全部在 port-id7427 的 2/26 23:30 到 2/27 02:30，2/25 那一晚是 0 列。旗標在 2/26 23:30 升起，實際值在那一晚第一次越過 capacity 是 2/27 01:05，早 95 分鐘。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 25,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none",
+          "min": 0,
+          "max": 1.2
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 20
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"early_warning_30m\"}",
+          "instant": false,
+          "legendFormat": "{{port_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "預警旗標 early_warning_30m",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 29
+      },
+      "id": 9,
+      "title": "四級告警等級",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lab07-prometheus"
+      },
+      "description": "warning_level_code 是四級告警的數字編碼: 0 Info、1 Watch、2 Warning、3 Critical。整份資料 2,465 列裡有 239 列不是 Info; Critical 只有 1 列 (port-id7429，2/26 11:10) ，port-id7428 與 port-id7430 整段都是 Info。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "fillOpacity": 80,
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineWidth": 0,
+            "spanNulls": true
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "Info"
+                },
+                "1": {
+                  "color": "yellow",
+                  "index": 1,
+                  "text": "Watch"
+                },
+                "2": {
+                  "color": "orange",
+                  "index": 2,
+                  "text": "Warning"
+                },
+                "3": {
+                  "color": "red",
+                  "index": 3,
+                  "text": "Critical"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "id": 10,
+      "options": {
+        "alignValue": "left",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "mergeValues": true,
+        "rowHeight": 0.85,
+        "showValue": "auto",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"warning_level_code\"}",
+          "instant": false,
+          "legendFormat": "{{port_id}} {{port_role}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "告警等級 warning_level_code (0 Info / 1 Watch / 2 Warning / 3 Critical) ",
+      "type": "state-timeline"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "id": 11,
+      "title": "兩個排序用的數字: resid_z 與 forecast_risk_score",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lab07-prometheus"
+      },
+      "description": "實際值對 y_hat 的穩健標準化殘差，量的是「現在偏離同時段的正常多少」。這份資料的範圍是 -7.63 到 25.55，最大值在 port-id7427。反應型告警的界限是 |z| >= 3 連續兩格。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": true,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 8,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 38
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"resid_z\"}",
+          "instant": false,
+          "legendFormat": "{{port_id}} {{port_role}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "殘差 z (resid_z) ",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lab07-prometheus"
+      },
+      "description": "0.6 x p_exceed 加 0.4 x 殘差飽和項，再乘 100。這一份重播裡各 port 的最大值: port-id7427 是 94.9、port-id7431 是 90.1、port-id7429 是 78.9、port-id7428 與 port-id7430 都是 40.0。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 38
+      },
+      "id": 13,
+      "options": {
+        "displayMode": "gradient",
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "left",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"forecast_risk_score\"}",
+          "instant": false,
+          "legendFormat": "{{port_id}} {{port_role}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "風險分數 forecast_risk_score (滿分 100) ",
+      "type": "bargauge"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 46
+      },
+      "id": 14,
+      "title": "整條鏈活著嗎",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lab07-prometheus"
+      },
+      "description": "1 代表 Prometheus 抓得到 Lab 06 的重播程式。這一格是 0 的時候，上面每一張圖看到的都是舊資料。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "DOWN"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "UP"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 47
+      },
+      "id": 15,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "up{job=\"lab06-replayer\"}",
+          "instant": false,
+          "legendFormat": "replayer",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "重播程式 UP",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lab07-prometheus"
+      },
+      "description": "CSV 裡的資料時間 (不是牆上時間) 。這一份涵蓋 2026-02-25 16:00 到 2026-02-27 09:00 共 41 小時，300 倍速跑一輪約 8.2 分鐘，走完會跳回 2/25 16:00 再來一輪。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "dateTimeAsIso"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 47
+      },
+      "id": 16,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "aiops_python_result_timestamp{job=\"lab06-replayer\"} * 1000",
+          "instant": false,
+          "legendFormat": "replay clock",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "重播走到資料裡的哪一刻",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lab07-prometheus"
+      },
+      "description": "五個 port x 十個數值欄位 = 50 條。少於這個數字代表 CSV 少了欄位或少了 port。這個查詢帶了 job=\"lab06-replayer\"，所以不會把 Lab 07 那 30 條一起算進來。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 47
+      },
+      "id": 17,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "count(aiops_python_result{job=\"lab06-replayer\"})",
+          "instant": false,
+          "legendFormat": "series",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "曝露出幾條 series",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lab07-prometheus"
+      },
+      "description": "這一刻 early_warning_30m 等於 1 的 port 數。整段重播只有 port-id7427 會讓它變成 1，共 33 格，其餘時間是 0。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 47
+      },
+      "id": 18,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "lab07-prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(aiops_python_result{job=\"lab06-replayer\", column=\"early_warning_30m\"})",
+          "instant": false,
+          "legendFormat": "在預警的 port 數",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "現在有幾個 port 在預警",
+      "type": "stat"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [
+    "aiops",
+    "forecasting",
+    "lab06",
+    "week6"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "Lab 06: 預警課堂案例 (兩晚對照)",
+  "uid": "aiops-lab06-forecast",
+  "version": 1,
+  "weekStart": ""
+}

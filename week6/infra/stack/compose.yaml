@@ -1,0 +1,125 @@
+name: aiops-week6
+
+# Week 6 的 Grafana 環境。兩本 lab 各自從一個 case 出發，所以這裡也重播兩份 case:
+#
+#   replayer06  重播 Lab 06 的那兩晚   (outputs/workshop/forecast_case_K.csv)
+#   replayer07  重播 Lab 07 的那次事故 (outputs/workshop/rca_case_L.csv)
+#   prometheus  每兩秒各抓一次，存成時間序列
+#   grafana     provisioning 直接把 datasource 與兩張儀表板掛好，不用手動匯入
+#
+# 兩支重播程式跑的是同一支 results_exporter.py，只是吃不同的 CSV 與欄位。它們曝露的
+# metric 名稱一樣 (aiops_python_result) ，靠 Prometheus 自動加上的 job label 分開:
+# job="lab06-replayer" 與 job="lab07-replayer"。兩張儀表板的查詢都帶著自己的 job，
+# 所以不會互相撈到對方的資料。
+
+services:
+  replayer06:
+    build:
+      context: ./replayer
+    ports:
+      - "${WEEK6_REPLAYER06_PORT:-8011}:8011"
+    environment:
+      RESULTS_CSV_PATH: /opt/outputs/workshop/forecast_case_K.csv
+      RESULT_COLUMNS: traffic_total,y_hat,y_hat_lower,y_hat_upper,capacity,forecast_30m,early_warning_30m,resid_z,forecast_risk_score,warning_level_code
+      # 這一份刻意不把 event_label 當 label，跟 replayer07 那一份不一樣。原因是重播程式
+      # 只會 set label 組合，不會把不再出現的組合拿掉 (只有換 CSV 才 clear) ，而 Lab 06 的
+      # case 裡 port-id7427 的 event_label 換過三種 (normal、benign_batch_ramp、
+      # batch_egress_saturation) 、port-id7431 換過兩種，所以帶著 event_label 會讓同一個
+      # port 同一個欄位變成三條 series: 一條是現在的值，另外兩條停在切換前的最後一個值不動。
+      # 儀表板上會多出幾條平的假線，y_hat_lower / y_hat_upper 的區間也配不成對。
+      # 拿掉之後是 5 個 port x 10 個欄位 = 50 條，一個欄位一個 port 就一條。
+      # replayer07 的 case 裡每個 port 的 event_label 從頭到尾同一個值，沒有這個問題，維持原樣。
+      RESULT_LABEL_COLUMNS: device_id,port_id,port_role,ml_method
+      RESULTS_EXPORTER_PORT: "8011"
+      # 這一份裝的是兩晚共 41 小時。300 倍速讓一輪大約八分鐘跑完，跟 Lab 07 那一份差不多,
+      # 兩張儀表板的節奏才一致。
+      REPLAY_SPEED_X: "${WEEK6_REPLAY06_SPEED:-300}"
+    volumes:
+      - ../../results_exporter.py:/opt/app/results_exporter.py:ro
+      - ../../outputs/workshop:/opt/outputs/workshop:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8011/metrics')"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    networks: [week6]
+
+  replayer07:
+    build:
+      context: ./replayer
+    ports:
+      - "${WEEK6_REPLAYER07_PORT:-8010}:8010"
+    environment:
+      # 重播程式本體不放在這裡，是下面 volumes 那一行把 results_exporter.py 掛進來的。
+      # 一份程式兩個地方用 (notebook 裡手動跑、compose 裡自動跑)，行為才不會分岔。
+      RESULTS_CSV_PATH: /opt/outputs/workshop/rca_case_L.csv
+      RESULT_COLUMNS: traffic_total,error_rate,z_error_rate,root_cause_score,candidate_rank,onset_flag
+      RESULT_LABEL_COLUMNS: device_id,port_id,port_role,event_label,ml_method
+      RESULTS_EXPORTER_PORT: "8010"
+      # 60 倍速: 牆上的一秒等於資料裡的一分鐘，整段事故窗約八分鐘跑完一輪，然後從頭再來。
+      REPLAY_SPEED_X: "${WEEK6_REPLAY07_SPEED:-60}"
+    volumes:
+      - ../../results_exporter.py:/opt/app/results_exporter.py:ro
+      - ../../outputs/workshop:/opt/outputs/workshop:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8010/metrics')"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    networks: [week6]
+
+  prometheus:
+    image: prom/prometheus:v3.13.2
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=2h
+      - --web.enable-lifecycle
+    ports:
+      - "${WEEK6_PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      replayer06:
+        condition: service_healthy
+      replayer07:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:9090/-/healthy"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    networks: [week6]
+
+  grafana:
+    image: grafana/grafana:13.1.0
+    ports:
+      - "${WEEK6_GRAFANA_PORT:-3000}:3000"
+    environment:
+      # 匿名唯讀登入: 課堂上不要花時間在帳號密碼上。
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      # notebook 那一格會把儀表板嵌進來，要允許被 iframe 包住。
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:3000/api/health || exit 1"]
+      interval: 2s
+      timeout: 2s
+      retries: 40
+    networks: [week6]
+
+networks:
+  week6:
+
+volumes:
+  prometheus-data:
+  grafana-data:

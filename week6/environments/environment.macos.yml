@@ -1,0 +1,35 @@
+# Week 6 (預警與根因分析) 的 conda 環境, macOS 版。
+#
+# 這一份只列 Week 6 兩本 notebook、1_pkg_checker 與 results_exporter.py 真正 import 的套件,
+# 比 repo 根目錄那份課程環境窄, 所以裝起來比較快。環境名字刻意跟課程環境一樣:
+#
+#   前幾週已經建過環境: conda env update -f environments/environment.macos.yml
+#                        (不要加 --prune, 那會刪掉別的 lab 需要的套件)
+#   完全還沒有環境:     conda env create -f environments/environment.macos.yml
+#
+# 建完之後: conda activate aiops-anomaly-zero-to-hero, 然後先跑 1_pkg_checker.ipynb。
+name: aiops-anomaly-zero-to-hero
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - pip
+  # 兩本 notebook 從頭到尾都在用的四個
+  - numpy>=1.26,<3
+  - pandas>=2.0,<4
+  - scipy>=1.12,<2
+  - matplotlib>=3.9
+  # Lab 06: Prophet 當季節基準, scikit-learn 的 HistGradientBoostingRegressor 學殘差,
+  #         statsmodels 的 Holt-Winters 當對照組
+  - prophet>=1.1
+  - scikit-learn>=1.4,<2
+  - statsmodels>=0.14
+  # Lab 07: 拓樸圖的下游可達 (缺了會降級成寫死的下游表, 不會中斷)
+  - networkx>=3.0
+  # results_exporter.py 把結果曝露成 /metrics 給 Prometheus 抓
+  - prometheus_client>=0.20
+  # notebook 環境本身。jupyterlab 要 4.1 以上, markdown 裡的 mermaid 流程圖才畫得出來
+  - jupyterlab>=4.3
+  - ipykernel>=6.29
+  - ipython>=8.18

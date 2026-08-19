@@ -39,7 +39,8 @@ actual OS / network telemetry
 
 已經有自己環境的讀者，直接執行 [`labs/getting-started/00-check-your-setup.ipynb`](labs/getting-started/00-check-your-setup.ipynb)。它逐格檢查 Python 環境、Prometheus、Grafana Local 與 node_exporter，任何一項失敗都會引導至安裝指南。
 
-課程教材放在 `labs/workshop/`。
+課程教材放在 `labs/workshop/`。第六週 (預警與根因分析) 例外: 它整包放在 `week6/`,是一個解壓縮到桌面
+就能從頭跑到底的獨立資料夾,學員當天拿到的就是它。細節見 [`week6/0_README.md`](week6/0_README.md)。
 
 ## 教材結構
 
@@ -51,6 +52,8 @@ actual OS / network telemetry
 ├── labs/
 │   ├── getting-started/       # setup 主入口、互動式檢查 notebook、安裝指南、screenshots/
 │   └── workshop/              # 課程教材
+├── week6/                     # 第六週整包，發給學員的獨立資料夾 (notebook、資料、投影片圖、
+│                              # 環境檔、Grafana 的 Docker Compose 都在裡面)
 ├── data/
 │   ├── synthetic/             # 可重建的 organized network telemetry CSV
 │   └── sample/                # 原始 LibreNMS/RRDTool sample data（選讀）
