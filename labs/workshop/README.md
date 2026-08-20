@@ -107,11 +107,10 @@ context、用 BM25 從可抽換的知識包檢索 K(c)、把兩塊送進模型�
 Week 6 的東西全部搬到 repo 根目錄的 `week6/`,那個資料夾就是上課當天發給學員的那一包:
 解壓縮到桌面、在裡面開 JupyterLab、從頭跑到底,不需要 repo 的其他部分,也沒有任何一份複本。
 
-檔名前面的數字就是上課順序,學員照著 0、1、2、3、4 走即可:
+檔名前面的數字就是上課順序,學員照著 1、2、3、4 走即可:
 
 ```
 week6/
-  0_README.md                          怎麼用這一包
   1_pkg_checker.ipynb                  上課前的環境檢查
   2_lab06_forecasting.ipynb            Lab 06 預警
   3_lab07_root_cause_analysis.ipynb    Lab 07 根因分析
@@ -127,9 +126,9 @@ week6/
 
 notebook 與那兩支 `.py` 都從自己的位置往上找 `data/` 與 `infra/`,所以資料夾整個搬到桌面也一樣跑。
 
-學員第一件事是跑 `week6/1_pkg_checker.ipynb`: 它檢查套件、真的配一次 Prophet 與一次
-`HistGradientBoostingRegressor`、驗中文字型、印出三個 CSV 的列數與時間範圍、確認 `outputs/workshop/`
-可以寫,並檢查 Docker 與三個 port。每一個失敗都附該作業系統的修法。
+學員第一件事是跑 `week6/1_pkg_checker.ipynb`: 它讀 `week6/environments/` 底下這台機器對應的環境檔,
+把缺的套件直接用 pip 裝起來,然後驗中文字型 (畫一張中文圖) 、印出三個 CSV 的列數與時間範圍,
+並檢查 Docker 與四個 port。最後一格是一張總表,每一項失敗都附該作業系統的修法。
 
 Lab 07 的 Grafana 環境包成 Docker Compose (`week6/infra/stack/`)，跟 Lab 05 同一個形狀，而且只有
 一行指令,三個作業系統都一樣 (在 `week6/` 裡執行):

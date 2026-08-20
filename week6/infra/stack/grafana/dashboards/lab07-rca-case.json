@@ -33,7 +33,7 @@
         "y": 0
       },
       "id": 1,
-      "title": "值班畫面看得到的: 流量",
+      "title": "監控畫面看得到的: 流量",
       "type": "row"
     },
     {
@@ -41,7 +41,7 @@
         "type": "prometheus",
         "uid": "lab07-prometheus"
       },
-      "description": "值班畫面上只有這個。事故窗裡只有兩個下游 port 在動，真正的根因 port-id7427 幾乎不動。",
+      "description": "監控畫面上只有這個。事故窗裡只有兩個下游 port 在動，真正的根因 port-id7427 幾乎不動。",
       "fieldConfig": {
         "defaults": {
           "color": {

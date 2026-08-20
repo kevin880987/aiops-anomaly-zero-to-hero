@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Week 6 的 Grafana 環境: 一支程式，macOS、Windows、Linux 都一樣跑。
+"""Week 6 的 Grafana 環境: 一支程式，macOS 與 Windows 都一樣跑。
 
 兩本 lab 各自從一個 case 出發，所以這裡同時重播兩份:
     Lab 06 的那兩晚   (2/25 良性、2/26 越線)
@@ -139,8 +139,8 @@ def port_is_free(port: int) -> bool:
 def check_docker() -> bool:
     from shutil import which
     if which("docker") is None:
-        say(False, "找不到 docker 指令。請先安裝 Docker Desktop (macOS / Windows) "
-                   "或 Docker Engine (Linux) ")
+        say(False, "找不到 docker 指令。請先安裝 Docker Desktop (macOS / Windows) ，"
+                   "裝完打開它，等圖示變成執行中再跑一次")
         return False
     probe = subprocess.run(["docker", "info"], text=True, check=False, capture_output=True)
     if probe.returncode != 0:

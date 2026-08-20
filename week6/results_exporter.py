@@ -54,7 +54,7 @@ EXPORT_PORT = int(os.environ.get("RESULTS_EXPORTER_PORT", 8010))
 POLL_SECONDS = 5
 
 # 重播倍速。預設 3600 是「一秒等於一小時」，一份七天的 CSV 大約三分鐘跑完一輪，
-# panel 會像值班畫面一樣往前走。設成 1 就是照真實時間重播。
+# panel 會像監控畫面一樣往前走。設成 1 就是照真實時間重播。
 REPLAY_SPEED_X = float(os.environ.get("REPLAY_SPEED_X", 3600))
 
 # 要曝露哪些數值欄位。沒有指定就用下面這張偏好清單跟 CSV 取交集，再沒有就退回全部數值欄位。
