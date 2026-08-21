@@ -1,13 +1,17 @@
-# Week 6 (預警與根因分析) 的 conda 環境, macOS 版。
+# Week 6 (預警與根因分析) 的 conda 環境, Windows 版。
 #
-# 這一份只列 Week 6 兩本 notebook、1_pkg_checker 與 results_exporter.py 真正 import 的套件,
-# 比 repo 根目錄那份課程環境窄, 所以裝起來比較快。環境名字刻意跟課程環境一樣:
+# 跟 macOS 版差一個 pywin32: Jupyter 在 Windows 上要靠它跟作業系統溝通。
 #
-#   前幾週已經建過環境: conda env update -f environments/environment.macos.yml
+# 請用「Anaconda Prompt」執行, 不是一般的命令提示字元:
+#
+#   前幾週已經建過環境: conda env update -f environments\environment.windows.yml
 #                        (不要加 --prune, 那會刪掉別的 lab 需要的套件)
-#   完全還沒有環境:     conda env create -f environments/environment.macos.yml
+#   完全還沒有環境:     conda env create -f environments\environment.windows.yml
 #
 # 建完之後: conda activate aiops-anomaly-zero-to-hero, 然後先跑 1_pkg_checker.ipynb。
+#
+# Windows 使用者名稱含中文或空白時, prophet 背後的編譯步驟可能失敗。
+# 遇到的話把 week6_implementation 資料夾改放到 C:\week6 再建一次。
 name: aiops-anomaly-zero-to-hero
 channels:
   - conda-forge
@@ -20,8 +24,9 @@ dependencies:
   - pandas>=2.0,<4
   - scipy>=1.12,<2
   - matplotlib>=3.9
-  # Lab 06: Prophet 當季節基準, scikit-learn 的 HistGradientBoostingRegressor 學殘差,
-  #         statsmodels 的 Holt-Winters 當對照組
+  # Lab 06: Prophet 當季節基準, scikit-learn 的 HistGradientBoostingRegressor 學殘差
+  #         與 metrics 的 MAE/RMSE, statsmodels 的 Holt-Winters 當對照組
+  # Lab 07: statsmodels 的 grangercausalitytests 做 Granger 因果檢定
   - prophet>=1.1
   - scikit-learn>=1.4,<2
   - statsmodels>=0.14
@@ -33,3 +38,4 @@ dependencies:
   - jupyterlab>=4.3
   - ipykernel>=6.29
   - ipython>=8.18
+  - pywin32>=306

@@ -1,9 +1,9 @@
 apiVersion: 1
 
 providers:
-  - name: Lab07
+  - name: network-ops
     orgId: 1
-    folder: AIOps Workshop
+    folder: 網路維運
     type: file
     disableDeletion: true
     allowUiUpdates: false

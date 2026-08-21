@@ -5,7 +5,7 @@
     Lab 06 的那兩晚   (2/25 良性、2/26 越線)
     Lab 07 的那次事故 (事故 L，光路劣化引發下游重傳)
 
-課堂上只要這一行 (在 week6 這個資料夾裡執行,也就是跟這支程式放在一起的那一層):
+課堂上只要這一行 (在 week6_implementation 這個資料夾裡執行,也就是跟這支程式放在一起的那一層):
 
     python 4_grafana.py
 
@@ -14,7 +14,7 @@
     1. 檢查 Docker 有沒有裝、Docker 的背景服務有沒有在跑
     2. 檢查兩份重播用的 CSV 在不在 (它們是兩本 notebook 各自寫出來的)
     3. 檢查四個 host port 有沒有被別的東西佔住
-    4. docker compose up -d --build,然後等三個服務都健康
+    4. docker compose up -d --build,然後等四個服務都健康
     5. 用預設瀏覽器打開兩張儀表板，畫面上就是上課走的那兩個 case
 
 其他子指令:
@@ -42,7 +42,7 @@ from urllib.request import urlopen
 def _find_root() -> Path:
     """從這支程式所在的位置往上走，找到裝著 infra/stack/compose.yaml 的那一層。
 
-    正常情況第一步就找到: 這支程式在 week6/，compose 在 week6/infra/stack/。
+    正常情況第一步就找到: 這支程式在 week6_implementation/，compose 在 week6_implementation/infra/stack/。
     還是寫成往上找，是為了萬一整個資料夾被放進更深的地方，路徑一樣算得出來。
     """
     here = Path(__file__).resolve().parent
@@ -67,10 +67,15 @@ DASHBOARDS = {
     "Lab 07 根因": "/d/aiops-lab07-rca/lab-07-rca",
 }
 
-# 預設 host port。被佔住的時候可以用環境變數或 infra/stack/.env 換掉。
-DEFAULT_PORTS = {"replayer06": 8011, "replayer07": 8010,
-                 "prometheus": 9090, "grafana": 3000}
+# 預設 host port。四個都是課程前幾週那一組加 10000: 前幾週照 getting-started 裝在本機的
+# Prometheus 與 Grafana 開機就佔著 9090 與 3000,Week 6 這一包整組讓開，學員不必先關掉它們。
+# 還是被佔住的話，可以用環境變數或 infra/stack/.env 換掉。
+DEFAULT_PORTS = {"replayer06": 18011, "replayer07": 18010,
+                 "prometheus": 19090, "grafana": 13000}
 READY_TIMEOUT_SECONDS = 240
+# 等 docker info / docker compose version 回應的秒數。Docker Desktop 正在啟動的期間
+# 這兩個指令要等很久，設太短會把「還在啟動」誤判成「沒有裝」。
+DOCKER_TIMEOUT = 20
 
 
 # --------------------------------------------------------------------------- 設定
@@ -96,7 +101,7 @@ def url_of(component: str, path: str = "") -> str:
 
 
 def dashboard_url(path: str) -> str:
-    return url_of("grafana", f"{path}?from=now-15m&to=now&refresh=5s")
+    return url_of("grafana", f"{path}?from=now-150s&to=now&refresh=1s")
 
 
 def all_dashboard_urls() -> dict:
@@ -142,10 +147,24 @@ def check_docker() -> bool:
         say(False, "找不到 docker 指令。請先安裝 Docker Desktop (macOS / Windows) ，"
                    "裝完打開它，等圖示變成執行中再跑一次")
         return False
-    probe = subprocess.run(["docker", "info"], text=True, check=False, capture_output=True)
+    # Docker Desktop 還在啟動的時候 docker info 會一直等，沒有 timeout 就會把整支程式卡住。
+    try:
+        probe = subprocess.run(["docker", "info"], text=True, check=False,
+                               capture_output=True, timeout=DOCKER_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        say(False, f"docker info 在 {DOCKER_TIMEOUT} 秒內沒有回應，Docker Desktop 可能還在啟動。"
+                   "等它的圖示不再跑動再跑一次")
+        return False
     if probe.returncode != 0:
         say(False, "Docker 裝好了，但背景服務沒有在跑。請先打開 Docker Desktop，"
                    "等它的圖示變成執行中再跑一次")
+        return False
+    # compose 是 Docker Desktop 附的外掛，這支程式每一個動作都靠它，所以單獨確認一次。
+    # 它不需要背景服務，所以就算 Docker 沒開也問得到答案。
+    probe = subprocess.run(["docker", "compose", "version"], text=True, check=False,
+                           capture_output=True, timeout=DOCKER_TIMEOUT)
+    if probe.returncode != 0:
+        say(False, "docker 有，但 docker compose 這個外掛沒有。請更新 Docker Desktop 到新版")
         return False
     say(True, "Docker 可以用")
     return True
@@ -169,8 +188,9 @@ def running_services() -> set[str]:
     """這個 compose 專案目前有哪幾個服務在跑。
 
     port 被佔住不一定是壞事: 佔住的如果就是這個 stack 自己，那是重跑而不是衝突。
-    但「有東西回應」不等於「是我們的東西」: 上一週課裝的本機 Grafana 一樣會佔住 3000
-    而且一樣回得出 /api/health,所以這裡問的是 docker compose 自己，不是那個 port。"""
+    但「有東西回應」不等於「是我們的東西」: 佔著同一個 port 的別人一樣回得出 /api/health
+    (前幾週裝在本機的 Grafana 佔著 3000 就是這樣) ,所以這裡問的是 docker compose 自己，
+    不是那個 port。"""
     probe = compose("ps", "--services", "--filter", "status=running", capture=True)
     if probe.returncode != 0:
         return set()
@@ -189,7 +209,7 @@ def check_ports() -> bool:
         else:
             say(False, f"{name} 的 port {port} 被別的程式佔住 (不是這個 stack) 。"
                        f"先關掉它，或在 infra/stack/.env 設 WEEK6_{name.upper()}_PORT 換一個。"
-                       f"上一週課用 brew 或 systemd 裝的 Grafana / Prometheus 是最常見的原因")
+                       f"這四個 port 已經避開課程前幾週用的 9090 與 3000")
             all_free = False
     return all_free
 
@@ -240,7 +260,7 @@ def cmd_up(args: argparse.Namespace) -> int:
             webbrowser.open(url)
     print("-" * 46)
     print("兩張儀表板各對應一本 lab 的 case: Lab 06 是 2/25 與 2/26 那兩晚,")
-    print("Lab 07 是事故 L。重播是循環的，走完整段會從頭再來一輪。")
+    print("Lab 07 是事故 L。重播是循環的，一輪各剛好 150 秒，畫面上就是完整的一個 case。")
     print("關掉環境: python 4_grafana.py down")
     return 0
 
@@ -285,7 +305,7 @@ def cmd_down(args: argparse.Namespace) -> int:
 def main(argv: list[str] | None = None) -> int:
     load_dotenv()
     parser = argparse.ArgumentParser(
-        description="Week 6 的 Grafana 環境 (Lab 06 與 Lab 07 兩個 case) ，一支程式跨三個作業系統")
+        description="Week 6 的 Grafana 環境 (Lab 06 與 Lab 07 兩個 case) ，一支程式，macOS 與 Windows 都一樣跑")
     sub = parser.add_subparsers(dest="command")
     up = sub.add_parser("up", help="檢查、啟動、然後打開兩張儀表板 (不給子指令時的預設) ")
     up.add_argument("--no-browser", action="store_true", help="不要自動開瀏覽器")

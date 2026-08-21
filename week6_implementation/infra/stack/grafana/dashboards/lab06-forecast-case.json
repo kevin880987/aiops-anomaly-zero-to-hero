@@ -15,9 +15,68 @@
     }
   ],
   "annotations": {
-    "list": []
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "red",
+        "name": "提前預警",
+        "titleFormat": "提前預警",
+        "textFormat": "",
+        "tagKeys": "",
+        "step": "1s",
+        "useValueForTime": false,
+        "expr": "sum(aiops_python_result{job=\"lab06-replayer\", column=\"early_warning_30m\"}) > 0",
+        "target": {
+          "expr": "sum(aiops_python_result{job=\"lab06-replayer\", column=\"early_warning_30m\"}) > 0",
+          "refId": "Anno",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "提前預警"
+        }
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "orange",
+        "name": "實際越過 capacity",
+        "titleFormat": "實際越過 capacity",
+        "textFormat": "",
+        "tagKeys": "",
+        "step": "1s",
+        "useValueForTime": false,
+        "expr": "count(aiops_python_result{job=\"lab06-replayer\", column=\"traffic_total\", port_id=\"port-id7427\"} > ignoring(column) aiops_python_result{job=\"lab06-replayer\", column=\"capacity\", port_id=\"port-id7427\"})",
+        "target": {
+          "expr": "count(aiops_python_result{job=\"lab06-replayer\", column=\"traffic_total\", port_id=\"port-id7427\"} > ignoring(column) aiops_python_result{job=\"lab06-replayer\", column=\"capacity\", port_id=\"port-id7427\"})",
+          "refId": "Anno",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "實際越過 capacity"
+        }
+      }
+    ]
   },
-  "description": "Lab 06 上課走的那兩晚 (2026-02-25 與 2026-02-26 的夜間傳檔) 。資料來自 2_lab06_forecasting.ipynb 寫出的 outputs/workshop/forecast_case_K.csv，由 week6/results_exporter.py 重播進 Prometheus。兩晚的流量形狀接近，只有 2/26 那一晚越過 capacity，預警規則也只在那一晚發。每一個 panel 的查詢都帶著 job=\"lab06-replayer\"，否則會撈到 Lab 07 那一份同名的 metric。",
+  "description": "五個受監控網路埠的流量、容量水位與提前預警，每 5 分鐘一格。預警規則測的不是當下的實際值，而是往前推 135 分鐘的預測值: 預測值越過該埠的 capacity 就把 early_warning_30m 設成 1，所以旗標會早於實際越線升起。",
   "editable": false,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -33,15 +92,15 @@
         "y": 0
       },
       "id": 1,
-      "title": "監控畫面看得到的: 兩晚的流量",
+      "title": "流量總覽",
       "type": "row"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "兩晚的形狀接近: port-id7427 在 2/25 那一晚的尖峰是 71.2 MB，在 2/26 那一晚是 99.3 MB，它的 capacity 是 82.3 MB。只有後面那一晚越線，這張圖是這本 lab 的對照組。",
+      "description": "五個受監控埠每 5 分鐘的進出位元組數。畫面上是連續兩晚的傳檔尖峰，兩晚的形狀接近; 分辨它們靠的是標註線，紅色是提前預警發出的時刻、橘色是流量實際越過 capacity 的時刻，兩條都只會出現在第二晚。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -117,7 +176,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"traffic_total\"}",
@@ -127,7 +186,7 @@
           "refId": "A"
         }
       ],
-      "title": "五個 port 的流量 (每 5 分鐘的位元組數) ",
+      "title": "各埠流量 traffic_total (每 5 分鐘位元組數) ",
       "type": "timeseries"
     },
     {
@@ -139,15 +198,15 @@
         "y": 9
       },
       "id": 3,
-      "title": "回頭看: 示範 port 的實際值、預測區間與 capacity",
+      "title": "預測區間與容量水位",
       "type": "row"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "y_hat_lower 與 y_hat_upper 帶的是 135 分鐘之前站在那一刻對這一格畫出來的區間，所以可以直接跟同一列的實際值比。紅色虛線是 port-id7427 的 capacity，值是 82,273,842 位元組。",
+      "description": "y_hat 是同時段的預期值，y_hat_lower 與 y_hat_upper 是它的區間。三條都是 135 分鐘之前站在那一刻對這一格算出來的，所以可以直接跟同一格的實際值比。紅色虛線是這個埠的 capacity，值是 82,273,842 位元組。實際值持續落在區間外，代表現在的用量已經不是同時段的常態。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -325,7 +384,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"traffic_total\", port_id=\"port-id7427\"}",
@@ -337,7 +396,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"y_hat\", port_id=\"port-id7427\"}",
@@ -349,7 +408,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"y_hat_lower\", port_id=\"port-id7427\"}",
@@ -361,7 +420,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"y_hat_upper\", port_id=\"port-id7427\"}",
@@ -373,7 +432,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"capacity\", port_id=\"port-id7427\"}",
@@ -383,15 +442,15 @@
           "refId": "E"
         }
       ],
-      "title": "port-id7427 wan-primary: 實際值對上 135 分鐘前畫出的區間",
+      "title": "port-id7427 (wan-primary) : 實際值與預測區間",
       "type": "timeseries"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "traffic_total 除以同一個 port 的 capacity。超過 100% 那條紅線就是越線。port-id7427 在 2/25 那一晚有 0 格超過 100%，2/26 入夜之後有 39 格。",
+      "description": "每個埠的流量除以自己的 capacity。超過 100% 那條紅線代表該格已經滿載，封包開始排隊或丟棄。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -426,7 +485,7 @@
               "mode": "none"
             },
             "thresholdsStyle": {
-              "mode": "line"
+              "mode": "line+area"
             }
           },
           "mappings": [],
@@ -471,7 +530,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "100 * aiops_python_result{job=\"lab06-replayer\", column=\"traffic_total\"} / ignoring(column) aiops_python_result{job=\"lab06-replayer\", column=\"capacity\"}",
@@ -481,7 +540,7 @@
           "refId": "A"
         }
       ],
-      "title": "用掉了 capacity 的百分之幾",
+      "title": "容量水位 (traffic_total / capacity) ",
       "type": "timeseries"
     },
     {
@@ -493,15 +552,15 @@
         "y": 19
       },
       "id": 6,
-      "title": "往前看: forecast_30m 與預警旗標",
+      "title": "提前預警",
       "type": "row"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "forecast_30m 帶的是站在這一格往前推 135 分鐘的值，也就是預警規則實際在測的那一條 (欄名沿用 30m，裡面裝的是 135 分鐘) 。它在 2/26 23:05 第一次超過 capacity，實際值在那一晚第一次超過是 2/27 01:05。",
+      "description": "forecast_30m 是站在每一格往前推 135 分鐘的預測值，預警規則測的就是這一條 (欄名沿用 30m，裡面裝的是 135 分鐘) 。它越過 capacity 的時刻比實際值越線的時刻早，中間那段時間就是值班可以處理的餘裕。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -637,7 +696,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"forecast_30m\", port_id=\"port-id7427\"}",
@@ -649,7 +708,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"capacity\", port_id=\"port-id7427\"}",
@@ -661,7 +720,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"traffic_total\", port_id=\"port-id7427\"}",
@@ -671,15 +730,15 @@
           "refId": "C"
         }
       ],
-      "title": "port-id7427 wan-primary: 規則在測的那一條對上 capacity",
+      "title": "port-id7427 (wan-primary) : 預測值與容量上限",
       "type": "timeseries"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "1 代表這個 port 這一格發出預警。整份資料 2,465 列裡只有 33 列是 1，全部在 port-id7427 的 2/26 23:30 到 2/27 02:30，2/25 那一晚是 0 列。旗標在 2/26 23:30 升起，實際值在那一晚第一次越過 capacity 是 2/27 01:05，早 95 分鐘。",
+      "description": "1 代表這個埠這一格發出提前預警。旗標升起到實際值越過 capacity 之間的時間，就是這次預警提早的量。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -756,7 +815,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"early_warning_30m\"}",
@@ -778,15 +837,15 @@
         "y": 29
       },
       "id": 9,
-      "title": "四級告警等級",
+      "title": "告警等級",
       "type": "row"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "warning_level_code 是四級告警的數字編碼: 0 Info、1 Watch、2 Warning、3 Critical。整份資料 2,465 列裡有 239 列不是 Info; Critical 只有 1 列 (port-id7429，2/26 11:10) ，port-id7428 與 port-id7430 整段都是 Info。",
+      "description": "四級告警的數字編碼: 0 Info、1 Watch、2 Warning、3 Critical。顏色是哪一級，色塊的長度是停在那一級多久。Critical 要立刻處理，Watch 只需要留意。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -869,7 +928,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"warning_level_code\"}",
@@ -891,15 +950,15 @@
         "y": 37
       },
       "id": 11,
-      "title": "兩個排序用的數字: resid_z 與 forecast_risk_score",
+      "title": "異常程度與風險排序",
       "type": "row"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "實際值對 y_hat 的穩健標準化殘差，量的是「現在偏離同時段的正常多少」。這份資料的範圍是 -7.63 到 25.55，最大值在 port-id7427。反應型告警的界限是 |z| >= 3 連續兩格。",
+      "description": "實際值對 y_hat 的穩健標準化殘差，量的是現在偏離同時段常態幾個 sigma。反應型告警的界限是 |z| >= 3 連續兩格。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -978,7 +1037,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"resid_z\"}",
@@ -994,9 +1053,9 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "0.6 x p_exceed 加 0.4 x 殘差飽和項，再乘 100。這一份重播裡各 port 的最大值: port-id7427 是 94.9、port-id7431 是 90.1、port-id7429 是 78.9、port-id7428 與 port-id7430 都是 40.0。",
+      "description": "0.6 x p_exceed 加 0.4 x 殘差飽和項，再乘 100，取時間窗內的最大值。取峰值而不是當下的值，是因為當下的值大部分時間都接近 0,只有事件發生的那幾格才高，用它排序會一直跳。同一時間多個埠都在告警的時候，用這個排序決定先看哪一個。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1034,7 +1093,7 @@
         "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
-            "lastNotNull"
+            "max"
           ],
           "fields": "",
           "values": false
@@ -1047,7 +1106,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab06-replayer\", column=\"forecast_risk_score\"}",
@@ -1057,7 +1116,7 @@
           "refId": "A"
         }
       ],
-      "title": "風險分數 forecast_risk_score (滿分 100) ",
+      "title": "風險分數 forecast_risk_score 峰值 (滿分 100) ",
       "type": "bargauge"
     },
     {
@@ -1069,15 +1128,15 @@
         "y": 46
       },
       "id": 14,
-      "title": "整條鏈活著嗎",
+      "title": "資料鏈路狀態",
       "type": "row"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "1 代表 Prometheus 抓得到 Lab 06 的重播程式。這一格是 0 的時候，上面每一張圖看到的都是舊資料。",
+      "description": "1 代表 Prometheus 抓得到這個資料來源。這一格是 0 的時候，上面每一張圖看到的都是舊資料。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1115,7 +1174,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
+        "w": 8,
         "x": 0,
         "y": 47
       },
@@ -1139,25 +1198,25 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "up{job=\"lab06-replayer\"}",
           "instant": false,
-          "legendFormat": "replayer",
+          "legendFormat": "collector",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "重播程式 UP",
+      "title": "資料採集狀態",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "CSV 裡的資料時間 (不是牆上時間) 。這一份涵蓋 2026-02-25 16:00 到 2026-02-27 09:00 共 41 小時，300 倍速跑一輪約 8.2 分鐘，走完會跳回 2/25 16:00 再來一輪。",
+      "description": "這一刻有幾個埠在回報資料。應該是 5，少於 5 代表有埠斷了，上面的圖會缺線。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1168,72 +1227,12 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "red",
                 "value": null
-              }
-            ]
-          },
-          "unit": "dateTimeAsIso"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 6,
-        "y": 47
-      },
-      "id": 16,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "lab07-prometheus"
-          },
-          "editorMode": "code",
-          "expr": "aiops_python_result_timestamp{job=\"lab06-replayer\"} * 1000",
-          "instant": false,
-          "legendFormat": "replay clock",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "重播走到資料裡的哪一刻",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "lab07-prometheus"
-      },
-      "description": "五個 port x 十個數值欄位 = 50 條。少於這個數字代表 CSV 少了欄位或少了 port。這個查詢帶了 job=\"lab06-replayer\"，所以不會把 Lab 07 那 30 條一起算進來。",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
+              },
               {
                 "color": "green",
-                "value": null
+                "value": 5
               }
             ]
           },
@@ -1243,8 +1242,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 12,
+        "w": 8,
+        "x": 8,
         "y": 47
       },
       "id": 17,
@@ -1267,25 +1266,25 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "count(aiops_python_result{job=\"lab06-replayer\"})",
+          "expr": "count(count by (port_id) (aiops_python_result{job=\"lab06-replayer\"}))",
           "instant": false,
-          "legendFormat": "series",
+          "legendFormat": "回報中的埠數",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "曝露出幾條 series",
+      "title": "回報中的埠數",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "這一刻 early_warning_30m 等於 1 的 port 數。整段重播只有 port-id7427 會讓它變成 1，共 33 格，其餘時間是 0。",
+      "description": "時間窗內 early_warning_30m 曾經等於 1 的埠數。0 代表這段時間沒有任何埠進入提前預警。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1311,8 +1310,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 18,
+        "w": 8,
+        "x": 16,
         "y": 47
       },
       "id": 18,
@@ -1323,7 +1322,7 @@
         "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
-            "lastNotNull"
+            "max"
           ],
           "fields": "",
           "values": false
@@ -1335,21 +1334,21 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "sum(aiops_python_result{job=\"lab06-replayer\", column=\"early_warning_30m\"})",
           "instant": false,
-          "legendFormat": "在預警的 port 數",
+          "legendFormat": "預警中的埠數",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "現在有幾個 port 在預警",
+      "title": "這段時間發過預警的埠數",
       "type": "stat"
     }
   ],
-  "refresh": "5s",
+  "refresh": "1s",
   "schemaVersion": 38,
   "style": "dark",
   "tags": [
@@ -1362,12 +1361,12 @@
     "list": []
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-150s",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "utc",
-  "title": "Lab 06: 預警課堂案例 (兩晚對照)",
+  "title": "網路埠容量預警",
   "uid": "aiops-lab06-forecast",
   "version": 1,
   "weekStart": ""

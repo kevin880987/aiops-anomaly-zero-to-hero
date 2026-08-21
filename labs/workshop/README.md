@@ -102,15 +102,15 @@ context、用 BM25 從可抽換的知識包檢索 K(c)、把兩塊送進模型�
 基準，另外兩個上線前的機械檢查: 無證據的假候選要墊底、每一句證據的來源標籤要追得回工具。最後一節把
 值班的核可寫回知識包，跑一次回饋迴路，大約 75 到 90 分鐘。
 
-### Lab 06 與 Lab 07 住在 repo 根目錄的 `week6/`
+### Lab 06 與 Lab 07 住在 repo 根目錄的 `week6_implementation/`
 
-Week 6 的東西全部搬到 repo 根目錄的 `week6/`,那個資料夾就是上課當天發給學員的那一包:
+Week 6 的東西全部搬到 repo 根目錄的 `week6_implementation/`,那個資料夾就是上課當天發給學員的那一包:
 解壓縮到桌面、在裡面開 JupyterLab、從頭跑到底,不需要 repo 的其他部分,也沒有任何一份複本。
 
 檔名前面的數字就是上課順序,學員照著 1、2、3、4 走即可:
 
 ```
-week6/
+week6_implementation/
   1_pkg_checker.ipynb                  上課前的環境檢查
   2_lab06_forecasting.ipynb            Lab 06 預警
   3_lab07_root_cause_analysis.ipynb    Lab 07 根因分析
@@ -121,17 +121,17 @@ week6/
 
 搬過去的東西原本散在四個地方: 兩本 notebook 與三支檔案在 `labs/workshop/`、講義投影片圖在
 `labs/workshop/slides/`、Week 6 的資料在 `data/synthetic/`、Grafana 環境在 `infra/stack/`。
-它們都只有 Week 6 在用,所以是搬家不是複製,repo 裡不會有第二份。`week6/environments/` 是新寫的,
+它們都只有 Week 6 在用,所以是搬家不是複製,repo 裡不會有第二份。`week6_implementation/environments/` 是新寫的,
 只列 Week 6 真的 import 的套件,環境名字沿用課程環境,學員不會多建一個。
 
 notebook 與那兩支 `.py` 都從自己的位置往上找 `data/` 與 `infra/`,所以資料夾整個搬到桌面也一樣跑。
 
-學員第一件事是跑 `week6/1_pkg_checker.ipynb`: 它讀 `week6/environments/` 底下這台機器對應的環境檔,
+學員第一件事是跑 `week6_implementation/1_pkg_checker.ipynb`: 它讀 `week6_implementation/environments/` 底下這台機器對應的環境檔,
 把缺的套件直接用 pip 裝起來,然後驗中文字型 (畫一張中文圖) 、印出三個 CSV 的列數與時間範圍,
 並檢查 Docker 與四個 port。最後一格是一張總表,每一項失敗都附該作業系統的修法。
 
-Lab 07 的 Grafana 環境包成 Docker Compose (`week6/infra/stack/`)，跟 Lab 05 同一個形狀，而且只有
-一行指令,三個作業系統都一樣 (在 `week6/` 裡執行):
+Lab 07 的 Grafana 環境包成 Docker Compose (`week6_implementation/infra/stack/`)，跟 Lab 05 同一個形狀，而且只有
+一行指令,三個作業系統都一樣 (在 `week6_implementation/` 裡執行):
 
 ```bash
 python 4_grafana.py
@@ -141,8 +141,8 @@ python 4_grafana.py
 佔住，然後啟動重播服務 + Prometheus + Grafana,最後打開儀表板。**打開看到的就是上課走的那一次事故**
 (事故 L，光路劣化引發下游重傳)，不是別的資料。儀表板由 provisioning 掛好，不用手動匯入。
 
-Lab 06 讀 `week6/data/synthetic/` 底下的 `*_week6.csv`,那是同一組欄位與取樣的擴充版，事件目錄多了
-七種三竹的業務型別; Lab 07 讀同一份原始資料，並且寫出三份結果到 `week6/outputs/workshop/`:
+Lab 06 讀 `week6_implementation/data/synthetic/` 底下的 `*_week6.csv`,那是同一組欄位與取樣的擴充版，事件目錄多了
+七種三竹的業務型別; Lab 07 讀同一份原始資料，並且寫出三份結果到 `week6_implementation/outputs/workshop/`:
 `rca_results.csv` (每個事故每個 port 一列)、`rca_case_L.csv` (上課那一次事故的逐格資料，Grafana
 重播用的就是它)、以及 `rca_feedback.jsonl` (回饋迴路寫回去的紀錄)。
 

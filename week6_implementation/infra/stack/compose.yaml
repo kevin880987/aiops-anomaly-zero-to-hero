@@ -2,22 +2,32 @@ name: aiops-week6
 
 # Week 6 的 Grafana 環境。兩本 lab 各自從一個 case 出發，所以這裡也重播兩份 case:
 #
-#   replayer06  重播 Lab 06 的那兩晚   (outputs/workshop/forecast_case_K.csv)
-#   replayer07  重播 Lab 07 的那次事故 (outputs/workshop/rca_case_L.csv)
-#   prometheus  每兩秒各抓一次，存成時間序列
+#   replayer06  Lab 06 的那兩晚   (outputs/workshop/forecast_case_K.csv)
+#   replayer07  Lab 07 的那次事故 (outputs/workshop/rca_case_L.csv)
+#   prometheus  每半秒各抓一次，存成時間序列
 #   grafana     provisioning 直接把 datasource 與兩張儀表板掛好，不用手動匯入
 #
 # 兩支重播程式跑的是同一支 results_exporter.py，只是吃不同的 CSV 與欄位。它們曝露的
 # metric 名稱一樣 (aiops_python_result) ，靠 Prometheus 自動加上的 job label 分開:
 # job="lab06-replayer" 與 job="lab07-replayer"。兩張儀表板的查詢都帶著自己的 job，
 # 所以不會互相撈到對方的資料。
+#
+# 畫面的更新速度由四個數字一起決定，改其中一個就要想到另外三個:
+#   RESULTS_POLL_SECONDS  重播程式多久把下一筆寫進 /metrics   (這裡 0.5 秒)
+#   scrape_interval       Prometheus 多久抓一次              (prometheus.yml，0.5 秒)
+#   refresh               Grafana 多久重畫一次               (兩張儀表板，1 秒)
+#   REPLAY_SPEED_X        一秒牆上時間等於幾秒資料時間        (下面兩個 service 各一個)
+#
+# 兩個倍速都調成「一輪剛好 150 秒」，而兩張儀表板的時間窗也是 150 秒 (now-150s) 。
+# 這兩個數字必須一起改: 窗比一輪長，畫面上就會同時出現這一輪與上一輪，學員分不出
+# 哪一段是哪一晚; 窗比一輪短，case 的一部分會被切在畫面外。
 
 services:
   replayer06:
     build:
       context: ./replayer
     ports:
-      - "${WEEK6_REPLAYER06_PORT:-8011}:8011"
+      - "${WEEK6_REPLAYER06_PORT:-18011}:8011"
     environment:
       RESULTS_CSV_PATH: /opt/outputs/workshop/forecast_case_K.csv
       RESULT_COLUMNS: traffic_total,y_hat,y_hat_lower,y_hat_upper,capacity,forecast_30m,early_warning_30m,resid_z,forecast_risk_score,warning_level_code
@@ -31,9 +41,13 @@ services:
       # replayer07 的 case 裡每個 port 的 event_label 從頭到尾同一個值，沒有這個問題，維持原樣。
       RESULT_LABEL_COLUMNS: device_id,port_id,port_role,ml_method
       RESULTS_EXPORTER_PORT: "8011"
-      # 這一份裝的是兩晚共 41 小時。300 倍速讓一輪大約八分鐘跑完，跟 Lab 07 那一份差不多,
-      # 兩張儀表板的節奏才一致。
-      REPLAY_SPEED_X: "${WEEK6_REPLAY06_SPEED:-300}"
+      RESULTS_POLL_SECONDS: "${WEEK6_POLL_SECONDS:-0.5}"
+      # 這一份裝的是兩晚共 41 小時 (147,600 秒) 。984 倍速讓一輪剛好 150 秒，跟 Lab 07 那一份
+      # 一模一樣長，而儀表板的時間窗也設成 150 秒 (now-150s) ，所以畫面上永遠是完整的一個
+      # case、而且只有一份: 兩晚都在，不會出現上一輪的重複段落讓人分不清是哪一晚。
+      # 0.5 秒抓一次配 984 倍速，等於資料裡的每 8.2 分鐘抓到一次，而資料本身是 5 分鐘一格，
+      # 所以圖上大約每兩格會取到一格。
+      REPLAY_SPEED_X: "${WEEK6_REPLAY06_SPEED:-984}"
     volumes:
       - ../../results_exporter.py:/opt/app/results_exporter.py:ro
       - ../../outputs/workshop:/opt/outputs/workshop:ro
@@ -48,16 +62,19 @@ services:
     build:
       context: ./replayer
     ports:
-      - "${WEEK6_REPLAYER07_PORT:-8010}:8010"
+      - "${WEEK6_REPLAYER07_PORT:-18010}:8010"
     environment:
       # 重播程式本體不放在這裡，是下面 volumes 那一行把 results_exporter.py 掛進來的。
       # 一份程式兩個地方用 (notebook 裡手動跑、compose 裡自動跑)，行為才不會分岔。
       RESULTS_CSV_PATH: /opt/outputs/workshop/rca_case_L.csv
-      RESULT_COLUMNS: traffic_total,error_rate,z_error_rate,root_cause_score,candidate_rank,onset_flag
+      RESULT_COLUMNS: traffic_total,error_rate,z_error_rate,root_cause_score,candidate_rank,onset_flag,llm_confidence,llm_rank,llm_escalation
       RESULT_LABEL_COLUMNS: device_id,port_id,port_role,event_label,ml_method
       RESULTS_EXPORTER_PORT: "8010"
-      # 60 倍速: 牆上的一秒等於資料裡的一分鐘，整段事故窗約八分鐘跑完一輪，然後從頭再來。
-      REPLAY_SPEED_X: "${WEEK6_REPLAY07_SPEED:-60}"
+      RESULTS_POLL_SECONDS: "${WEEK6_POLL_SECONDS:-0.5}"
+      # 190 倍速: 牆上的半秒等於資料裡的 95 秒，28,500 秒的事故窗剛好 150 秒跑完一輪，
+      # 跟 Lab 06 那一份一樣長，也跟儀表板 150 秒的時間窗對齊。
+      # 資料是 5 分鐘一格，所以這一份每一格都會被抓到，一格都不會跳過。
+      REPLAY_SPEED_X: "${WEEK6_REPLAY07_SPEED:-190}"
     volumes:
       - ../../results_exporter.py:/opt/app/results_exporter.py:ro
       - ../../outputs/workshop:/opt/outputs/workshop:ro
@@ -76,7 +93,7 @@ services:
       - --storage.tsdb.retention.time=2h
       - --web.enable-lifecycle
     ports:
-      - "${WEEK6_PROMETHEUS_PORT:-9090}:9090"
+      - "${WEEK6_PROMETHEUS_PORT:-19090}:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
@@ -95,7 +112,7 @@ services:
   grafana:
     image: grafana/grafana:13.1.0
     ports:
-      - "${WEEK6_GRAFANA_PORT:-3000}:3000"
+      - "${WEEK6_GRAFANA_PORT:-13000}:3000"
     environment:
       # 匿名唯讀登入: 課堂上不要花時間在帳號密碼上。
       GF_AUTH_ANONYMOUS_ENABLED: "true"
@@ -103,6 +120,8 @@ services:
       GF_AUTH_DISABLE_LOGIN_FORM: "true"
       # notebook 那一格會把儀表板嵌進來，要允許被 iframe 包住。
       GF_SECURITY_ALLOW_EMBEDDING: "true"
+      # 預設下限是 5 秒，儀表板寫 refresh=1s 會被擋下來改回 5 秒。
+      GF_DASHBOARDS_MIN_REFRESH_INTERVAL: "1s"
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro

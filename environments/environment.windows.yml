@@ -25,7 +25,7 @@ dependencies:
   - pytest-cov>=5.0
   - pywin32>=306
   - prometheus_client>=0.20
-  # --- Week 6 (week6/2_lab06_forecasting + 3_lab07_root_cause_analysis) ---
+  # --- Week 6 (week6_implementation/2_lab06_forecasting + 3_lab07_root_cause_analysis) ---
   - prophet>=1.1          # Lab 06 forecasting model: trend + seasonality + event regressor h(t)
   - networkx>=3.0         # Lab 07 topology graph (downstream reach in the ranking)
   - statsmodels>=0.14     # Lab 06 Holt-Winters / SARIMA baselines, Lab 07 Granger causality

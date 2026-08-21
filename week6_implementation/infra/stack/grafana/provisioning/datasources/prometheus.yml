@@ -1,0 +1,20 @@
+apiVersion: 1
+
+# 換過 name 或 uid 的話，舊的那一筆會留在 grafana-data 這個 volume 裡。
+# 要清乾淨就跑 python 4_grafana.py down --clean 再起一次。
+deleteDatasources:
+  - name: Lab07 Prometheus
+    orgId: 1
+
+datasources:
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    # container 之間用 service name，瀏覽器才用 localhost。
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      # 跟 prometheus.yml 的 scrape_interval 對齊，Grafana 才不會自己把點抽稀。
+      timeInterval: 500ms

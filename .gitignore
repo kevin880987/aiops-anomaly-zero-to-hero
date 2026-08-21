@@ -70,8 +70,8 @@ outputs/setup/*
 
 # Week 6 ships as a self-contained folder that students download, so its notebooks
 # write to their own outputs/ next to them rather than to the repo-root one.
-week6/outputs/workshop/*
-!week6/outputs/workshop/.gitkeep
+week6_implementation/outputs/workshop/*
+!week6_implementation/outputs/workshop/.gitkeep
 
 # Diagram sources. The .drawio files live in materials/diagrams/ one level up, and
 # materials/tools/build_diagrams.py exports the .svg into labs/*/diagrams/. Only the

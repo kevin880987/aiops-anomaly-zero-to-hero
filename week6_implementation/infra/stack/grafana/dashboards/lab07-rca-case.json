@@ -15,9 +15,45 @@
     }
   ],
   "annotations": {
-    "list": []
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "red",
+        "name": "異常持續中",
+        "titleFormat": "異常持續中",
+        "textFormat": "",
+        "tagKeys": "",
+        "step": "1s",
+        "useValueForTime": false,
+        "expr": "sum(aiops_python_result{job=\"lab07-replayer\", column=\"onset_flag\"}) > 0",
+        "target": {
+          "expr": "sum(aiops_python_result{job=\"lab07-replayer\", column=\"onset_flag\"}) > 0",
+          "refId": "Anno",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "異常持續中"
+        }
+      }
+    ]
   },
-  "description": "Lab 07 上課走的那一次事故 (事故 L，光路劣化引發下游重傳) 。資料來自 3_lab07_root_cause_analysis.ipynb 寫出的 outputs/workshop/rca_case_L.csv，由 week6/results_exporter.py 重播進 Prometheus。",
+  "description": "一次進行中的網路事故: 上游光路劣化，下游埠出現重傳與錯誤率上升。這張儀表板把流量、錯誤率、各埠的異常起點與根因候選排名放在同一頁，用來決定先派人查哪一個埠。",
   "editable": false,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -33,15 +69,15 @@
         "y": 0
       },
       "id": 1,
-      "title": "監控畫面看得到的: 流量",
+      "title": "流量總覽",
       "type": "row"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "監控畫面上只有這個。事故窗裡只有兩個下游 port 在動，真正的根因 port-id7427 幾乎不動。",
+      "description": "五個受監控埠每 5 分鐘的進出位元組數。紅色標註區間是至少一個埠已經偏離常態的時段; 在那一段裡這張圖幾乎沒有變化，所以只看流量會判斷成沒事。同一段時間右邊的錯誤率已經拉起來了。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -117,7 +153,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab07-replayer\", column=\"traffic_total\"}",
@@ -127,7 +163,7 @@
           "refId": "A"
         }
       ],
-      "title": "五個 port 的流量 (每 5 分鐘的位元組數) ",
+      "title": "各埠流量 traffic_total (每 5 分鐘位元組數) ",
       "type": "timeseries"
     },
     {
@@ -139,15 +175,15 @@
         "y": 9
       },
       "id": 3,
-      "title": "換一個量才看得到根因: error_rate",
+      "title": "錯誤率與異常起點",
       "type": "row"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "這一型事故的簽章指標。流量上完全看不到的 port-id7427，在這一欄先動起來。",
+      "description": "每個埠的封包錯誤率。跟左邊同一段紅色標註區間對照: 流量看不出來的異常，在這一欄一開始就看得到。光路劣化與下游重傳這一型事故，錯誤率會比流量更早離開常態。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -223,7 +259,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab07-replayer\", column=\"error_rate\"}",
@@ -233,15 +269,15 @@
           "refId": "A"
         }
       ],
-      "title": "簽章指標 error_rate",
+      "title": "錯誤率 error_rate",
       "type": "timeseries"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "1 代表這個 port 已經連續三格偏離同時段常態超過 3 個 sigma。階梯往上跳的先後就是 onset 的先後。",
+      "description": "1 代表這個埠已經連續三格偏離同時段常態超過 3 個 sigma。階梯往上跳的先後，就是各埠開始異常的先後。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -318,7 +354,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab07-replayer\", column=\"onset_flag\"}",
@@ -328,7 +364,7 @@
           "refId": "A"
         }
       ],
-      "title": "誰先越線 (onset)",
+      "title": "異常起點 onset_flag",
       "type": "timeseries"
     },
     {
@@ -340,15 +376,15 @@
         "y": 18
       },
       "id": 6,
-      "title": "工具給的答案: Score(c) 排名",
+      "title": "根因候選排名",
       "type": "row"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "四項證據等權相加。最長的那一根就是排名第一的候選。",
+      "description": "四項證據等權相加: A 異常幅度、T 時間一致性、G 拓樸位置、C 統計與因果證據。最長的那一根就是排名第一的候選。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -399,7 +435,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab07-replayer\", column=\"root_cause_score\"}",
@@ -409,15 +445,15 @@
           "refId": "A"
         }
       ],
-      "title": "Score(c) 根因分數 (滿分 100) ",
+      "title": "根因分數 Score(c) (滿分 100) ",
       "type": "bargauge"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "1 就是這次排第一的候選。它應該落在 port-id7427。",
+      "description": "1 就是這次排名第一的候選，建議從它開始查。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -463,7 +499,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab07-replayer\", column=\"candidate_rank\"}",
@@ -479,9 +515,9 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "事故窗內對同時段常態的偏離。最大的不是排名第一的那一個，這就是「最嚴重的症狀不是根因」。",
+      "description": "事故窗內錯誤率對同時段常態的偏離。z 最大的埠不一定是根因: 症狀最嚴重的通常是下游被影響的埠。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -527,7 +563,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "aiops_python_result{job=\"lab07-replayer\", column=\"z_error_rate\"}",
@@ -548,16 +584,276 @@
         "x": 0,
         "y": 27
       },
-      "id": 10,
-      "title": "整條鏈活著嗎",
+      "id": 14,
+      "panels": [],
+      "title": "AI 診斷",
       "type": "row"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "1 代表 Prometheus 抓得到重播程式。這一格是 0 的時候，上面每一張圖看到的都是舊資料。",
+      "id": 15,
+      "type": "text",
+      "gridPos": {
+        "h": 14,
+        "w": 11,
+        "x": 0,
+        "y": 28
+      },
+      "title": "診斷摘要與建議處置",
+      "description": "模型讀的是前面四項證據加上這個客戶的知識包 (拓樸、處置手冊、歷史工單) ，它整合證據，不產生證據: 每一條建議處置都指得回處置手冊的某一段。完整的診斷 (支持證據、反對證據、傳播路徑、還缺什麼) 在事件報告裡。",
+      "options": {
+        "mode": "markdown",
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "#### 摘要\n\n2026-03-02 14:00 到 17:55，signature_metric 為 error_rate。evidence_chain 顯示三個 port 依序偏離同時段常態超過 3 sigma: port-id7427 (edge-fw-01) 於 14:00、port-id7429 (core-sw-01) 於 14:40、port-id7431 (dist-sw-02) 於 14:55。\n\n#### 根因假設\n\n1. **[Medium]** port-id7427 (edge-fw-01, 對外主線) 的 error_rate 劣化為觸發點，下游 port-id7429 與 port-id7431 被放大\n2. **[Low]** port-id7429 (core-sw-01, 主機群 uplink) 自身劣化為主因，port-id7427 的早期偏離只是同期背景訊號\n3. **[Low]** 三個 port 各自獨立劣化，或存在一個未被查詢到的共同上游因素，不構成單一傳播鏈\n\n信心只到 Medium: 排第一的那個 port 的 z 是三者中最小的，granger 與 cross_port_synchrony 都很低，對傳播關係沒有統計支持。\n\n#### 建議處置\n\n- 讀 port-id7427 的 SFP 收發光功率\n- 檢查主備切換紀錄與 CRC 計數器\n- 確認下游 port-id7429、port-id7431 的重傳是否跟著上游 error_rate 走"
+      },
+      "transparent": false
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "模型自己給的信心，跟上一排工具算的 Score(c) 同樣是 0 到 100，可以直接並排比。只有進到短名單的三個埠有值，沒有被問到的埠留白: 留白不等於模型判定它沒問題。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 7,
+        "x": 11,
+        "y": 28
+      },
+      "id": 16,
+      "options": {
+        "displayMode": "gradient",
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "left",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color",
+        "text": {
+          "titleSize": 16,
+          "valueSize": 40
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "refId": "A",
+          "range": true,
+          "instant": false,
+          "expr": "aiops_python_result{job=\"lab07-replayer\", column=\"llm_confidence\"}",
+          "legendFormat": "{{port_id}}"
+        }
+      ],
+      "title": "AI 對各候選的信心 (滿分 100) ",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "模型照自己的信心重排出來的名次。跟上一排工具的 candidate_rank 一致就代表兩層沒有分歧。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 3,
+        "x": 18,
+        "y": 28
+      },
+      "id": 17,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true,
+        "text": {
+          "titleSize": 14,
+          "valueSize": 48
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "refId": "A",
+          "range": true,
+          "instant": false,
+          "expr": "aiops_python_result{job=\"lab07-replayer\", column=\"llm_rank\"}",
+          "legendFormat": "{{port_id}}"
+        }
+      ],
+      "title": "AI 排名",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "模型判斷這次事故要不要往上升級。影響超過一個埠、或第一名分數夠高，就會是「是」。",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "否",
+                  "color": "green",
+                  "index": 1
+                },
+                "1": {
+                  "text": "是",
+                  "color": "red",
+                  "index": 0
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 3,
+        "x": 21,
+        "y": 28
+      },
+      "id": 18,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "refId": "A",
+          "range": true,
+          "instant": false,
+          "expr": "aiops_python_result{job=\"lab07-replayer\", column=\"llm_escalation\"}",
+          "legendFormat": "本次事故"
+        }
+      ],
+      "title": "需要升級",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 42
+      },
+      "id": 10,
+      "title": "資料鏈路狀態",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "1 代表 Prometheus 抓得到這個資料來源。這一格是 0 的時候，上面每一張圖看到的都是舊資料。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -595,9 +891,9 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
+        "w": 12,
         "x": 0,
-        "y": 28
+        "y": 43
       },
       "id": 11,
       "options": {
@@ -619,25 +915,25 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "expr": "up{job=\"lab07-replayer\"}",
           "instant": false,
-          "legendFormat": "replayer",
+          "legendFormat": "collector",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "重播程式 UP",
+      "title": "資料採集狀態",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "lab07-prometheus"
+        "uid": "prometheus"
       },
-      "description": "CSV 裡的資料時間 (不是牆上時間) 。重播是循環的: 走完整段事故窗就從頭再來一輪，所以這個時間會週期性地跳回 12:00。事故窗是 14:00 到 17:55。",
+      "description": "這一刻有幾個埠在回報資料。應該是 5，少於 5 代表有埠斷了，上面的圖會缺線。",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -648,72 +944,12 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "red",
                 "value": null
-              }
-            ]
-          },
-          "unit": "dateTimeAsIso"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 6,
-        "y": 28
-      },
-      "id": 12,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "lab07-prometheus"
-          },
-          "editorMode": "code",
-          "expr": "aiops_python_result_timestamp{job=\"lab07-replayer\"} * 1000",
-          "instant": false,
-          "legendFormat": "replay clock",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "重播走到資料裡的哪一刻",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "lab07-prometheus"
-      },
-      "description": "五個 port x 六個欄位 = 30 條。少於這個數字代表 CSV 少了欄位或少了 port。",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
+              },
               {
                 "color": "green",
-                "value": null
+                "value": 5
               }
             ]
           },
@@ -723,9 +959,9 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
+        "w": 12,
         "x": 12,
-        "y": 28
+        "y": 43
       },
       "id": 13,
       "options": {
@@ -747,21 +983,21 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "lab07-prometheus"
+            "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "count(aiops_python_result{job=\"lab07-replayer\"})",
+          "expr": "count(count by (port_id) (aiops_python_result{job=\"lab07-replayer\"}))",
           "instant": false,
-          "legendFormat": "series",
+          "legendFormat": "回報中的埠數",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "曝露出幾條 series",
+      "title": "回報中的埠數",
       "type": "stat"
     }
   ],
-  "refresh": "5s",
+  "refresh": "1s",
   "schemaVersion": 38,
   "style": "dark",
   "tags": [
@@ -774,12 +1010,12 @@
     "list": []
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-150s",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "utc",
-  "title": "Lab 07: RCA 課堂案例 (事故 L) ",
+  "title": "網路事故根因分析",
   "uid": "aiops-lab07-rca",
   "version": 1,
   "weekStart": ""

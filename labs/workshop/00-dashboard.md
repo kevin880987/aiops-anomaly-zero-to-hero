@@ -100,5 +100,5 @@ Lab 06 與 Lab 07 用另一張 dashboard，`infra/grafana/dashboards/forecast_rc
 
 那一張是匯入的，不逐格建立。這裡逐格建立是因為重點就在自己寫一次 PromQL，那一張有十二格，而且讀的是
 notebook 算完之後才存在的欄位，逐格建立換不到相應的學習。做法寫在 Lab 07 的「上 Grafana: 讓值班的人
-看得到」那一節，Lab 06 與 Lab 07 兩章的結果都在那裡一起接上去，資料由 `week6/results_exporter.py`
-重播進 Prometheus。Lab 06 與 Lab 07 本身也搬到了 repo 根目錄的 `week6/`,那一包就是發給學員的版本。
+看得到」那一節，Lab 06 與 Lab 07 兩章的結果都在那裡一起接上去，資料由 `week6_implementation/results_exporter.py`
+重播進 Prometheus。Lab 06 與 Lab 07 本身也搬到了 repo 根目錄的 `week6_implementation/`,那一包就是發給學員的版本。

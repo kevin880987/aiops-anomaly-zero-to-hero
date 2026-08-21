@@ -33,7 +33,7 @@ def _find_root() -> Path:
     """從這支程式所在的位置往上走，找到裝著 outputs/ 的那一層。
 
     兩種擺法都要對得上:
-        直接執行: 程式在 week6/，輸出在 week6/outputs/
+        直接執行: 程式在 week6_implementation/，輸出在 week6_implementation/outputs/
         compose 起的 container: 程式掛在 /opt/app/，輸出掛在 /opt/outputs/
     """
     here = Path(__file__).resolve().parent
@@ -51,7 +51,10 @@ if not CSV_PATH.is_absolute():
     CSV_PATH = REPO_ROOT / CSV_PATH
 
 EXPORT_PORT = int(os.environ.get("RESULTS_EXPORTER_PORT", 8010))
-POLL_SECONDS = 5
+
+# 多久把下一筆寫進 /metrics。設得比 Prometheus 的 scrape_interval 大，畫面上就會出現
+# 一段一段不動的平線 (同一個值被連抓好幾次) ，所以兩邊要對齊。compose 把兩個都設成 0.5 秒。
+POLL_SECONDS = float(os.environ.get("RESULTS_POLL_SECONDS", 0.5))
 
 # 重播倍速。預設 3600 是「一秒等於一小時」，一份七天的 CSV 大約三分鐘跑完一輪，
 # panel 會像監控畫面一樣往前走。設成 1 就是照真實時間重播。
